@@ -90,6 +90,94 @@
     #filterMonth, #filterYear, #d-date-select, #d-shift-select, #m-mode, #m-month, #m-quarter, #m-year {
       font-size: 0.95rem !important; padding: 0.55rem 0.75rem !important; min-height: 40px;
     }
+
+    /* ============================================
+       📱 MOBILE RESPONSIVE OVERRIDE
+       — เปลี่ยน shell layout เป็น flow layout เพื่อให้เลื่อนหน้าจอได้
+       — รองรับทั้ง GAS Web App และ GitHub Pages
+       ============================================ */
+    html, body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+    @media (max-width: 1023px) {
+      /* Body: ปลด h-screen + overflow-hidden เพื่อให้เลื่อนได้ทั้งหน้า */
+      body.flex.h-screen.overflow-hidden {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow: auto !important;
+        overflow-x: hidden !important;
+        display: block !important;
+      }
+      main {
+        height: auto !important;
+        min-height: 100vh !important;
+        width: 100% !important;
+      }
+      /* แต่ละ view: เปลี่ยนเป็น flow ไม่ใช่ flex-1 ที่ fixed */
+      #table-view, #daily-record-view, #daily-dashboard-view, #monthly-dashboard-view {
+        flex: none !important;
+        height: auto !important;
+        min-height: 60vh !important;
+        overflow: visible !important;
+      }
+      /* ตารางใน table-view ยังเลื่อนแนวนอนได้ */
+      #table-view > .flex-1 { overflow: auto !important; max-height: 70vh; }
+    }
+
+    /* ===== การ์ดมือถือ: บังคับ 2 คอลัมน์เต็มจอ + ใหญ่กว่าเดิม ===== */
+    @media (max-width: 640px) {
+      /* KPI cards row (4 ใบ) → 2 คอลัมน์ */
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      /* Staff cards row (5 ใบ) → 2 คอลัมน์ */
+      .grid.grid-cols-2.sm\:grid-cols-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      /* Daily record dept cards (IPD/OPD) → 2 คอลัมน์ */
+      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      /* Disease cards → 2 คอลัมน์ */
+      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      /* O2 cards → 2 คอลัมน์ */
+      .grid.grid-cols-2.md\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      /* ขยาย KPI card เต็มจอ */
+      .card-zoom { padding: 1.4rem !important; min-height: 110px; }
+      .card-zoom p.text-3xl { font-size: 2.7rem !important; line-height: 1.05 !important; }
+      .card-zoom p.text-xl { font-size: 2rem !important; line-height: 1.05 !important; }
+      .card-zoom .text-sm { font-size: 0.95rem !important; }
+      .card-zoom .p-3 { padding: 0.85rem !important; }
+      .card-zoom i.text-2xl { font-size: 1.85rem !important; }
+
+      /* Disease card ใหญ่บนมือถือ */
+      .disease-card { padding: 1.1rem !important; min-height: 130px; }
+      .disease-card p.text-xs { font-size: 1rem !important; }
+      .disease-card p.text-xl { font-size: 2rem !important; }
+      .disease-card i { font-size: 1.7rem !important; }
+
+      /* O2 card ใหญ่บนมือถือ */
+      .o2-card { padding: 1.3rem !important; min-height: 155px; }
+      .o2-card p.text-sm { font-size: 1.1rem !important; }
+      .o2-card p.text-3xl { font-size: 2.7rem !important; }
+      .o2-card i.text-2xl { font-size: 1.85rem !important; }
+
+      /* การ์ดแผนกใน Daily Record ใหญ่ */
+      #daily-record-content .card-zoom { min-height: 11rem !important; padding: 1rem !important; }
+      #daily-record-content .card-zoom h4 { font-size: 1.1rem !important; line-height: 1.2; }
+      #daily-record-content .card-zoom .text-\[10px\] { font-size: 0.95rem !important; padding: 0.5rem !important; }
+
+      /* ตารางมือถือ: ขยาย font + padding */
+      table thead th { padding: 0.8rem 0.6rem !important; font-size: 0.95rem !important; }
+      table tbody td { padding: 0.8rem 0.6rem !important; font-size: 1rem !important; }
+
+      /* Header bar — ปรับให้กระชับขึ้นบนมือถือ */
+      header h1 { font-size: 1.15rem !important; line-height: 1.25 !important; }
+    }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden">
