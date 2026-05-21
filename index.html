@@ -9,17 +9,87 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #e0f8f5 0%, #f3f4f6 100%); color: #1f2937; }
+    /* ========== 🔍 ACCESSIBILITY-FOCUSED SCALING (สำหรับสายตาผู้ใหญ่) ========== */
+    :root { font-size: 16px; }
+    @media (min-width: 640px)  { :root { font-size: 17px; } }
+    @media (min-width: 1024px) { :root { font-size: 18px; } }
+    @media (min-width: 1536px) { :root { font-size: 19px; } }
+
+    body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #e0f8f5 0%, #f3f4f6 100%); color: #1f2937; font-size: 1rem; line-height: 1.55; }
     .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
     .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255, 255, 255, 0.8); }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 10px; }
     .card-zoom { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
     .card-zoom:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-    .disease-card { border-radius: 10px; transition: all 0.3s ease; cursor: pointer; }
+    .disease-card { border-radius: 12px; transition: all 0.3s ease; cursor: pointer; }
     .disease-card:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .o2-card { border-radius: 12px; transition: all 0.3s ease; cursor: pointer; }
+    .o2-card { border-radius: 14px; transition: all 0.3s ease; cursor: pointer; }
     .o2-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+
+    /* ===== 📏 ขนาดตัวอักษรขั้นต่ำ — กันเล็กเกินจนอ่านไม่ออก ===== */
+    .text-\[10px\], .text-\[11px\] { font-size: 0.85rem !important; }
+    .text-\[12px\] { font-size: 0.9rem !important; }
+
+    /* ===== 💎 KPI Cards — ตัวเลขใหญ่ ๆ สำหรับเห็นชัด ===== */
+    .card-zoom p.text-3xl { font-size: 2.5rem !important; line-height: 1.1 !important; font-weight: 800; }
+    @media (min-width: 768px) { .card-zoom p.text-3xl { font-size: 3rem !important; } }
+    @media (min-width: 1280px) { .card-zoom p.text-3xl { font-size: 3.5rem !important; } }
+
+    .card-zoom p.text-xl { font-size: 1.85rem !important; line-height: 1.1; font-weight: 800; }
+    .card-zoom p.text-2xl { font-size: 2.1rem !important; line-height: 1.1; font-weight: 800; }
+
+    /* ===== 🦠 Disease & O2 Cards — ใหญ่ขึ้น ===== */
+    .disease-card { padding: 1rem !important; min-height: 110px; }
+    .disease-card p.text-xs { font-size: 0.95rem !important; font-weight: 700 !important; }
+    .disease-card p.text-xl { font-size: 1.85rem !important; line-height: 1.1; }
+    .disease-card i { font-size: 1.5rem !important; }
+    .o2-card { padding: 1.25rem !important; min-height: 130px; }
+    .o2-card p.text-sm { font-size: 1.05rem !important; font-weight: 700 !important; }
+    .o2-card p.text-3xl { font-size: 2.5rem !important; line-height: 1.1; }
+    .o2-card i { font-size: 1.6rem !important; }
+
+    /* ===== 🏥 Daily Record dept cards — ใหญ่ขึ้น ===== */
+    #daily-record-content .card-zoom { min-height: 10rem; height: auto !important; padding: 0.85rem !important; }
+    #daily-record-content .card-zoom h4 { font-size: 1.05rem !important; line-height: 1.2; }
+    #daily-record-content .card-zoom .text-\[10px\] { font-size: 0.85rem !important; padding: 0.35rem !important; }
+    #daily-record-content .card-zoom .text-xs { font-size: 0.85rem !important; }
+
+    /* ===== 📊 Tables — เซลล์ใหญ่ ห่างจากกัน อ่านง่าย ===== */
+    table thead th { padding: 0.9rem 1rem !important; font-size: 0.95rem !important; }
+    table tbody td { padding: 0.85rem 1rem !important; font-size: 1rem !important; line-height: 1.5; }
+    @media (max-width: 640px) {
+      table thead th { padding: 0.7rem 0.5rem !important; font-size: 0.85rem !important; }
+      table tbody td { padding: 0.65rem 0.5rem !important; font-size: 0.9rem !important; }
+    }
+
+    /* ===== 🔘 Buttons — เป้ากดใหญ่ขึ้นสำหรับมือถือ ===== */
+    button { min-height: 38px; }
+    button.text-sm { padding-top: 0.55rem !important; padding-bottom: 0.55rem !important; }
+
+    /* ===== 📋 Section headings ใหญ่ขึ้น ===== */
+    h2.text-lg { font-size: 1.25rem !important; font-weight: 800; }
+    h2.text-xl { font-size: 1.5rem !important; font-weight: 800; }
+    h2.text-2xl { font-size: 1.75rem !important; font-weight: 800; }
+    h1.text-xl { font-size: 1.55rem !important; }
+    h1.text-2xl { font-size: 1.9rem !important; }
+    @media (min-width: 1024px) {
+      h1.text-2xl { font-size: 2.1rem !important; }
+      h2.text-2xl { font-size: 1.95rem !important; }
+    }
+
+    /* ===== 📝 Form labels & inputs ในโมดอล อ่านง่ายขึ้น ===== */
+    #dataForm label { font-size: 0.95rem !important; margin-bottom: 0.4rem !important; }
+    #dataForm input, #dataForm select { font-size: 1rem !important; padding: 0.6rem 0.85rem !important; min-height: 42px; }
+
+    /* ===== 🎨 Header banner ใหญ่ขึ้น ===== */
+    header h1 { font-size: 1.35rem !important; font-weight: 800; }
+    @media (min-width: 1024px) { header h1 { font-size: 1.75rem !important; } }
+
+    /* ===== Filter / dropdown ใหญ่ขึ้น ===== */
+    #filterMonth, #filterYear, #d-date-select, #d-shift-select, #m-mode, #m-month, #m-quarter, #m-year {
+      font-size: 0.95rem !important; padding: 0.55rem 0.75rem !important; min-height: 40px;
+    }
   </style>
 </head>
 <body class="flex h-screen overflow-hidden">
