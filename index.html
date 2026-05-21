@@ -123,60 +123,129 @@
       #table-view > .flex-1 { overflow: auto !important; max-height: 70vh; }
     }
 
-    /* ===== การ์ดมือถือ: บังคับ 2 คอลัมน์เต็มจอ + ใหญ่กว่าเดิม ===== */
+    /* ===== 📱 SMARTPHONE: การ์ดเต็มจอ + ตัวเลขสะใจ ===== */
     @media (max-width: 640px) {
-      /* KPI cards row (4 ใบ) → 2 คอลัมน์ */
+      /* 🔥 KPI cards (ผู้ป่วยทั้งหมด, เฉลี่ย, จำนวนเวร, O2): 1 คอลัมน์เต็มจอ */
       .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
       }
-      /* Staff cards row (5 ใบ) → 2 คอลัมน์ */
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom {
+        padding: 2rem !important;
+        min-height: 140px;
+        border-radius: 1.25rem !important;
+      }
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-3xl {
+        font-size: 5rem !important;
+        line-height: 1 !important;
+        font-weight: 900;
+        margin-top: 0.25rem;
+      }
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-sm {
+        font-size: 1.25rem !important;
+      }
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom i.text-2xl {
+        font-size: 2.5rem !important;
+      }
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom .p-3 {
+        padding: 1.25rem !important;
+      }
+
+      /* Staff cards (RN/PN/NA/Porter/Help — 5 ใบ): 2 คอลัมน์ ใหญ่ */
       .grid.grid-cols-2.sm\:grid-cols-5 {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.9rem !important;
       }
-      /* Daily record dept cards (IPD/OPD) → 2 คอลัมน์ */
-      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom,
+      .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer {
+        min-height: 150px !important;
+        padding: 1.3rem !important;
       }
-      /* Disease cards → 2 คอลัมน์ */
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xl {
+        font-size: 2.6rem !important;
+        line-height: 1.05 !important;
+      }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xs {
+        font-size: 1rem !important;
+      }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom i.text-xl {
+        font-size: 2rem !important;
+      }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer span.text-lg {
+        font-size: 1.6rem !important;
+      }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer span.text-xs {
+        font-size: 1rem !important;
+      }
+
+      /* Disease cards: 2 คอลัมน์ ใหญ่สะใจ */
       .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6 {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.9rem !important;
       }
-      /* O2 cards → 2 คอลัมน์ */
+      .disease-card {
+        padding: 1.4rem !important;
+        min-height: 160px;
+        border-radius: 1rem !important;
+      }
+      .disease-card p.text-xs { font-size: 1.1rem !important; }
+      .disease-card p.text-xl { font-size: 2.7rem !important; line-height: 1; }
+      .disease-card i { font-size: 2rem !important; }
+
+      /* O2 cards: 2 คอลัมน์ ใหญ่ */
       .grid.grid-cols-2.md\:grid-cols-4 {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.9rem !important;
       }
+      .o2-card {
+        padding: 1.5rem !important;
+        min-height: 175px;
+        border-radius: 1.1rem !important;
+      }
+      .o2-card p.text-sm { font-size: 1.2rem !important; }
+      .o2-card p.text-3xl { font-size: 3rem !important; line-height: 1; }
+      .o2-card i.text-2xl { font-size: 2.2rem !important; }
 
-      /* ขยาย KPI card เต็มจอ */
-      .card-zoom { padding: 1.4rem !important; min-height: 110px; }
-      .card-zoom p.text-3xl { font-size: 2.7rem !important; line-height: 1.05 !important; }
-      .card-zoom p.text-xl { font-size: 2rem !important; line-height: 1.05 !important; }
-      .card-zoom .text-sm { font-size: 0.95rem !important; }
-      .card-zoom .p-3 { padding: 0.85rem !important; }
-      .card-zoom i.text-2xl { font-size: 1.85rem !important; }
+      /* Daily Record dept cards: 2 คอลัมน์ ใหญ่ */
+      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.9rem !important;
+      }
+      #daily-record-content .card-zoom {
+        min-height: 13rem !important;
+        padding: 1.2rem !important;
+      }
+      #daily-record-content .card-zoom h4 { font-size: 1.2rem !important; line-height: 1.25; }
+      #daily-record-content .card-zoom .text-\[10px\] { font-size: 1.05rem !important; padding: 0.55rem !important; }
+      #daily-record-content .card-zoom .text-xs { font-size: 1rem !important; }
 
-      /* Disease card ใหญ่บนมือถือ */
-      .disease-card { padding: 1.1rem !important; min-height: 130px; }
-      .disease-card p.text-xs { font-size: 1rem !important; }
-      .disease-card p.text-xl { font-size: 2rem !important; }
-      .disease-card i { font-size: 1.7rem !important; }
+      /* ตาราง: เซลล์ใหญ่ พอดีจอ */
+      table thead th { padding: 0.85rem 0.6rem !important; font-size: 1rem !important; }
+      table tbody td { padding: 0.85rem 0.6rem !important; font-size: 1.05rem !important; }
 
-      /* O2 card ใหญ่บนมือถือ */
-      .o2-card { padding: 1.3rem !important; min-height: 155px; }
-      .o2-card p.text-sm { font-size: 1.1rem !important; }
-      .o2-card p.text-3xl { font-size: 2.7rem !important; }
-      .o2-card i.text-2xl { font-size: 1.85rem !important; }
+      /* Section heading ใหญ่ขึ้น */
+      h2.text-lg { font-size: 1.4rem !important; }
+      h2.text-xl { font-size: 1.6rem !important; }
+      h3.text-xl { font-size: 1.5rem !important; }
 
-      /* การ์ดแผนกใน Daily Record ใหญ่ */
-      #daily-record-content .card-zoom { min-height: 11rem !important; padding: 1rem !important; }
-      #daily-record-content .card-zoom h4 { font-size: 1.1rem !important; line-height: 1.2; }
-      #daily-record-content .card-zoom .text-\[10px\] { font-size: 0.95rem !important; padding: 0.5rem !important; }
-
-      /* ตารางมือถือ: ขยาย font + padding */
-      table thead th { padding: 0.8rem 0.6rem !important; font-size: 0.95rem !important; }
-      table tbody td { padding: 0.8rem 0.6rem !important; font-size: 1rem !important; }
-
-      /* Header bar — ปรับให้กระชับขึ้นบนมือถือ */
+      /* Header bar กระชับ */
       header h1 { font-size: 1.15rem !important; line-height: 1.25 !important; }
+
+      /* Daily/Monthly dashboard top banner ใหญ่ */
+      #daily-dashboard-view > div > .bg-gradient-to-r h1,
+      #monthly-dashboard-view > div > .bg-gradient-to-r h1 {
+        font-size: 1.6rem !important;
+      }
+    }
+
+    /* ===== จอเล็กพิเศษ (≤380px): บีบ padding ลงนิด แต่ตัวเลขยังใหญ่ ===== */
+    @media (max-width: 380px) {
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom { padding: 1.5rem !important; }
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-3xl { font-size: 4.5rem !important; }
+      .disease-card { padding: 1.1rem !important; min-height: 145px; }
+      .disease-card p.text-xl { font-size: 2.3rem !important; }
+      .o2-card { padding: 1.2rem !important; min-height: 160px; }
+      .o2-card p.text-3xl { font-size: 2.6rem !important; }
     }
   </style>
 </head>
@@ -383,8 +452,17 @@
       }
     }
 
-    // ----- Polyfill google.script.run สำหรับ GitHub Pages (ไม่มี GAS runtime) -----
-    if (typeof google === 'undefined' || !google.script || !google.script.run) {
+    // ----- Polyfill google.script.run (เฉพาะเมื่อ "ไม่ได้รัน" บน GAS) -----
+    // เช็ค 3 ชั้นเพื่อกัน polyfill ไปทับ google.script.run จริงของ GAS:
+    //   1. google.script.run มีอยู่แล้ว → ไม่ polyfill
+    //   2. hostname เป็น script.google.com / googleusercontent.com → ไม่ polyfill
+    //   3. ถ้าทั้ง 2 ไม่ใช่ (เช่น github.io) → polyfill
+    (function setupPolyfill() {
+      try {
+        if (typeof google !== 'undefined' && google.script && google.script.run) return;
+        const h = (window.location && window.location.hostname) || '';
+        if (h.endsWith('script.google.com') || h.endsWith('googleusercontent.com')) return;
+      } catch (e) { /* fall through to polyfill */ }
       const makeRunner = (success, failure) => {
         const r = {
           withSuccessHandler: (fn) => makeRunner(fn, failure),
@@ -400,8 +478,9 @@
         });
         return r;
       };
-      window.google = { script: { run: makeRunner(null, null) } };
-    }
+      window.google = window.google || {};
+      window.google.script = { run: makeRunner(null, null) };
+    })();
 
     // ==========================================
     // 🎯 COLUMN MAPPING — แก้ไขที่นี่ถ้าตำแหน่งคอลัมน์ในชีต IPD/OPD เปลี่ยน
