@@ -123,31 +123,31 @@
       #table-view > .flex-1 { overflow: auto !important; max-height: 70vh; }
     }
 
-    /* ===== 📱 SMARTPHONE: การ์ดเต็มจอ + ตัวเลขสะใจ ===== */
-    @media (max-width: 640px) {
-      /* 🔥 KPI cards (ผู้ป่วยทั้งหมด, เฉลี่ย, จำนวนเวร, O2): 1 คอลัมน์เต็มจอ */
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+    /* ===== 📱 SMARTPHONE / TABLET: การ์ดเต็มจอ + ตัวเลขสะใจ — ครอบคลุม ≤1023px (กันหลุดเข้า lg breakpoint บนแท็บเล็ตและมือถือ landscape) ===== */
+    @media (max-width: 1023px) {
+      /* 🔥 KPI cards: บังคับ 1 คอลัมน์เต็มจอ — ใช้ attribute selector แทน escape เพื่อความชัวร์ */
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] {
         grid-template-columns: 1fr !important;
         gap: 1rem !important;
       }
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom {
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom {
         padding: 2rem !important;
-        min-height: 140px;
+        min-height: 160px;
         border-radius: 1.25rem !important;
       }
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-3xl {
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-3xl {
         font-size: 5rem !important;
         line-height: 1 !important;
         font-weight: 900;
         margin-top: 0.25rem;
       }
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-sm {
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-sm {
         font-size: 1.25rem !important;
       }
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom i.text-2xl {
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom i.text-2xl {
         font-size: 2.5rem !important;
       }
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom .p-3 {
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom .p-3 {
         padding: 1.25rem !important;
       }
 
@@ -259,13 +259,84 @@
       header.glass-card button { padding: 0.55rem 0.85rem !important; font-size: 0.85rem !important; }
     }
 
-    /* ===== 💻 PC OVERRIDE — header ไม่กระจุก ===== */
+    /* ===== 💻 PC OVERRIDE — header แบบ 2 แถว (title แถวบนเต็มกว้าง, ปุ่ม+filter แถวล่างไม่กระจุกขวา) ===== */
     @media (min-width: 1024px) {
-      header.glass-card { padding: 1.25rem 1.5rem !important; }
-      header.glass-card h1 { font-size: 1.5rem !important; }
+      header.glass-card {
+        padding: 1.25rem 1.5rem !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.85rem !important;
+      }
+      header.glass-card h1 {
+        font-size: 1.6rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      /* แถวปุ่ม: ปุ่ม "หน้าแรก/เพิ่มข้อมูล" ชิดซ้าย, filter ดันไปขวา */
+      header.glass-card > div:nth-child(2) {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+      }
+      header.glass-card #filterSection {
+        margin-left: auto !important;
+        gap: 0.75rem !important;
+        padding-left: 1rem !important;
+        border-left: 2px solid #e5e7eb;
+      }
       header.glass-card button { font-size: 0.95rem !important; padding: 0.65rem 1.1rem !important; }
-      header.glass-card #filterSection { gap: 0.75rem !important; padding-left: 1rem !important; }
       header.glass-card select { padding: 0.55rem 0.85rem !important; }
+    }
+
+    /* ===== 📱 Mobile header: title 1 แถว, ปุ่มแต่ละปุ่มเต็มกว้าง 1 แถว ===== */
+    @media (max-width: 640px) {
+      header.glass-card > div:nth-child(2) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.6rem !important;
+        width: 100% !important;
+      }
+      header.glass-card > div:nth-child(2) > button {
+        width: 100% !important;
+        padding: 0.95rem !important;
+        font-size: 1.05rem !important;
+        justify-content: center !important;
+      }
+      header.glass-card #filterSection {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem !important;
+        border-left: none !important;
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+      header.glass-card #filterSection select {
+        font-size: 1rem !important;
+        padding: 0.75rem !important;
+      }
+      header.glass-card #filterSection button {
+        grid-column: span 2 !important;
+        padding: 0.85rem !important;
+        font-size: 1rem !important;
+      }
+    }
+
+    /* ===== 📱 LINE textarea: ขยายให้เห็นข้อความทั้งหมดบนมือถือ ===== */
+    @media (max-width: 1023px) {
+      #lineCopyText {
+        min-height: 22rem !important;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+      }
+      #reportCopyText {
+        min-height: 38rem !important;
+        font-size: 1rem !important;
+      }
     }
 
     /* ===== จอเล็กพิเศษ (≤380px): บีบ padding ลงนิด แต่ตัวเลขยังใหญ่ ===== */
@@ -292,15 +363,17 @@
   </aside>
 
   <main class="w-full min-h-screen flex flex-col p-3 md:p-5 max-w-[1600px] mx-auto">
-    <header class="glass-card mb-4 p-4 md:p-5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 lg:gap-4">
-      <div class="flex items-center gap-3 w-full lg:w-auto">
+    <header class="glass-card mb-4 p-4 md:p-5 flex flex-col gap-3">
+      <!-- Row 1: hamburger + title (เต็มกว้างทุกขนาดจอ) -->
+      <div class="flex items-center gap-3 w-full">
         <button onclick="toggleSidebar()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-xl transition flex-shrink-0"><i class="fa-solid fa-bars text-2xl"></i></button>
-        <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-teal-800 tracking-wide leading-snug">
+        <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-teal-800 tracking-wide leading-snug flex-1">
           ระบบบันทึกข้อมูลเวรพยาบาลตรวจการ สถาบันบำราศนราดูร
         </h1>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2 justify-start lg:justify-end w-full lg:w-auto">
+      <!-- Row 2: ปุ่ม + filter (มือถือ: stack เต็มแถว / PC: ปุ่มซ้าย filter ขวา) -->
+      <div class="flex flex-wrap items-center gap-2 w-full">
         <button onclick="switchTab('สรุป')" class="px-4 py-2 text-sm font-bold text-teal-800 bg-teal-100 border border-teal-300 rounded-xl hover:bg-teal-200 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-sm">
           <i class="fa-solid fa-house"></i> หน้าแรก
         </button>
@@ -308,7 +381,7 @@
           <i class="fa-solid fa-plus-circle"></i> เพิ่มข้อมูลพยาบาลตรวจการประจำเวรใหม่
         </button>
 
-        <div id="filterSection" class="flex items-center gap-2 border-l-2 border-gray-200 pl-2 ml-1">
+        <div id="filterSection" class="flex items-center gap-2">
           <select id="filterMonth" class="bg-white border border-teal-200 rounded-xl px-2 py-2 text-sm focus:ring-2 focus:ring-teal-400">
             <option value="all">เดือนทั้งหมด</option>
             <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
@@ -858,9 +931,29 @@
 
     function fetchData() {
       // หมายเหตุ: google.script.run ใช้งานได้ผ่าน polyfill ด้วย (สำหรับ GitHub Pages)
-      Swal.fire({ title: 'กำลังโหลดข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      console.log('[fetchData] เริ่มดึงข้อมูล... hostname=', window.location.hostname);
+      Swal.fire({ title: 'กำลังโหลดข้อมูล...', html: '<small class="text-gray-500">ถ้านานเกิน 30 วินาที จะปิดอัตโนมัติ — ลองกด F12 ดู Console</small>', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+      // 🛡 Safety timeout — กัน Swal ค้างปิดไม่ได้ ถ้า server ไม่ตอบ
+      let fetchDone = false;
+      const safetyTimer = setTimeout(() => {
+        if (fetchDone) return;
+        fetchDone = true;
+        Swal.fire({
+          icon: 'error',
+          title: 'เซิร์ฟเวอร์ไม่ตอบใน 30 วินาที',
+          html: '<div class="text-left text-sm space-y-1">' +
+                '<p>• ถ้าใช้ Apps Script: กรุณาเช็คว่า <b>Deploy → Manage deployments → New version</b> แล้ว</p>' +
+                '<p>• ถ้าใช้ GitHub Pages: เช็คว่าตั้งค่า <code>GAS_WEB_APP_URL</code> ถูกต้อง</p>' +
+                '<p>• เปิด Console (F12) ดู error</p></div>',
+          confirmButtonText: 'รับทราบ',
+        });
+      }, 30000);
+
       google.script.run
         .withSuccessHandler(res => {
+          fetchDone = true; clearTimeout(safetyTimer);
+          console.log('[fetchData] success — got tables:', res && res.tables ? Object.keys(res.tables) : 'none');
           try {
             if (!res || !res.tables) throw new Error("ไม่พบข้อมูลจากเซิร์ฟเวอร์");
             globalData = res;
@@ -883,7 +976,11 @@
             Swal.close();
           } catch (error) { console.error(error); Swal.fire('เกิดข้อผิดพลาดในการโหลดข้อมูล', error.message, 'error'); }
         })
-        .withFailureHandler(err => { console.error(err); Swal.fire('เกิดข้อผิดพลาดของเซิร์ฟเวอร์', err.message, 'error'); })
+        .withFailureHandler(err => {
+          fetchDone = true; clearTimeout(safetyTimer);
+          console.error('[fetchData] failure', err);
+          Swal.fire('เกิดข้อผิดพลาดของเซิร์ฟเวอร์', (err && err.message) || String(err), 'error');
+        })
         .getAppData('all', 'all');
     }
 
@@ -920,7 +1017,14 @@
       let shift = targetData['เวร'];
       currentDailyRecordId = targetData['ID'];
 
-      let shiftOptions = dataRows.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
+      // 🔥 กรอง dropdown "เลือกเวรที่จะบันทึก" ตามเดือน/ปีที่เลือกใน header filter (กันโหลดช้าเมื่อข้อมูลเยอะ)
+      let filteredShifts = dataRows.filter(passesHeaderFilter);
+      // ถ้าเวรปัจจุบันไม่อยู่ใน filter ก็ใส่กลับเข้าไปด้วย (กัน select ไม่ตรง)
+      if (currentDailyRecordId && !filteredShifts.some(r => r['ID'] === currentDailyRecordId)) {
+        let cur = dataRows.find(r => r['ID'] === currentDailyRecordId);
+        if (cur) filteredShifts = [cur, ...filteredShifts];
+      }
+      let shiftOptions = filteredShifts.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
       let depts = globalData.tables['แผนก'] || [];
       let ipdDepts = depts.filter(d => d['ประเภท'] === 'IPD');
       let opdDepts = depts.filter(d => d['ประเภท'] === 'OPD');
