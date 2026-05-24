@@ -292,21 +292,40 @@
       header.glass-card select { padding: 0.55rem 0.85rem !important; }
     }
 
-    /* ===== 📱 Mobile header: title 1 แถว, ปุ่มแต่ละปุ่มเต็มกว้าง 1 แถว ===== */
+    /* ===== 📱 Mobile header (≤640px): title 2 บรรทัดเต็มจอ / ปุ่ม 2 ตัวอยู่บรรทัดเดียวกัน / filter อีกบรรทัด เต็มจอ ===== */
     @media (max-width: 640px) {
+      header.glass-card { padding: 1rem !important; }
+
+      /* Row 1 (title): hamburger + ระบบบันทึก... — 2 บรรทัด เต็มจอ */
+      header.glass-card > div:nth-child(1) { gap: 0.75rem !important; align-items: flex-start !important; }
+      header.glass-card h1 {
+        font-size: 1.5rem !important;
+        line-height: 1.3 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        word-wrap: break-word !important;
+        font-weight: 800 !important;
+      }
+      header.glass-card > div:nth-child(1) > button i { font-size: 1.75rem !important; }
+
+      /* Row 2 (action buttons + filter): ปุ่ม 2 ตัว 50/50 บรรทัดเดียวกัน */
       header.glass-card > div:nth-child(2) {
-        display: flex !important;
-        flex-direction: column !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 0.6rem !important;
         width: 100% !important;
       }
       header.glass-card > div:nth-child(2) > button {
         width: 100% !important;
-        padding: 0.95rem !important;
-        font-size: 1.05rem !important;
+        padding: 0.95rem 0.5rem !important;
+        font-size: 1rem !important;
         justify-content: center !important;
+        text-align: center !important;
+        line-height: 1.25 !important;
       }
+      /* filter section อยู่บรรทัดของตัวเองเต็มจอ */
       header.glass-card #filterSection {
+        grid-column: span 2 !important;
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 0.5rem !important;
@@ -314,19 +333,24 @@
         padding-left: 0 !important;
         margin-left: 0 !important;
         width: 100% !important;
+        margin-top: 0.25rem !important;
+        padding-top: 0.6rem !important;
+        border-top: 2px solid #f3f4f6 !important;
       }
       header.glass-card #filterSection select {
-        font-size: 1rem !important;
-        padding: 0.75rem !important;
+        font-size: 1.05rem !important;
+        padding: 0.85rem 0.6rem !important;
+        font-weight: 600 !important;
       }
       header.glass-card #filterSection button {
         grid-column: span 2 !important;
-        padding: 0.85rem !important;
-        font-size: 1rem !important;
+        padding: 0.95rem !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
       }
     }
 
-    /* ===== 📱 LINE textarea: ขยายให้เห็นข้อความทั้งหมดบนมือถือ ===== */
+    /* ===== 📱 LINE textarea ===== */
     @media (max-width: 1023px) {
       #lineCopyText {
         min-height: 22rem !important;
@@ -336,6 +360,81 @@
       #reportCopyText {
         min-height: 38rem !important;
         font-size: 1rem !important;
+      }
+    }
+
+    /* ===== 📱 SIDEBAR เมนูด้านข้าง: กว้างขึ้น + ตัวอักษรใหญ่ ×2 ===== */
+    @media (max-width: 1023px) {
+      aside#sidebar {
+        width: 88vw !important;
+        max-width: 28rem !important;
+      }
+      aside#sidebar h2 { font-size: 1.7rem !important; }
+      aside#sidebar nav button {
+        font-size: 1.25rem !important;
+        padding: 1.1rem 1.25rem !important;
+        line-height: 1.3 !important;
+      }
+      aside#sidebar nav button i { font-size: 1.5rem !important; margin-right: 0.5rem; }
+      aside#sidebar .p-6 { padding: 1.5rem 1.25rem !important; }
+    }
+
+    /* ===== 📱 ตาราง — เหลือ 3 คอลัมน์ (ID + ยอดรวม + ไอคอนตา) ===== */
+    @media (max-width: 768px) {
+      #table-body tr td,
+      #table-head tr th {
+        font-size: 1rem !important;
+        padding: 0.85rem 0.4rem !important;
+      }
+      /* ซ่อนทุก td/th กลางๆ — เก็บ col 1 (ID/วันที่), col 2 (เวร/ยอด), และ col สุดท้าย (ปุ่ม actions) */
+      #table-head th:nth-child(n+3):not(:last-child),
+      #table-body td:nth-child(n+3):not(:last-child) {
+        display: none !important;
+      }
+      #table-head th:nth-child(1), #table-body td:nth-child(1) { font-weight: 700 !important; }
+      #table-head th:nth-child(2), #table-body td:nth-child(2) { font-weight: 700 !important; color: #0f766e; }
+    }
+
+    /* ===== 📱 Daily Record: ฟิลด์ละบรรทัดเต็มจอ ===== */
+    @media (max-width: 768px) {
+      #daily-record-content .grid.grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 0.65rem !important;
+      }
+      #daily-record-content .bg-gray-50.p-2.rounded-lg {
+        padding: 1rem !important;
+        font-size: 1.1rem !important;
+        line-height: 1.5 !important;
+      }
+      #daily-record-content h2.text-2xl { font-size: 1.6rem !important; }
+      #daily-record-content label { font-size: 1.1rem !important; }
+      #daily-record-content select {
+        font-size: 1.05rem !important;
+        padding: 0.85rem !important;
+        width: 100% !important;
+        margin-top: 0.5rem;
+      }
+    }
+
+    /* ===== 📱 KPI/Stats card — ขยายตัวเลข+labels ตามขนาดการ์ด ===== */
+    @media (max-width: 1023px) {
+      .card-zoom p[class*="text-3xl"] { font-size: 4.5rem !important; line-height: 1 !important; font-weight: 900 !important; }
+      .card-zoom p[class*="text-2xl"] { font-size: 3.5rem !important; line-height: 1 !important; }
+      .card-zoom p[class*="text-xl"] { font-size: 2.6rem !important; line-height: 1.05 !important; }
+      .card-zoom p[class*="text-sm"] { font-size: 1.25rem !important; font-weight: 600; }
+      .card-zoom p[class*="text-xs"] { font-size: 1.1rem !important; }
+      .card-zoom i { font-size: 2.5rem !important; }
+    }
+
+    /* ===== 📱 ตารางยอดสถิติแยกตามแผนก ในมือถือ — เหลือ 3 คอลัมน์ (หน่วยงาน + ยอดผู้ป่วย + ต้องการช่วย + eye) ===== */
+    @media (max-width: 768px) {
+      table.dept-stats-table th:not(.col-keep),
+      table.dept-stats-table td:not(.col-keep) {
+        display: none !important;
+      }
+      table.dept-stats-table th, table.dept-stats-table td {
+        font-size: 1.05rem !important;
+        padding: 0.9rem 0.5rem !important;
       }
     }
 
@@ -560,16 +659,27 @@
     //   1. google.script.run มีอยู่แล้ว → ไม่ polyfill
     //   2. hostname เป็น script.google.com / googleusercontent.com → ไม่ polyfill
     //   3. ถ้าทั้ง 2 ไม่ใช่ (เช่น github.io) → polyfill
+    window.__IS_POLYFILL__ = false;
+    window.__GS_HOST__ = (window.location && window.location.hostname) || '';
     (function setupPolyfill() {
       try {
-        if (typeof google !== 'undefined' && google.script && google.script.run) return;
-        const h = (window.location && window.location.hostname) || '';
-        if (h.endsWith('script.google.com') || h.endsWith('googleusercontent.com')) return;
-      } catch (e) { /* fall through to polyfill */ }
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          console.log('[Setup] google.script.run พบของจริงจาก GAS — ไม่ polyfill (host=' + window.__GS_HOST__ + ')');
+          return;
+        }
+        const h = window.__GS_HOST__;
+        if (h.endsWith('script.google.com') || h.endsWith('googleusercontent.com')) {
+          console.log('[Setup] รันบน GAS host แต่ google.script ยังไม่พร้อม — รอ GAS โหลด (host=' + h + ')');
+          return;
+        }
+      } catch (e) { console.warn('[Setup] polyfill check error:', e); }
+      console.log('[Setup] ⚠ ใช้ polyfill (HTTP API ตรงไป GAS_WEB_APP_URL) — host=' + window.__GS_HOST__);
+      window.__IS_POLYFILL__ = true;
       const makeRunner = (success, failure) => {
         const r = {
           withSuccessHandler: (fn) => makeRunner(fn, failure),
-          withFailureHandler: (fn) => makeRunner(success, fn)
+          withFailureHandler: (fn) => makeRunner(success, fn),
+          _isPolyfill: true
         };
         Object.keys(API_ACTIONS).forEach(action => {
           r[action] = function () {
@@ -1617,16 +1727,17 @@
         <div class="bg-white rounded-xl shadow-sm p-3 md:p-5 border border-gray-100">
           <h2 class="text-lg font-bold text-gray-700 mb-4"><i class="fas fa-hospital-user text-teal-500 mr-2"></i> ยอดสถิติแยกตามแผนก</h2>
           <div class="overflow-x-auto">
-            <table class="min-w-full text-xs md:text-sm divide-y divide-gray-200">
+            <table class="min-w-full text-xs md:text-sm divide-y divide-gray-200 dept-stats-table">
               <thead class="bg-teal-50 text-gray-600 font-semibold">
                 <tr>
-                  <th class="px-2 md:px-4 py-2 text-left rounded-tl-lg">หน่วยงาน/ตึก</th>
-                  <th class="px-2 md:px-4 py-2 text-center">ยอดผู้ป่วย</th>
-                  <th class="px-2 md:px-4 py-2 text-center">ช่วยเคลื่อนย้าย</th>
+                  <th class="px-2 md:px-4 py-2 text-left rounded-tl-lg col-keep">หน่วยงาน/ตึก</th>
+                  <th class="px-2 md:px-4 py-2 text-center col-keep">ยอดผู้ป่วย</th>
+                  <th class="px-2 md:px-4 py-2 text-center col-keep">ช่วยเคลื่อนย้าย</th>
                   <th class="px-2 md:px-4 py-2 text-center">On Respirator</th>
                   <th class="px-2 md:px-4 py-2 text-center hidden sm:table-cell">On HFNC</th>
                   <th class="px-2 md:px-4 py-2 text-center hidden sm:table-cell">Mask c bag</th>
                   <th class="px-2 md:px-4 py-2 text-center hidden sm:table-cell rounded-tr-lg">Cannular</th>
+                  <th class="px-2 md:px-4 py-2 text-center col-keep" aria-label="ดูรายละเอียด"><i class="fa-solid fa-eye text-teal-500"></i></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -1634,16 +1745,21 @@
                   let rows = Object.keys(wardStats).map(d => {
                     let s = wardStats[d];
                     return `<tr class="hover:bg-teal-50 transition">
-                      <td class="px-2 md:px-4 py-2 font-bold text-teal-700">${esc(d)}</td>
-                      <td class="px-2 md:px-4 py-2 text-center font-semibold text-gray-700">${fmt(s.pat,0)}</td>
-                      <td class="px-2 md:px-4 py-2 text-center ${s.help>0?'text-amber-600 font-semibold bg-amber-50 rounded':''}">${fmt(s.help,0)}</td>
+                      <td class="px-2 md:px-4 py-2 font-bold text-teal-700 col-keep">${esc(d)}</td>
+                      <td class="px-2 md:px-4 py-2 text-center font-semibold text-gray-700 col-keep">${fmt(s.pat,0)}</td>
+                      <td class="px-2 md:px-4 py-2 text-center col-keep ${s.help>0?'text-amber-600 font-semibold bg-amber-50 rounded':''}">${fmt(s.help,0)}</td>
                       <td class="px-2 md:px-4 py-2 text-center ${s.res>0?'text-red-600 font-semibold':''}">${fmt(s.res,0)}</td>
                       <td class="px-2 md:px-4 py-2 text-center hidden sm:table-cell ${s.hfnc>0?'text-orange-600 font-semibold':''}">${fmt(s.hfnc,0)}</td>
                       <td class="px-2 md:px-4 py-2 text-center hidden sm:table-cell ${s.mask>0?'text-purple-600 font-semibold':''}">${fmt(s.mask,0)}</td>
                       <td class="px-2 md:px-4 py-2 text-center hidden sm:table-cell ${s.can>0?'text-teal-600 font-semibold':''}">${fmt(s.can,0)}</td>
+                      <td class="px-2 md:px-4 py-2 text-center col-keep">
+                        <button onclick='showWardDeptDetail(${JSON.stringify(d)}, ${JSON.stringify(s).replace(/"/g,"&quot;")})' class="text-teal-500 hover:text-teal-700 transition" title="ดูรายละเอียด">
+                          <i class="fa-solid fa-eye text-lg"></i>
+                        </button>
+                      </td>
                     </tr>`;
                   }).join('');
-                  return rows || `<tr><td colspan="7" class="text-center py-4 text-gray-500">ไม่มีข้อมูลในช่วงที่เลือก</td></tr>`;
+                  return rows || `<tr><td colspan="8" class="text-center py-4 text-gray-500">ไม่มีข้อมูลในช่วงที่เลือก</td></tr>`;
                 })()}
               </tbody>
             </table>
@@ -1760,6 +1876,25 @@
             </td></tr>`;
         }).join('');
       }
+    }
+
+    // ดูรายละเอียดของแถวยอดสถิติแยกตามแผนก (โผล่เป็น modal — ใช้คู่กับปุ่มไอคอนตาในตาราง)
+    function showWardDeptDetail(deptName, s) {
+      try { if (typeof s === 'string') s = JSON.parse(s); } catch(e) { s = {}; }
+      const items = [
+        ['ยอดผู้ป่วย', s.pat||0, 'text-gray-700'],
+        ['ช่วยเคลื่อนย้าย', s.help||0, 'text-amber-600'],
+        ['On Respirator', s.res||0, 'text-red-600'],
+        ['On HFNC', s.hfnc||0, 'text-orange-600'],
+        ['Mask c bag', s.mask||0, 'text-purple-600'],
+        ['Cannular', s.can||0, 'text-teal-600']
+      ];
+      const html = '<div class="grid grid-cols-2 gap-3 text-left">' +
+        items.map(([k,v,c]) => `<div class="bg-gray-50 p-3 rounded-lg border">
+          <div class="text-xs text-gray-500">${esc(k)}</div>
+          <div class="text-2xl font-bold ${c}">${esc(String(v))}</div>
+        </div>`).join('') + '</div>';
+      Swal.fire({ title: '<i class="fa-solid fa-hospital text-teal-500"></i> ' + esc(deptName), html: html, width: 460, confirmButtonText: 'ปิด', confirmButtonColor: '#0d9488' });
     }
 
     function viewDetails(idx) {
