@@ -11,9 +11,9 @@
   <style>
     /* ========== 🔍 ACCESSIBILITY-FOCUSED SCALING (สำหรับสายตาผู้ใหญ่) ========== */
     :root { font-size: 16px; }
-    @media (min-width: 640px)  { :root { font-size: 17px; } }
-    @media (min-width: 1024px) { :root { font-size: 18px; } }
-    @media (min-width: 1536px) { :root { font-size: 19px; } }
+    @media (min-width: 640px)  { :root { font-size: 32px; } }
+    @media (min-width: 1024px) { :root { font-size: 32px; } }
+    @media (min-width: 1536px) { :root { font-size: 32px; } }
 
     body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #e0f8f5 0%, #f3f4f6 100%); color: #1f2937; font-size: 1rem; line-height: 1.55; }
     .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
@@ -28,13 +28,13 @@
     .o2-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
 
     /* ===== 📏 ขนาดตัวอักษรขั้นต่ำ — กันเล็กเกินจนอ่านไม่ออก ===== */
-    .text-\[10px\], .text-\[11px\] { font-size: 0.85rem !important; }
-    .text-\[12px\] { font-size: 0.9rem !important; }
+    .text-\[20px\], .text-\[24px\] { font-size: 0.85rem !important; }
+    .text-\[26px\] { font-size: 0.9rem !important; }
 
     /* ===== 💎 KPI Cards — ตัวเลขใหญ่ ๆ สำหรับเห็นชัด ===== */
-    .card-zoom p.text-3xl { font-size: 2.5rem !important; line-height: 1.1 !important; font-weight: 800; }
-    @media (min-width: 768px) { .card-zoom p.text-3xl { font-size: 3rem !important; } }
-    @media (min-width: 1280px) { .card-zoom p.text-3xl { font-size: 3.5rem !important; } }
+    .card-zoom p.text-3xl { font-size: 4.5rem !important; line-height: 1.1 !important; font-weight: 800; }
+    @media (min-width: 768px) { .card-zoom p.text-6xl { font-size: 3rem !important; } }
+    @media (min-width: 1280px) { .card-zoom p.text-6xl { font-size: 3.5rem !important; } }
 
     .card-zoom p.text-xl { font-size: 1.85rem !important; line-height: 1.1; font-weight: 800; }
     .card-zoom p.text-2xl { font-size: 2.1rem !important; line-height: 1.1; font-weight: 800; }
@@ -45,9 +45,9 @@
     .disease-card p.text-xl { font-size: 1.85rem !important; line-height: 1.1; }
     .disease-card i { font-size: 1.5rem !important; }
     .o2-card { padding: 1.25rem !important; min-height: 130px; }
-    .o2-card p.text-sm { font-size: 1.05rem !important; font-weight: 700 !important; }
-    .o2-card p.text-3xl { font-size: 2.5rem !important; line-height: 1.1; }
-    .o2-card i { font-size: 1.6rem !important; }
+    .o2-card p.text-sm { font-size: 3.05rem !important; font-weight: 700 !important; }
+    .o2-card p.text-3xl { font-size: 4.5rem !important; line-height: 1.1; }
+    .o2-card i { font-size: 3.6rem !important; }
 
     /* ===== 🏥 Daily Record dept cards — ใหญ่ขึ้น ===== */
     #daily-record-content .card-zoom { min-height: 10rem; height: auto !important; padding: 0.85rem !important; }
