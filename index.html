@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* ========== 🔍 ACCESSIBILITY-FOCUSED SCALING (สำหรับสายตาผู้ใหญ่) ========== */
-:root { font-size: 16px; }
+    :root { font-size: 16px; }
 
     body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #e0f8f5 0%, #f3f4f6 100%); color: #1f2937; font-size: 1rem; line-height: 1.55; }
     .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
@@ -24,33 +24,37 @@
     .o2-card { border-radius: 14px; transition: all 0.3s ease; cursor: pointer; }
     .o2-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
 
+    /* ===== 🔥 ปุ่มกระพริบ ===== */
+    @keyframes soft-blink {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 rgba(20, 184, 166, 0); }
+      50% { opacity: 0.85; transform: scale(1.02); box-shadow: 0 0 15px rgba(20, 184, 166, 0.6); }
+    }
+    .btn-blink {
+      animation: soft-blink 1.5s infinite ease-in-out;
+    }
+
     /* ===== 📏 ขนาดตัวอักษรขั้นต่ำ — กันเล็กเกินจนอ่านไม่ออก ===== */
     .text-\[20px\], .text-\[24px\] { font-size: 0.85rem !important; }
     .text-\[26px\] { font-size: 0.9rem !important; }
 
     /* ===== 💎 KPI Cards — ตัวเลขใหญ่ ๆ สำหรับเห็นชัด ===== */
-    .card-zoom p.text-3xl {
-  font-size: clamp(2rem, 5vw, 3.5rem) !important;
-}
+    .card-zoom p.text-3xl { font-size: clamp(2rem, 5vw, 3.5rem) !important; }
     @media (min-width: 768px) { .card-zoom p.text-6xl { font-size: 3rem !important; } }
     @media (min-width: 1280px) { .card-zoom p.text-6xl { font-size: 3.5rem !important; } }
 
-    .card-zoom p.text-xl {
-  font-size: clamp(1.2rem, 3vw, 2.2rem) !important;
-}
+    .card-zoom p.text-xl { font-size: clamp(1.2rem, 3vw, 2.2rem) !important; }
     .card-zoom p.text-2xl { font-size: 2.1rem !important; line-height: 1.1; font-weight: 800; }
 
-    /* ===== 🦠 Disease & O2 Cards — ใหญ่ขึ้น ===== */
+    /* ===== 🦠 Disease & O2 Cards ===== */
     .disease-card { padding: 1rem !important; min-height: 110px; }
     .disease-card p.text-xs { font-size: 0.95rem !important; font-weight: 700 !important; }
     .disease-card p.text-xl { font-size: 1.85rem !important; line-height: 1.1; }
     .disease-card i { font-size: 1.5rem !important; }
+    
     .o2-card { padding: 1.25rem !important; min-height: 130px; }
-    .o2-card p.text-sm { font-size: 3.05rem !important; font-weight: 700 !important; }
-    ..o2-card p.text-3xl {
-  font-size: clamp(1.8rem, 4.5vw, 3rem) !important;
-}
-    .o2-card i { font-size: 3.6rem !important; }
+    .o2-card p.text-sm { font-size: 1.1rem !important; font-weight: 700 !important; } /* แก้ไขขนาดตัวหนังสือการ์ด O2 */
+    .o2-card p.text-3xl { font-size: clamp(1.8rem, 4vw, 2.5rem) !important; }
+    .o2-card i { font-size: 2.5rem !important; }
 
     /* ===== 🏥 Daily Record dept cards — ใหญ่ขึ้น ===== */
     #daily-record-content .card-zoom { min-height: 10rem; height: auto !important; padding: 0.85rem !important; }
@@ -61,12 +65,12 @@
     /* ===== 📊 Tables — เซลล์ใหญ่ ห่างจากกัน อ่านง่าย ===== */
     table thead th { padding: 0.9rem 1rem !important; font-size: 0.95rem !important; }
     table tbody td { padding: 0.85rem 1rem !important; font-size: 1rem !important; line-height: 1.5; }
-@media (max-width: 640px) {
-  body { font-size: 1.8rem !important; }
-  .grid { grid-template-columns: 1fr !important; }
-  #dataForm { grid-template-columns: 1fr !important; }
-  #lineCopyText, #reportCopyText { font-size: 1rem !important; }
-}
+    @media (max-width: 640px) {
+      body { font-size: 1.8rem !important; }
+      .grid { grid-template-columns: 1fr !important; }
+      #dataForm { grid-template-columns: 1fr !important; }
+      #lineCopyText, #reportCopyText { font-size: 1rem !important; }
+    }
 
     /* ===== 🔘 Buttons — เป้ากดใหญ่ขึ้นสำหรับมือถือ ===== */
     button { min-height: 38px; }
@@ -98,330 +102,120 @@
 
     /* ============================================
        📱 MOBILE RESPONSIVE OVERRIDE
-       — เปลี่ยน shell layout เป็น flow layout เพื่อให้เลื่อนหน้าจอได้
-       — รองรับทั้ง GAS Web App และ GitHub Pages
        ============================================ */
     html, body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
     @media (max-width: 1023px) {
-      /* Body: ปลด h-screen + overflow-hidden เพื่อให้เลื่อนได้ทั้งหน้า */
       body.flex.h-screen.overflow-hidden {
-        height: auto !important;
-        min-height: 100vh !important;
-        overflow: auto !important;
-        overflow-x: hidden !important;
-        display: block !important;
+        height: auto !important; min-height: 100vh !important; overflow: auto !important; overflow-x: hidden !important; display: block !important;
       }
-      main {
-        height: auto !important;
-        min-height: 100vh !important;
-        width: 100% !important;
-      }
-      /* แต่ละ view: เปลี่ยนเป็น flow ไม่ใช่ flex-1 ที่ fixed */
-      #table-view, #daily-record-view, #daily-dashboard-view, #monthly-dashboard-view {
-        flex: none !important;
-        height: auto !important;
-        min-height: 60vh !important;
-        overflow: visible !important;
-      }
-      /* ตารางใน table-view ยังเลื่อนแนวนอนได้ */
+      main { height: auto !important; min-height: 100vh !important; width: 100% !important; }
+      #table-view, #daily-record-view, #daily-dashboard-view, #monthly-dashboard-view { flex: none !important; height: auto !important; min-height: 60vh !important; overflow: visible !important; }
       #table-view > .flex-1 { overflow: auto !important; max-height: 70vh; }
     }
 
-    /* ===== 📱 SMARTPHONE / TABLET: การ์ดเต็มจอ + ตัวเลขสะใจ — ครอบคลุม ≤1023px (กันหลุดเข้า lg breakpoint บนแท็บเล็ตและมือถือ landscape) ===== */
+    /* ===== 📱 SMARTPHONE / TABLET ===== */
     @media (max-width: 1023px) {
-      /* 🔥 KPI cards: บังคับ 1 คอลัมน์เต็มจอ — ใช้ attribute selector แทน escape เพื่อความชัวร์ */
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
-      }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom {
-        padding: 2rem !important;
-        min-height: 160px;
-        border-radius: 1.25rem !important;
-      }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-3xl {
-        font-size: 5rem !important;
-        line-height: 1 !important;
-        font-weight: 900;
-        margin-top: 0.25rem;
-      }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-sm {
-        font-size: 1.25rem !important;
-      }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom i.text-2xl {
-        font-size: 2.5rem !important;
-      }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom .p-3 {
-        padding: 1.25rem !important;
-      }
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] { grid-template-columns: 1fr !important; gap: 1rem !important; }
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom { padding: 2rem !important; min-height: 160px; border-radius: 1.25rem !important; }
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-3xl { font-size: 5rem !important; line-height: 1 !important; font-weight: 900; margin-top: 0.25rem; }
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-sm { font-size: 1.25rem !important; }
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom i.text-2xl { font-size: 2.5rem !important; }
+      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom .p-3 { padding: 1.25rem !important; }
 
-      /* Staff cards (RN/PN/NA/Porter/Help — 5 ใบ): 2 คอลัมน์ ใหญ่ */
-      .grid.grid-cols-2.sm\:grid-cols-5 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 0.9rem !important;
-      }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom,
-      .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer {
-        min-height: 150px !important;
-        padding: 1.3rem !important;
-      }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xl {
-        font-size: 2.6rem !important;
-        line-height: 1.05 !important;
-      }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xs {
-        font-size: 1rem !important;
-      }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom i.text-xl {
-        font-size: 2rem !important;
-      }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer span.text-lg {
-        font-size: 1.6rem !important;
-      }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer span.text-xs {
-        font-size: 1rem !important;
-      }
+      .grid.grid-cols-2.sm\:grid-cols-5 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom, .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer { min-height: 150px !important; padding: 1.3rem !important; }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xl { font-size: 2.6rem !important; line-height: 1.05 !important; }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xs { font-size: 1rem !important; }
+      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom i.text-xl { font-size: 2rem !important; }
 
-      /* Disease cards: 2 คอลัมน์ ใหญ่สะใจ */
-      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 0.9rem !important;
-      }
-      .disease-card {
-        padding: 1.4rem !important;
-        min-height: 160px;
-        border-radius: 1rem !important;
-      }
+      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
+      .disease-card { padding: 1.4rem !important; min-height: 160px; border-radius: 1rem !important; }
       .disease-card p.text-xs { font-size: 1.1rem !important; }
       .disease-card p.text-xl { font-size: 2.7rem !important; line-height: 1; }
       .disease-card i { font-size: 2rem !important; }
 
-      /* O2 cards: 2 คอลัมน์ ใหญ่ */
-      .grid.grid-cols-2.md\:grid-cols-4 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 0.9rem !important;
-      }
-      .o2-card {
-        padding: 1.5rem !important;
-        min-height: 175px;
-        border-radius: 1.1rem !important;
-      }
+      .grid.grid-cols-2.md\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
+      .o2-card { padding: 1.5rem !important; min-height: 175px; border-radius: 1.1rem !important; }
       .o2-card p.text-sm { font-size: 1.2rem !important; }
       .o2-card p.text-3xl { font-size: 3rem !important; line-height: 1; }
       .o2-card i.text-2xl { font-size: 2.2rem !important; }
 
-      /* Daily Record dept cards: 2 คอลัมน์ ใหญ่ */
-      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 0.9rem !important;
-      }
-      #daily-record-content .card-zoom {
-        min-height: 13rem !important;
-        padding: 1.2rem !important;
-      }
+      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
+      #daily-record-content .card-zoom { min-height: 13rem !important; padding: 1.2rem !important; }
       #daily-record-content .card-zoom h4 { font-size: 1.2rem !important; line-height: 1.25; }
       #daily-record-content .card-zoom .text-\[10px\] { font-size: 1.05rem !important; padding: 0.55rem !important; }
       #daily-record-content .card-zoom .text-xs { font-size: 1rem !important; }
 
-      /* ตาราง: เซลล์ใหญ่ พอดีจอ */
       table thead th { padding: 0.85rem 0.6rem !important; font-size: 1rem !important; }
       table tbody td { padding: 0.85rem 0.6rem !important; font-size: 1.05rem !important; }
 
-      /* Section heading ใหญ่ขึ้น */
       h2.text-lg { font-size: 1.4rem !important; }
       h2.text-xl { font-size: 1.6rem !important; }
       h3.text-xl { font-size: 1.5rem !important; }
-
-      /* Header bar กระชับ */
       header h1 { font-size: 1.15rem !important; line-height: 1.25 !important; }
-
-      /* Daily/Monthly dashboard top banner ใหญ่ */
-      #daily-dashboard-view > div > .bg-gradient-to-r h1,
-      #monthly-dashboard-view > div > .bg-gradient-to-r h1 {
-        font-size: 1.6rem !important;
-      }
+      #daily-dashboard-view > div > .bg-gradient-to-r h1, #monthly-dashboard-view > div > .bg-gradient-to-r h1 { font-size: 1.6rem !important; }
     }
 
-    /* ===== 💪 EXTRA SMARTPHONE OVERRIDE — สูตร attribute selector หนักที่สุด ===== */
+    /* ===== 💪 EXTRA SMARTPHONE OVERRIDE ===== */
     @media (max-width: 640px) {
-      .card-zoom, .disease-card, .o2-card {
-        padding: 1.5rem !important;
-      }
-      .card-zoom p[class*="text-3xl"], .o2-card p[class*="text-3xl"] {
-        font-size: 4rem !important; line-height: 1.05 !important;
-      }
-      .card-zoom p[class*="text-xl"], .disease-card p[class*="text-xl"] {
-        font-size: 2.3rem !important; line-height: 1.05 !important;
-      }
-      .card-zoom p[class*="text-sm"], .o2-card p[class*="text-sm"] {
-        font-size: 1.1rem !important;
-      }
+      .card-zoom, .disease-card, .o2-card { padding: 1.5rem !important; }
+      .card-zoom p[class*="text-3xl"], .o2-card p[class*="text-3xl"] { font-size: 4rem !important; line-height: 1.05 !important; }
+      .card-zoom p[class*="text-xl"], .disease-card p[class*="text-xl"] { font-size: 2.3rem !important; line-height: 1.05 !important; }
+      .card-zoom p[class*="text-sm"], .o2-card p[class*="text-sm"] { font-size: 1.1rem !important; }
       .disease-card p[class*="text-xs"] { font-size: 0.95rem !important; }
-
       header.glass-card { padding: 1rem !important; gap: 0.75rem !important; }
       header.glass-card h1 { font-size: 1.05rem !important; line-height: 1.3 !important; }
       header.glass-card button { padding: 0.55rem 0.85rem !important; font-size: 0.85rem !important; }
     }
 
-    /* ===== 💻 PC OVERRIDE — header แบบ 2 แถว (title แถวบนเต็มกว้าง, ปุ่ม+filter แถวล่างไม่กระจุกขวา) ===== */
+    /* ===== 💻 PC OVERRIDE ===== */
     @media (min-width: 1024px) {
-      header.glass-card {
-        padding: 1.25rem 1.5rem !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 0.85rem !important;
-      }
-      header.glass-card h1 {
-        font-size: 1.6rem !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      /* แถวปุ่ม: ปุ่ม "หน้าแรก/เพิ่มข้อมูล" ชิดซ้าย, filter ดันไปขวา */
-      header.glass-card > div:nth-child(2) {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
-        gap: 0.75rem !important;
-        width: 100% !important;
-      }
-      header.glass-card #filterSection {
-        margin-left: auto !important;
-        gap: 0.75rem !important;
-        padding-left: 1rem !important;
-        border-left: 2px solid #e5e7eb;
-      }
+      header.glass-card { padding: 1.25rem 1.5rem !important; flex-direction: column !important; align-items: stretch !important; gap: 0.85rem !important; }
+      header.glass-card h1 { font-size: 1.6rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      header.glass-card > div:nth-child(2) { display: flex !important; flex-wrap: nowrap !important; justify-content: flex-start !important; align-items: center !important; gap: 0.75rem !important; width: 100% !important; }
+      header.glass-card #filterSection { margin-left: auto !important; gap: 0.75rem !important; padding-left: 1rem !important; border-left: 2px solid #e5e7eb; }
       header.glass-card button { font-size: 0.95rem !important; padding: 0.65rem 1.1rem !important; }
       header.glass-card select { padding: 0.55rem 0.85rem !important; }
     }
 
-    /* ===== 📱 Mobile header (≤640px): title 2 บรรทัดเต็มจอ / ปุ่ม 2 ตัวอยู่บรรทัดเดียวกัน / filter อีกบรรทัด เต็มจอ ===== */
+    /* ===== 📱 Mobile header ===== */
     @media (max-width: 640px) {
       header.glass-card { padding: 1rem !important; }
-
-      /* Row 1 (title): hamburger + ระบบบันทึก... — 2 บรรทัด เต็มจอ */
       header.glass-card > div:nth-child(1) { gap: 0.75rem !important; align-items: flex-start !important; }
-      header.glass-card h1 {
-        font-size: 1.5rem !important;
-        line-height: 1.3 !important;
-        white-space: normal !important;
-        overflow: visible !important;
-        word-wrap: break-word !important;
-        font-weight: 800 !important;
-      }
+      header.glass-card h1 { font-size: 1.5rem !important; line-height: 1.3 !important; white-space: normal !important; overflow: visible !important; word-wrap: break-word !important; font-weight: 800 !important; }
       header.glass-card > div:nth-child(1) > button i { font-size: 1.75rem !important; }
-
-      /* Row 2 (action buttons + filter): ปุ่ม 2 ตัว 50/50 บรรทัดเดียวกัน */
-      header.glass-card > div:nth-child(2) {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 0.6rem !important;
-        width: 100% !important;
-      }
-      header.glass-card > div:nth-child(2) > button {
-        width: 100% !important;
-        padding: 0.95rem 0.5rem !important;
-        font-size: 1rem !important;
-        justify-content: center !important;
-        text-align: center !important;
-        line-height: 1.25 !important;
-      }
-      /* filter section อยู่บรรทัดของตัวเองเต็มจอ */
-      header.glass-card #filterSection {
-        grid-column: span 2 !important;
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 0.5rem !important;
-        border-left: none !important;
-        padding-left: 0 !important;
-        margin-left: 0 !important;
-        width: 100% !important;
-        margin-top: 0.25rem !important;
-        padding-top: 0.6rem !important;
-        border-top: 2px solid #f3f4f6 !important;
-      }
-      header.glass-card #filterSection select {
-        font-size: 1.05rem !important;
-        padding: 0.85rem 0.6rem !important;
-        font-weight: 600 !important;
-      }
-      header.glass-card #filterSection button {
-        grid-column: span 2 !important;
-        padding: 0.95rem !important;
-        font-size: 1.1rem !important;
-        font-weight: 700 !important;
-      }
+      header.glass-card > div:nth-child(2) { display: grid !important; grid-template-columns: 1fr !important; gap: 0.6rem !important; width: 100% !important; }
+      header.glass-card > div:nth-child(2) > button { width: 100% !important; padding: 0.95rem 0.5rem !important; font-size: 1rem !important; justify-content: center !important; text-align: center !important; line-height: 1.25 !important; }
+      header.glass-card #filterSection { grid-column: span 1 !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 0.5rem !important; border-left: none !important; padding-left: 0 !important; margin-left: 0 !important; width: 100% !important; margin-top: 0.25rem !important; padding-top: 0.6rem !important; border-top: 2px solid #f3f4f6 !important; }
+      header.glass-card #filterSection select { font-size: 1.05rem !important; padding: 0.85rem 0.6rem !important; font-weight: 600 !important; }
+      header.glass-card #filterSection button { grid-column: span 2 !important; padding: 0.95rem !important; font-size: 1.1rem !important; font-weight: 700 !important; }
     }
 
-    /* ===== 📱 LINE textarea ===== */
     @media (max-width: 1023px) {
-      #lineCopyText {
-        min-height: 22rem !important;
-        font-size: 1rem !important;
-        line-height: 1.6 !important;
-      }
-      #reportCopyText {
-        min-height: 38rem !important;
-        font-size: 1rem !important;
-      }
-    }
-
-    /* ===== 📱 SIDEBAR เมนูด้านข้าง: กว้างขึ้น + ตัวอักษรใหญ่ ×2 ===== */
-    @media (max-width: 1023px) {
-      aside#sidebar {
-        width: 88vw !important;
-        max-width: 28rem !important;
-      }
+      #lineCopyText { min-height: 22rem !important; font-size: 1rem !important; line-height: 1.6 !important; }
+      #reportCopyText { min-height: 38rem !important; font-size: 1rem !important; }
+      aside#sidebar { width: 88vw !important; max-width: 28rem !important; }
       aside#sidebar h2 { font-size: 1.7rem !important; }
-      aside#sidebar nav button {
-        font-size: 1.25rem !important;
-        padding: 1.1rem 1.25rem !important;
-        line-height: 1.3 !important;
-      }
+      aside#sidebar nav button { font-size: 1.25rem !important; padding: 1.1rem 1.25rem !important; line-height: 1.3 !important; }
       aside#sidebar nav button i { font-size: 1.5rem !important; margin-right: 0.5rem; }
       aside#sidebar .p-6 { padding: 1.5rem 1.25rem !important; }
     }
 
-    /* ===== 📱 ตาราง — เหลือ 3 คอลัมน์ (ID + ยอดรวม + ไอคอนตา) ===== */
     @media (max-width: 768px) {
-      #table-body tr td,
-      #table-head tr th {
-        font-size: 1rem !important;
-        padding: 0.85rem 0.4rem !important;
-      }
-      /* ซ่อนทุก td/th กลางๆ — เก็บ col 1 (ID/วันที่), col 2 (เวร/ยอด), และ col สุดท้าย (ปุ่ม actions) */
-      #table-head th:nth-child(n+3):not(:last-child),
-      #table-body td:nth-child(n+3):not(:last-child) {
-        display: none !important;
-      }
+      #table-body tr td, #table-head tr th { font-size: 1rem !important; padding: 0.85rem 0.4rem !important; }
+      #table-head th:nth-child(n+3):not(:last-child), #table-body td:nth-child(n+3):not(:last-child) { display: none !important; }
       #table-head th:nth-child(1), #table-body td:nth-child(1) { font-weight: 700 !important; }
       #table-head th:nth-child(2), #table-body td:nth-child(2) { font-weight: 700 !important; color: #0f766e; }
-    }
-
-    /* ===== 📱 Daily Record: ฟิลด์ละบรรทัดเต็มจอ ===== */
-    @media (max-width: 768px) {
-      #daily-record-content .grid.grid-cols-1.md\:grid-cols-2 {
-        grid-template-columns: 1fr !important;
-        gap: 0.65rem !important;
-      }
-      #daily-record-content .bg-gray-50.p-2.rounded-lg {
-        padding: 1rem !important;
-        font-size: 1.1rem !important;
-        line-height: 1.5 !important;
-      }
+      #daily-record-content .grid.grid-cols-1.md\:grid-cols-2 { grid-template-columns: 1fr !important; gap: 0.65rem !important; }
+      #daily-record-content .bg-gray-50.p-2.rounded-lg { padding: 1rem !important; font-size: 1.1rem !important; line-height: 1.5 !important; }
       #daily-record-content h2.text-2xl { font-size: 1.6rem !important; }
       #daily-record-content label { font-size: 1.1rem !important; }
-      #daily-record-content select {
-        font-size: 1.05rem !important;
-        padding: 0.85rem !important;
-        width: 100% !important;
-        margin-top: 0.5rem;
-      }
+      #daily-record-content select { font-size: 1.05rem !important; padding: 0.85rem !important; width: 100% !important; margin-top: 0.5rem; }
+      table.dept-stats-table th:not(.col-keep), table.dept-stats-table td:not(.col-keep) { display: none !important; }
+      table.dept-stats-table th, table.dept-stats-table td { font-size: 1.05rem !important; padding: 0.9rem 0.5rem !important; }
     }
 
-    /* ===== 📱 KPI/Stats card — ขยายตัวเลข+labels ตามขนาดการ์ด ===== */
     @media (max-width: 1023px) {
       .card-zoom p[class*="text-3xl"] { font-size: 4.5rem !important; line-height: 1 !important; font-weight: 900 !important; }
       .card-zoom p[class*="text-2xl"] { font-size: 3.5rem !important; line-height: 1 !important; }
@@ -431,19 +225,6 @@
       .card-zoom i { font-size: 2.5rem !important; }
     }
 
-    /* ===== 📱 ตารางยอดสถิติแยกตามแผนก ในมือถือ — เหลือ 3 คอลัมน์ (หน่วยงาน + ยอดผู้ป่วย + ต้องการช่วย + eye) ===== */
-    @media (max-width: 768px) {
-      table.dept-stats-table th:not(.col-keep),
-      table.dept-stats-table td:not(.col-keep) {
-        display: none !important;
-      }
-      table.dept-stats-table th, table.dept-stats-table td {
-        font-size: 1.05rem !important;
-        padding: 0.9rem 0.5rem !important;
-      }
-    }
-
-    /* ===== จอเล็กพิเศษ (≤380px): บีบ padding ลงนิด แต่ตัวเลขยังใหญ่ ===== */
     @media (max-width: 380px) {
       .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom { padding: 1.5rem !important; }
       .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-3xl { font-size: 4.5rem !important; }
@@ -468,7 +249,6 @@
 
   <main class="w-full min-h-screen flex flex-col p-3 md:p-5 max-w-[1600px] mx-auto">
     <header class="glass-card mb-4 p-4 md:p-5 flex flex-col gap-3">
-      <!-- Row 1: hamburger + title (เต็มกว้างทุกขนาดจอ) -->
       <div class="flex items-center gap-3 w-full">
         <button onclick="toggleSidebar()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-xl transition flex-shrink-0"><i class="fa-solid fa-bars text-2xl"></i></button>
         <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-teal-800 tracking-wide leading-snug flex-1">
@@ -476,13 +256,9 @@
         </h1>
       </div>
 
-      <!-- Row 2: ปุ่ม + filter (มือถือ: stack เต็มแถว / PC: ปุ่มซ้าย filter ขวา) -->
       <div class="flex flex-wrap items-center gap-2 w-full">
-        <button onclick="switchTab('สรุป')" class="px-4 py-2 text-sm font-bold text-teal-800 bg-teal-100 border border-teal-300 rounded-xl hover:bg-teal-200 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-sm">
-          <i class="fa-solid fa-house"></i> หน้าแรก
-        </button>
-        <button onclick="openModal(null, 'Data')" class="px-4 py-2 text-sm font-medium text-white bg-teal-500 rounded-xl hover:bg-teal-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-sm">
-          <i class="fa-solid fa-plus-circle"></i> เพิ่มข้อมูลพยาบาลตรวจการประจำเวรใหม่
+        <button onclick="openModal(null, 'Data')" class="btn-blink px-5 py-2.5 text-sm md:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-md border border-teal-400">
+          <i class="fa-solid fa-plus-circle text-lg md:text-xl"></i> บันทึกข้อมูลประจำวัน
         </button>
 
         <div id="filterSection" class="flex items-center gap-2">
@@ -603,12 +379,10 @@
 
   <script>
     // ==========================================
-    // 🌐 GAS Web App URL — ใส่ URL ของ Apps Script Web App ที่ Deploy แล้ว
-    // ใช้ทั้งเมื่อรันบน GAS Web App URL ตรงๆ และเมื่อรันบน GitHub Pages
+    // 🌐 GAS Web App URL
     // ==========================================
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwvcP4hBVE6bUi0zM9_8pJ1bNSwZtqfSIvEO2rHq2vycReCSITPD7ZASYEppV4RWEEk/exec';
 
-    // ----- รายการ action ที่ฝั่ง backend รองรับ -----
     const API_ACTIONS = {
       getAppData:         { method: 'GET',  args: ['filterMonth', 'filterYear'] },
       saveRecord:         { method: 'POST', args: ['sheetName', 'data', 'filterMonth', 'filterYear'] },
@@ -616,7 +390,6 @@
       uploadImageToDrive: { method: 'POST', args: ['base64', 'fileName', 'mimeType'] }
     };
 
-    // ----- API client (JSONP สำหรับ GET, FormData POST สำหรับ write) -----
     function apiCall(action, positionalArgs) {
       const cfg = API_ACTIONS[action];
       if (!cfg) return Promise.reject(new Error('Unknown action: ' + action));
@@ -659,11 +432,6 @@
       }
     }
 
-    // ----- Polyfill google.script.run (เฉพาะเมื่อ "ไม่ได้รัน" บน GAS) -----
-    // เช็ค 3 ชั้นเพื่อกัน polyfill ไปทับ google.script.run จริงของ GAS:
-    //   1. google.script.run มีอยู่แล้ว → ไม่ polyfill
-    //   2. hostname เป็น script.google.com / googleusercontent.com → ไม่ polyfill
-    //   3. ถ้าทั้ง 2 ไม่ใช่ (เช่น github.io) → polyfill
     window.__IS_POLYFILL__ = false;
     window.__GS_HOST__ = (window.location && window.location.hostname) || '';
     (function setupPolyfill() {
@@ -700,24 +468,19 @@
       window.google.script = { run: makeRunner(null, null) };
     })();
 
-    // ==========================================
-    // 🎯 COLUMN MAPPING — แก้ไขที่นี่ถ้าตำแหน่งคอลัมน์ในชีต IPD/OPD เปลี่ยน
-    // ==========================================
     const IPD_COL_INDEX = {
-      pat:  14, // O  = ยอดผู้ป่วย
-      help: 50, // AY = จำนวนผู้ป่วยที่ต้องการช่วยเหลือเคลื่อนย้าย
-      res:  54, // BC = On Respirator
-      hfnc: 55, // BD = On HFNC
-      mask: 56, // BE = Mask c bag
-      can:  57  // BF = Cannular
+      pat:  14,
+      help: 50,
+      res:  54,
+      hfnc: 55,
+      mask: 56,
+      can:  57
     };
-    // ช่วงคอลัมน์ที่ใช้นับจำนวนบุคลากร (รวมหลายคอลัมน์ + รองรับชื่อคั่นด้วย ",")
     const STAFF_RANGES = {
-      IPD: { rn: [4, 9],  na: [12, 13] },   // RN = E-J, NA = M-N
-      OPD: { rn: [5, 9],  na: [12, 13] }    // RN = F-J, NA = M-N
+      IPD: { rn: [4, 9],  na: [12, 13] },
+      OPD: { rn: [5, 9],  na: [12, 13] }
     };
 
-    // helper: lookup ค่าใน IPD record ตามตำแหน่งคอลัมน์ (มี fallback ลองชื่อมาตรฐาน)
     function ipdVal(record, ipdHdrs, kind, ...nameFallbacks) {
       let idx = IPD_COL_INDEX[kind];
       if (ipdHdrs[idx] && record[ipdHdrs[idx]] !== undefined && String(record[ipdHdrs[idx]]).trim() !== '') {
@@ -833,14 +596,12 @@
       });
     }
 
-    // เวลาเวร (ใช้เติมในรายงาน) — แก้ที่นี่ถ้าเวลาเปลี่ยน
     const SHIFT_TIME_LABEL = {
       'เวรเช้า': '08.30 - 16.30 น.',
       'เวรบ่าย': '16.30 - 00.30 น.',
       'เวรดึก': '00.30 - 08.30 น.'
     };
 
-    // ลำดับคอลัมน์ออกซิเจนตาม สรุป (ตรงตามที่ user ส่งมา)
     const REPORT_O2_COLS = [
       '3/2 On Respirator', '3/2 On HFNC',
       '7/4 On Respirator', '7/4 On HFNC',
@@ -850,7 +611,6 @@
       'NICU On Respirator', 'NICU On HFNC'
     ];
 
-    // ลำดับโรคในรายงาน (รองรับชื่อคอลัมน์หลายแบบ)
     const REPORT_DISEASE_COLS = [
       { label: 'DHF', keys: ['DHF'] },
       { label: 'DF',  keys: ['DF'] },
@@ -864,7 +624,6 @@
       { label: 'Monkeypox', keys: ['Monkeypox', 'Mpox'] }
     ];
 
-    // ลำดับตึก + sub-items
     const REPORT_WARDS = [
       { ward: 'ตึก 3/2' },
       { ward: 'ตึก 3/3' },
@@ -891,7 +650,6 @@
       ]}
     ];
 
-    // หาคอลัมน์ใน record จากคำใน partials (case-insensitive, รองรับช่องว่าง/ขึ้นบรรทัด)
     function findColByPartials(rec, partials, excludePartials) {
       if (!rec) return null;
       return Object.keys(rec).find(k => {
@@ -911,7 +669,6 @@
       return 0;
     }
 
-    // ประกอบข้อความรายงานสรุปประจำวัน
     function buildReportText(targetData, sumRec) {
       let lines = [];
       let shiftTime = SHIFT_TIME_LABEL[String(targetData['เวร']||'').trim()] || '';
@@ -927,23 +684,19 @@
         return lines.join('\n');
       }
 
-      // O2 by ward
       REPORT_O2_COLS.forEach(col => {
         let v = num(sumRec[col] || 0);
         lines.push(`${col} ${v} ราย`);
       });
 
-      // Diseases
       lines.push('โรคหลักตามยุทธศาสตร์ของสถาบัน');
       REPORT_DISEASE_COLS.forEach(d => {
         let v = firstKeyVal(sumRec, d.keys);
         lines.push(`${d.label} ${v} ราย`);
       });
 
-      // Total
       lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${num(sumRec['รวมยอดผู้ป่วยในทั้งหมด']||0)} ราย`);
 
-      // Per-ward + sub-items
       REPORT_WARDS.forEach(g => {
         let v = num(sumRec[g.ward] || 0);
         lines.push(`${g.ward} ${v} ราย`);
@@ -964,7 +717,6 @@
       document.getElementById('filterMonth').value = d.getMonth() + 1;
       document.getElementById('filterYear').innerHTML = `<option value="${d.getFullYear() + 543}">${d.getFullYear() + 543}</option>`;
       renderMenus();
-      // แสดง view ทันทีก่อนโหลดข้อมูล — กันหน้าจอว่าง ถ้าข้อมูลโหลดช้า/พลาด
       try { switchTab('สรุป'); } catch(e) { console.error(e); }
       fetchData();
     };
@@ -1045,11 +797,10 @@
     }
 
     function fetchData() {
-      // หมายเหตุ: google.script.run ใช้งานได้ผ่าน polyfill ด้วย (สำหรับ GitHub Pages)
       console.log('[fetchData] เริ่มดึงข้อมูล... hostname=', window.location.hostname);
-      Swal.fire({ title: 'กำลังโหลดข้อมูล...', html: '<small class="text-gray-500">ถ้านานเกิน 30 วินาที จะปิดอัตโนมัติ — ลองกด F12 ดู Console</small>', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      // นำข้อความ "ถ้านานเกิน 30 วิ" ออกตามที่ขอ
+      Swal.fire({ title: 'กำลังโหลดข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      // 🛡 Safety timeout — กัน Swal ค้างปิดไม่ได้ ถ้า server ไม่ตอบ
       let fetchDone = false;
       const safetyTimer = setTimeout(() => {
         if (fetchDone) return;
@@ -1124,7 +875,7 @@
         container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-500">
           <i class="fa-solid fa-box-open text-6xl mb-4 text-gray-300"></i>
           <h2 class="text-xl font-bold">ยังไม่มีข้อมูลเวรประจำวัน</h2>
-          <p>กรุณากดปุ่ม "เพิ่มข้อมูลพยาบาลตรวจการประจำเวรใหม่" ด้านบน เพื่อสร้างเวรใหม่</p>
+          <p>กรุณากดปุ่ม "บันทึกข้อมูลประจำวัน" ด้านบน เพื่อสร้างเวรใหม่</p>
         </div>`;
         return;
       }
@@ -1132,9 +883,7 @@
       let shift = targetData['เวร'];
       currentDailyRecordId = targetData['ID'];
 
-      // 🔥 กรอง dropdown "เลือกเวรที่จะบันทึก" ตามเดือน/ปีที่เลือกใน header filter (กันโหลดช้าเมื่อข้อมูลเยอะ)
       let filteredShifts = dataRows.filter(passesHeaderFilter);
-      // ถ้าเวรปัจจุบันไม่อยู่ใน filter ก็ใส่กลับเข้าไปด้วย (กัน select ไม่ตรง)
       if (currentDailyRecordId && !filteredShifts.some(r => r['ID'] === currentDailyRecordId)) {
         let cur = dataRows.find(r => r['ID'] === currentDailyRecordId);
         if (cur) filteredShifts = [cur, ...filteredShifts];
@@ -1146,7 +895,6 @@
 
       let lineText = `วันที่ ${date}\nเวร ${shift}\nพยาบาลตรวจการ : ${targetData['พยาบาลตรวจการ']||'-'}\nแพทย์เวร MED : ${targetData['แพทย์เวร MED']||'-'}\nแพทย์เวร ER : ${targetData['แพทย์เวร ER']||'-'}\nแพทย์ Intern/Extern : ${targetData['แพทย์ Intern/Extern']||'-'}`;
 
-      // ดึงแถวจากชีต "สรุป" ที่มี ID ตรงกับเวรปัจจุบัน เพื่อสร้างรายงานสรุปครั้งที่ 2
       let sumRecord = (globalData.tables['สรุป']||[]).find(r => String(r['ID']||'').trim() === String(targetData['ID']||'').trim());
       let reportText = buildReportText(targetData, sumRecord);
 
@@ -1199,7 +947,6 @@
           </div>
         </div>
 
-        <!-- 🟢 กล่องรายงานสรุปประจำวัน (ครั้งที่ 2) -->
         <div class="bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm mt-6 mb-4">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3 border-b border-green-200 pb-2">
             <h3 class="text-base md:text-lg font-bold text-green-700">
@@ -1221,7 +968,6 @@
       let records = globalData.tables[type] || [];
       let hdrs = globalData.headers[type] || [];
 
-      // ✅ จับคู่ด้วย ID ของเวรปัจจุบันก่อน (date+shift) — fallback ด้วย date+shift+dept
       let currentId = currentDailyRecordId || (date + shift);
       let idx = records.findIndex(r =>
         String(r['ID']||'').trim() === String(currentId).trim() &&
@@ -1240,7 +986,6 @@
       let rnCount = 0, naCount = 0, patCount = 0;
 
       if (record) {
-        // ยอดผู้ป่วย (IPD: O=14, OPD: ลองคอลัมน์ O ก่อน แล้ว fallback ชื่อ)
         if (hdrs[IPD_COL_INDEX.pat]) patCount = num(record[hdrs[IPD_COL_INDEX.pat]] || 0);
         if (!patCount) {
           let patKeys = ['ยอดผู้ป่วยทั้งหมด', 'ยอดผู้รับบริการ', 'ยอดผู้ป่วย'];
@@ -1249,7 +994,6 @@
           }
         }
 
-        // นับ RN และ NA ตามช่วงคอลัมน์ (รวมหลายคอลัมน์ + comma = หลายคน)
         let ranges = STAFF_RANGES[type] || STAFF_RANGES.IPD;
         for (let i = ranges.rn[0]; i <= ranges.rn[1]; i++) {
           if (hdrs[i]) rnCount += countStaff(record[hdrs[i]]);
@@ -1519,7 +1263,6 @@
       let wardStats = {};
       deptCols.forEach(dc => { wardStats[dc.display] = { pat:0, res:0, hfnc:0, mask:0, can:0, help:0 }; });
 
-      // map ward display name (เช่น "ตึก 3/2") → key  + alternate forms
       let wardKeyMap = {};
       Object.keys(wardStats).forEach(k => {
         wardKeyMap[k.replace(/\s+/g,' ').trim().toLowerCase()] = k;
@@ -1536,7 +1279,6 @@
       let ipdRows = (globalData.tables['IPD'] || []).filter(r => validIds.has(r['ID']));
       let opdRows = (globalData.tables['OPD'] || []).filter(r => validIds.has(r['ID']));
 
-      // ✅ IPD: lookup ตามตำแหน่งคอลัมน์ (O=14, AY=50, BC=54, BD=55, BE=56, BF=57)
       let ipdHdrs = globalData.headers['IPD'] || [];
       ipdRows.forEach(r => {
         let key = findWardKey(r['หน่วยงาน'] || r['แผนก']);
@@ -1548,7 +1290,6 @@
         wardStats[key].mask += ipdVal(r, ipdHdrs, 'mask', 'Mask c bag');
         wardStats[key].can  += ipdVal(r, ipdHdrs, 'can',  'Cannular');
       });
-      // OPD: lookup ตามชื่อ
       opdRows.forEach(r => {
         let key = findWardKey(r['หน่วยงาน'] || r['แผนก']);
         if (!key) return;
@@ -1602,20 +1343,17 @@
       Object.keys(OXYGEN).forEach(type => {
         window.currentStats.oxygen[type] = [];
         let totalO2Type = 0;
-        // จาก IPD รายตึก: ใช้ตำแหน่งคอลัมน์
         ipdRows.forEach(r => {
           let dept = r['หน่วยงาน'] || r['แผนก'] || 'ไม่ระบุ';
           let kindKey = type === 'On Respirator' ? 'res' : type === 'On HFNC' ? 'hfnc' : type === 'Mask c bag' ? 'mask' : 'can';
           let c = ipdVal(r, ipdHdrs, kindKey, type);
           if (c > 0) { window.currentStats.oxygen[type].push({ dept, count: c }); totalO2Type += c; }
         });
-        // จาก OPD ใช้ชื่อ
         opdRows.forEach(r => {
           let dept = r['หน่วยงาน'] || r['แผนก'] || 'ไม่ระบุ';
           let c = num(r[type] || 0);
           if (c > 0) { window.currentStats.oxygen[type].push({ dept, count: c }); totalO2Type += c; }
         });
-        // ค่ารวมในการ์ดใหญ่ → รวมจาก สรุป เป็นหลัก ถ้าไม่มีค่อย fallback IPD
         let sumFromRecords = 0;
         let foundInRecords = false;
         records.forEach(r => {
@@ -1776,7 +1514,6 @@
 
     function drawTrendChart(canvasId, records, groupBy, viewId) {
       let buckets = {};
-      // รวมจาก records (สรุป) + เผื่อเสริมจาก IPD/OPD ของ ID เดียวกัน
       let validIds = new Set(records.map(r => r['ID']));
       let extraRows = [
         ...((globalData.tables['IPD']||[]).filter(r => validIds.has(r['ID']))),
@@ -1883,7 +1620,6 @@
       }
     }
 
-    // ดูรายละเอียดของแถวยอดสถิติแยกตามแผนก (โผล่เป็น modal — ใช้คู่กับปุ่มไอคอนตาในตาราง)
     function showWardDeptDetail(deptName, s) {
       try { if (typeof s === 'string') s = JSON.parse(s); } catch(e) { s = {}; }
       const items = [
@@ -1995,29 +1731,23 @@
         `).join('');
     }
 
-    // ==========================================
-    // 🎨 Modal field config (per-OPD-unit visibility, staff groups, shift hiding)
-    // ==========================================
     const STAFF_GROUPS = [
       { key: 'พนักงานเวรเปล เวรดึก', regex: /^พนักงานเวรเปล\s*เวรดึก(\s*\d+)?$/, posType: 'พนักงาน', dayShiftHide: true },
-      { key: 'พนักงานเวรเปล',         regex: /^พนักงานเวรเปล(\s*\d+)?$/,           posType: 'พนักงาน', dayShiftHide: false },
-      { key: 'พนักงานเวรดึก',         regex: /^พนักงานเวรดึก(\s*\d+)?$/,           posType: 'พนักงาน', dayShiftHide: true },
-      { key: 'พนักงาน',                regex: /^พนักงาน(\s*\d+)?$/,                  posType: 'พนักงาน', dayShiftHide: false },
+      { key: 'พนักงานเวรเปล',         regex: /^พนักงานเวรเปล(\s*\d+)?$/,            posType: 'พนักงาน', dayShiftHide: false },
+      { key: 'พนักงานเวรดึก',         regex: /^พนักงานเวรดึก(\s*\d+)?$/,            posType: 'พนักงาน', dayShiftHide: true },
+      { key: 'พนักงาน',                regex: /^พนักงาน(\s*\d+)?$/,                 posType: 'พนักงาน', dayShiftHide: false },
       { key: 'RN เวรดึก',              regex: /^RN\s*เวรดึก(\s*\d+)?$/,              posType: 'RN',       dayShiftHide: true },
       { key: 'PN เวรดึก',              regex: /^PN\s*เวรดึก(\s*\d+)?$/,              posType: 'PN',       dayShiftHide: true },
       { key: 'NA เวรดึก',              regex: /^NA\s*เวรดึก(\s*\d+)?$/,              posType: 'NA',       dayShiftHide: true },
-      { key: 'RN',                     regex: /^RN(\s*\d+)?$/,                        posType: 'RN',       dayShiftHide: false },
-      { key: 'PN',                     regex: /^PN(\s*\d+)?$/,                        posType: 'PN',       dayShiftHide: false },
-      { key: 'NA',                     regex: /^NA(\s*\d+)?$/,                        posType: 'NA',       dayShiftHide: false }
+      { key: 'RN',                     regex: /^RN(\s*\d+)?$/,                       posType: 'RN',       dayShiftHide: false },
+      { key: 'PN',                     regex: /^PN(\s*\d+)?$/,                       posType: 'PN',       dayShiftHide: false },
+      { key: 'NA',                     regex: /^NA(\s*\d+)?$/,                       posType: 'NA',       dayShiftHide: false }
     ];
 
-    // คอลัมน์ "นับจำนวน" สำหรับเวรเช้า (เวรบ่ายเป็นคนกรอกย้อนหลัง) — ใช้ number input
     const SHIFT_COUNT_FIELDS = ['Head เวรเช้า', 'RN เวรเช้า', 'PN เวรเช้า', 'NA เวรเช้า', 'พนักงาน เวรเช้า'];
-    // ฟิลด์เพิ่มเติมเฉพาะเวรบ่าย (สำหรับ ER/Anas/OR)
     const NIGHT_MORN_EXTRAS = ['RN เวรดึก 1', 'PN เวรดึก 1', 'NA เวรดึก 1', 'พนักงานเวรดึก',
                                 'Head เวรเช้า', 'RN เวรเช้า', 'PN เวรเช้า', 'NA เวรเช้า', 'พนักงาน เวรเช้า'];
 
-    // OPD - visible columns ต่อหน่วยงาน
     const OPD_VISIBLE = {
       opdRoom:   ['เวร', 'หน่วยงาน', 'แพทย์', 'RN 1', 'ยอดผู้รับบริการ', 'หมายเหตุ', 'แนบรูป'],
       screening: ['เวร', 'หน่วยงาน', 'RN 1', 'หมายเหตุ', 'แนบรูป'],
@@ -2046,7 +1776,6 @@
       return 'opdRoom';
     }
 
-    // mapping ชื่อแผนก → ประเภทแพทย์ (สำหรับดึงรายชื่อจาก Doc แบบยืดหยุ่น)
     function getDocTypeForDept(deptName) {
       if (!deptName) return '';
       let d = String(deptName).toLowerCase().replace(/\s+/g, '');
@@ -2068,7 +1797,6 @@
       return a.includes(b) || b.includes(a);
     }
 
-    // HR pool dept สำหรับ OPD Med 1-6 → ใช้ชื่อกลาง "OPD Med"
     function getHrPoolDept(deptName) {
       if (!deptName) return '';
       let d = String(deptName).trim();
@@ -2076,7 +1804,6 @@
       return d;
     }
 
-    // อัปโหลดรูปไป Drive (ผ่าน google.script.run)
     function handleImageUpload(input, header) {
       const file = input.files && input.files[0];
       if (!file) return;
@@ -2098,7 +1825,6 @@
       reader.readAsDataURL(file);
     }
 
-    // ตอนเปลี่ยน "เวร" หรือ "หน่วยงาน" ใน modal → re-render เพื่อให้ visibility ถูกต้อง
     function onModalFieldChange() {
       const form = document.getElementById('dataForm');
       if (!form) return;
@@ -2128,7 +1854,6 @@
 
       const headers = globalData.headers[targetSheet] || [];
       let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
-      // restore form data จาก re-render (เปลี่ยน shift/dept)
       if (window._modalSavedData) {
         Object.assign(rowData, window._modalSavedData);
         delete window._modalSavedData;
@@ -2136,8 +1861,7 @@
       let currentDept = rowData['หน่วยงาน'] || rowData['แผนก'] || contextDept || '';
       let currentShift = String(rowData['เวร']||'').trim();
 
-      // ===== ยุบกลุ่ม staff columns (RN/PN/NA/พนักงาน เวรดึก/เวรเปล) =====
-      let primaryHeaders = {}; // header(primary) -> { key, posType, members }
+      let primaryHeaders = {};
       let skipHeaders = new Set();
       STAFF_GROUPS.forEach(g => {
         let groupHeaders = headers.filter(h => typeof h === 'string' && g.regex.test(h));
@@ -2155,22 +1879,18 @@
         }
       });
 
-      // ===== ตัดสินว่า header ใดควรแสดงตาม unit (OPD) + shift =====
       let opdUnit = targetSheet === 'OPD' ? classifyOpdUnit(currentDept) : null;
       let visibleSet = null;
       if (opdUnit) {
         visibleSet = new Set(OPD_VISIBLE[opdUnit] || OPD_VISIBLE.opdRoom);
-        // ER/Anas/OR เมื่อเป็นเวรบ่าย → เพิ่ม night/morning extras
         if (['er','anas','or'].includes(opdUnit) && currentShift === 'เวรบ่าย') {
           NIGHT_MORN_EXTRAS.forEach(c => visibleSet.add(c));
         }
-        // Porter: เวรเช้า ซ่อนคอลัมน์เวรดึก
         if (opdUnit === 'porter' && currentShift === 'เวรเช้า') {
           visibleSet.delete('พนักงานเวรเปล เวรดึก 1');
         }
       }
 
-      // ===== shift-based hiding (IPD และทั่วไป) — ถ้าเลือกเวรเช้า ซ่อน เวรดึก + Head/RN/PN/NA เวรเช้า count =====
       function shouldHideByShift(header) {
         if (currentShift !== 'เวรเช้า') return false;
         if (SHIFT_COUNT_FIELDS.includes(header)) return true;
@@ -2178,7 +1898,6 @@
         return false;
       }
 
-      // ===== render each header =====
       headers.forEach(header => {
         if (header === 'ID' || header === 'Code') {
           form.innerHTML += `<input type="hidden" name="${esc(header)}" value="${esc(rowData[header] ?? '')}">`;
@@ -2186,12 +1905,10 @@
         }
         if (skipHeaders.has(header)) return;
 
-        // ซ่อนคอลัมน์ที่ไม่อยู่ใน visible (OPD) — เก็บค่าเดิมเป็น hidden field
         if (visibleSet && !visibleSet.has(header)) {
           form.innerHTML += `<input type="hidden" name="${esc(header)}" value="${esc(rowData[header] ?? '')}">`;
           return;
         }
-        // ซ่อนตาม shift
         if (shouldHideByShift(header)) {
           form.innerHTML += `<input type="hidden" name="${esc(header)}" value="${esc(rowData[header] ?? '')}">`;
           return;
@@ -2200,7 +1917,6 @@
         let inputHtml = '';
         let value = rowData[header] ?? '';
 
-        // Required: วันที่/เวร ของ Data, จำนวนผู้ป่วยช่วยเหลือ ของ IPD
         let isRequired = '';
         if (targetSheet === 'Data' && (header === 'วันที่' || header === 'เวร')) isRequired = 'required';
         if (targetSheet === 'IPD' && header.includes('จำนวนผู้ป่วยที่ต้องการความช่วยเหลือ')) isRequired = 'required';
@@ -2227,12 +1943,10 @@
         else if (isImageField) { iconHtml = '<i class="fa-solid fa-image text-cyan-500 mr-1"></i>'; labelColor = 'text-cyan-700'; }
         else if (isEKG) { iconHtml = '<i class="fa-solid fa-heart-pulse text-rose-500 mr-1"></i>'; labelColor = 'text-rose-700'; }
 
-        // ----- เวรเช้า count fields → number input (single number, not multi-select) -----
         if (isShiftCount) {
           if (value === '' || value === undefined) value = 0;
           inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" placeholder="จำนวนคน" class="w-full border-gray-300 bg-amber-50 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-400 text-sm shadow-sm transition font-bold text-amber-700">`;
         }
-        // ----- Staff multi-select (RN, PN, NA, พนักงาน เวรดึก, เวรเปล) -----
         else if (primaryHeaders[header]) {
           let pg = primaryHeaders[header];
           let posType = pg.posType;
@@ -2253,7 +1967,7 @@
           else if (isPN) colorClass = 'text-green-700 bg-green-50 border-green-300 focus:ring-green-400';
           else if (isNA) colorClass = 'text-amber-600 bg-amber-50 border-amber-300 focus:ring-amber-400';
           else colorClass = 'text-gray-700 bg-gray-100 border-gray-400 focus:ring-gray-400';
-          // hint for porter dual columns
+          
           let hintText = '';
           if (opdUnit === 'porter' && header === 'พนักงานเวรเปล เวรดึก 1') {
             hintText = '<p class="text-[10px] text-rose-500 mt-0.5">* ลงข้อมูลเฉพาะ "เวรบ่าย" (เพื่อจัดเวรดึก) — เวรเช้าไม่ต้องลง</p>';
@@ -2266,7 +1980,6 @@
               <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
             </select>${hintText}`;
         }
-        // ----- พยาบาลตรวจการ -----
         else if (isSup) {
           let supNameKey = getNameKey('Sup');
           let supList = globalData.tables['Sup'] || [];
@@ -2276,7 +1989,6 @@
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
           </select>`;
         }
-        // ----- แพทย์ (Data sheet header MED/INTERN/ER) — เดิม -----
         else if (isMedDoc || isInternDoc || isERDoc) {
           let docNameKey = getNameKey('Doc');
           let docList = globalData.tables['Doc'] || [];
@@ -2290,7 +2002,6 @@
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
           </select>`;
         }
-        // ----- แพทย์ (OPD/ER) — ดึงจาก Doc ตามประเภทที่ map ตาม dept -----
         else if (isOpdDoctor) {
           let docNameKey = getNameKey('Doc');
           let expectedType = getDocTypeForDept(currentDept);
@@ -2301,11 +2012,9 @@
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อแพทย์ใหม่</option>
           </select>`;
         }
-        // ----- เวร EKG → ข้อความ -----
         else if (isEKG) {
           inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" placeholder="พิมพ์รายชื่อ" class="w-full border-rose-200 bg-rose-50 rounded-lg px-3 py-2 focus:ring-2 focus:ring-rose-400 text-sm shadow-sm text-rose-700 font-semibold">`;
         }
-        // ----- แนบรูป → file upload + preview -----
         else if (isImageField) {
           let previewHtml = '';
           if (value && String(value).trim() !== '') {
@@ -2316,28 +2025,23 @@
             <div id="preview_img_${esc(header)}" class="mt-1 text-xs">${previewHtml}</div>
             <p class="text-[10px] text-gray-500 mt-0.5">รองรับ jpg/png — อัปโหลดเข้า Google Drive อัตโนมัติ</p>`;
         }
-        // ----- วันที่ -----
         else if (header.includes('วันที่')) {
           if (!value) value = getTodayString();
           inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" placeholder="เช่น 14/4/2568" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm transition font-bold text-teal-700">`;
         }
-        // ----- เวร select + re-render -----
         else if (header.includes('เวร') && targetSheet !== 'HR' && !header.includes('เวรเปล') && !header.includes('เวรดึก') && !header.includes('เวรเช้า') && !header.includes('EKG')) {
           inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm font-bold text-teal-700">
             <option value="">-- เลือกระบุเวร --</option>
             ${['เวรเช้า', 'เวรบ่าย', 'เวรดึก'].map(s => `<option value="${s}" ${value === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>`;
         }
-        // ----- หน่วยงาน select + re-render -----
         else if (header === 'หน่วยงาน' || header === 'แผนก') {
           inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm">
             <option value="">-- เลือก --</option>
             ${(globalData.dropdowns.departments||[]).map(d => `<option value="${esc(d)}" ${value === d ? 'selected' : ''}>${esc(d)}</option>`).join('')}
           </select>`;
         }
-        // ----- ตัวเลข / ผู้ป่วยประเภท / total -----
         else {
-          // OPD ยอดผู้รับบริการ → manual number (ไม่ auto-sum) — เท่ากับ default number input
           let textKeywords = ['Code','ID','วันที่','เวร','หน่วยงาน','แผนก','เวลา','ช่วยงานตึก','หมายเหตุ','แนบรูป','แพทย์','พยาบาล','RN','PN','NA','พนักงาน','เวรเปล','Head','EKG','ชื่อ','ตำแหน่ง','โทร','ประเภท','เบอร์ภายใน','pIC'];
           let isText = textKeywords.some(kw => header.includes(kw));
           let isNumber = !isText;
