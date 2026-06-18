@@ -10,10 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* ========== 🔍 ACCESSIBILITY-FOCUSED SCALING (สำหรับสายตาผู้ใหญ่) ========== */
-    :root { font-size: 16px; }
-    @media (min-width: 640px)  { :root { font-size: 32px; } }
-    @media (min-width: 1024px) { :root { font-size: 32px; } }
-    @media (min-width: 1536px) { :root { font-size: 32px; } }
+:root { font-size: 16px; }
 
     body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #e0f8f5 0%, #f3f4f6 100%); color: #1f2937; font-size: 1rem; line-height: 1.55; }
     .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
@@ -58,10 +55,12 @@
     /* ===== 📊 Tables — เซลล์ใหญ่ ห่างจากกัน อ่านง่าย ===== */
     table thead th { padding: 0.9rem 1rem !important; font-size: 0.95rem !important; }
     table tbody td { padding: 0.85rem 1rem !important; font-size: 1rem !important; line-height: 1.5; }
-    @media (max-width: 640px) {
-      table thead th { padding: 0.7rem 0.5rem !important; font-size: 0.85rem !important; }
-      table tbody td { padding: 0.65rem 0.5rem !important; font-size: 0.9rem !important; }
-    }
+@media (max-width: 640px) {
+  body { font-size: 1.8rem !important; }
+  .grid { grid-template-columns: 1fr !important; }
+  #dataForm { grid-template-columns: 1fr !important; }
+  #lineCopyText, #reportCopyText { font-size: 1rem !important; }
+}
 
     /* ===== 🔘 Buttons — เป้ากดใหญ่ขึ้นสำหรับมือถือ ===== */
     button { min-height: 38px; }
