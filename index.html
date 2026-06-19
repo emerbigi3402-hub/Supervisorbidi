@@ -66,7 +66,7 @@
     table thead th { padding: 0.9rem 1rem !important; font-size: 0.95rem !important; }
     table tbody td { padding: 0.85rem 1rem !important; font-size: 1rem !important; line-height: 1.5; }
 
-    /* ===== 🔘 Buttons — เป้ากดใหญ่ขึ้นสำหรับมือถือ ===== */
+    /* ===== 🔘 Buttons — เป้ากดใหญ่ขึ้น ===== */
     button { min-height: 38px; }
     button.text-sm { padding-top: 0.55rem !important; padding-bottom: 0.55rem !important; }
 
@@ -95,63 +95,8 @@
     }
 
     /* ============================================
-       📱 MOBILE RESPONSIVE OVERRIDE
+       💻 PC OVERRIDE (ยังคงเดิม ไม่แก้เด็ดขาด)
        ============================================ */
-    html, body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-
-    @media (max-width: 1023px) {
-      body.flex.h-screen.overflow-hidden {
-        height: auto !important; min-height: 100vh !important; overflow: auto !important; overflow-x: hidden !important; display: block !important;
-      }
-      main { height: auto !important; min-height: 100vh !important; width: 100% !important; }
-      #table-view, #daily-record-view, #daily-dashboard-view, #monthly-dashboard-view { flex: none !important; height: auto !important; min-height: 60vh !important; overflow: visible !important; }
-      #table-view > .flex-1 { overflow: auto !important; max-height: 70vh; }
-    }
-
-    /* ===== 📱 SMARTPHONE / TABLET ===== */
-    @media (max-width: 1023px) {
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] { grid-template-columns: 1fr !important; gap: 1rem !important; }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom { padding: 2rem !important; min-height: 160px; border-radius: 1.25rem !important; }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-3xl { font-size: 5rem !important; line-height: 1 !important; font-weight: 900; margin-top: 0.25rem; }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom p.text-sm { font-size: 1.25rem !important; }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom i.text-2xl { font-size: 2.5rem !important; }
-      [class~="grid-cols-1"][class~="sm:grid-cols-2"][class~="lg:grid-cols-4"] > .card-zoom .p-3 { padding: 1.25rem !important; }
-
-      .grid.grid-cols-2.sm\:grid-cols-5 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom, .grid.grid-cols-2.sm\:grid-cols-5 > .cursor-pointer { min-height: 150px !important; padding: 1.3rem !important; }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xl { font-size: 2.6rem !important; line-height: 1.05 !important; }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom p.text-xs { font-size: 1rem !important; }
-      .grid.grid-cols-2.sm\:grid-cols-5 > .card-zoom i.text-xl { font-size: 2rem !important; }
-
-      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
-      .disease-card { padding: 1.4rem !important; min-height: 160px; border-radius: 1rem !important; }
-      .disease-card p.text-xs { font-size: 1.1rem !important; }
-      .disease-card p.text-xl { font-size: 2.7rem !important; line-height: 1; }
-      .disease-card i { font-size: 2rem !important; }
-
-      .grid.grid-cols-2.md\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
-      .o2-card { padding: 1.5rem !important; min-height: 175px; border-radius: 1.1rem !important; }
-      .o2-card p.text-sm { font-size: 1.2rem !important; }
-      .o2-card p.text-3xl { font-size: 3rem !important; line-height: 1; }
-      .o2-card i.text-2xl { font-size: 2.2rem !important; }
-
-      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 0.9rem !important; }
-      #daily-record-content .card-zoom { min-height: 13rem !important; padding: 1.2rem !important; }
-      #daily-record-content .card-zoom h4 { font-size: 1.2rem !important; line-height: 1.25; }
-      #daily-record-content .card-zoom .text-\[10px\] { font-size: 1.05rem !important; padding: 0.55rem !important; }
-      #daily-record-content .card-zoom .text-xs { font-size: 1rem !important; }
-
-      table thead th { padding: 0.85rem 0.6rem !important; font-size: 1rem !important; }
-      table tbody td { padding: 0.85rem 0.6rem !important; font-size: 1.05rem !important; }
-
-      h2.text-lg { font-size: 1.4rem !important; }
-      h2.text-xl { font-size: 1.6rem !important; }
-      h3.text-xl { font-size: 1.5rem !important; }
-      header h1 { font-size: 1.15rem !important; line-height: 1.25 !important; }
-      #daily-dashboard-view > div > .bg-gradient-to-r h1, #monthly-dashboard-view > div > .bg-gradient-to-r h1 { font-size: 1.6rem !important; }
-    }
-
-    /* ===== 💻 PC OVERRIDE ===== */
     @media (min-width: 1024px) {
       header.glass-card { padding: 1.25rem 1.5rem !important; flex-direction: column !important; align-items: stretch !important; gap: 0.85rem !important; }
       header.glass-card h1 { font-size: 1.6rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -162,151 +107,181 @@
     }
 
     /* ============================================
-       📱 EXTRA ACCESSIBILITY FOR MOBILE ONLY (≤ 768px)
-       (ปรับปรุงพิเศษให้ใหญ่สะใจ แยกบรรทัดสำหรับผู้สูงอายุ เฉพาะบนสมาร์ทโฟน)
+       📱 ULTRA-LARGE SMARTPHONE ONLY (≤ 768px)
+       จัดให้ใหญ่สะใจสุดขีดเฉพาะมือถือ ไม่เล็ง ไม่พลาด
        ============================================ */
-    @media (max-width: 768px) {
-      /* 1. ปุ่มเมนู Sidebar (นิ้วจิ้มได้พอดี แบบไม่เล็ง) */
-      aside#sidebar nav button {
-        font-size: 1.5rem !important;
-        padding: 1.35rem 1.25rem !important;
-        margin-bottom: 0.75rem !important;
-      }
-      aside#sidebar nav button i { font-size: 1.8rem !important; margin-right: 1rem !important; }
+    html, body { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
-      /* 2. Header หลัก: ปุ่มและตัวกรองแยกบรรทัดกัน (1 ตัวต่อบรรทัด ใหญ่ๆ) */
-      header.glass-card > div:nth-child(2) {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 1rem !important;
+    @media (max-width: 768px) {
+      /* เลื่อนหน้าจอได้อิสระ */
+      body.flex.h-screen.overflow-hidden { height: auto !important; min-height: 100vh !important; overflow: auto !important; overflow-x: hidden !important; display: block !important; }
+      main { height: auto !important; min-height: 100vh !important; width: 100% !important; }
+      #table-view, #daily-record-view, #daily-dashboard-view, #monthly-dashboard-view { flex: none !important; height: auto !important; min-height: 60vh !important; overflow: visible !important; }
+      #table-view > .flex-1 { overflow: auto !important; max-height: 70vh; }
+
+      /* 1. เมนูด้านข้าง กว้างเต็มจอ (100vw) และตัวหนังสืออภิมหาใหญ่ */
+      aside#sidebar { width: 100vw !important; max-width: 100vw !important; border-radius: 0 !important; }
+      aside#sidebar h2 { font-size: 2.8rem !important; padding: 1rem 0 !important; }
+      aside#sidebar nav button {
+        font-size: 2.4rem !important;
+        padding: 2.5rem !important;
+        margin-bottom: 1.5rem !important;
+        line-height: 1.5 !important;
+        border-radius: 1.5rem !important;
       }
+      aside#sidebar nav button i { font-size: 3rem !important; margin-right: 1.5rem !important; }
+      aside#sidebar .p-6 { padding: 2.5rem !important; }
+      aside#sidebar .fa-xmark { font-size: 4rem !important; padding: 1rem !important; }
+
+      /* 2. ฟอร์มเพิ่มข้อมูล (1 คำถาม 1 บรรทัด ตัวหนังสือเบิ้มๆ) */
+      #formModal { padding: 0 !important; } /* ให้เต็มจอพอดี */
+      #modalContent { max-height: 100vh !important; height: 100vh !important; border-radius: 0 !important; }
+      #modal-title { font-size: 2.4rem !important; line-height: 1.4 !important; padding: 2rem !important; }
+      #dataForm { display: flex !important; flex-direction: column !important; gap: 3rem !important; padding: 1rem !important; }
+      #dataForm > div { width: 100% !important; max-width: 100% !important; }
+      
+      #dataForm label {
+        font-size: 2rem !important; /* ป้ายคำถามใหญ่เบิ้ม */
+        margin-bottom: 1.2rem !important;
+        display: block !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
+      }
+      #dataForm input, #dataForm select, #dataForm textarea {
+        width: 100% !important;
+        font-size: 2rem !important; /* ช่องกรอกใหญ่สะใจ */
+        padding: 2rem !important;
+        min-height: 85px !important;
+        border-width: 3px !important;
+        border-radius: 1.2rem !important;
+        height: auto !important;
+      }
+      
+      /* ป้าย Badges (รายชื่อที่ถูกเลือก) */
+      span[class*="inline-flex"] {
+        font-size: 1.8rem !important;
+        padding: 1.5rem 2rem !important;
+        margin-bottom: 1rem !important;
+        border-radius: 1.2rem !important;
+      }
+      span[class*="inline-flex"] button { font-size: 2.2rem !important; margin-left: 1.5rem !important; }
+
+      /* ปุ่มบันทึก/ยกเลิก ใน Modal */
+      #formModal .p-4.border-t { flex-direction: column-reverse !important; gap: 1.5rem !important; padding: 2rem !important; }
+      #formModal .p-4.border-t button {
+        width: 100% !important;
+        font-size: 2.4rem !important;
+        padding: 2.5rem !important;
+        border-radius: 1.5rem !important;
+      }
+
+      /* 3. Header & ตัวกรอง (แยกบรรทัด ใหญ่ชัดเจน) */
+      header.glass-card { padding: 2rem 1.5rem !important; }
+      header.glass-card h1 { font-size: 2.2rem !important; line-height: 1.5 !important; white-space: normal !important; overflow: visible !important; }
+      header.glass-card > div:nth-child(1) { align-items: flex-start !important; }
+      header.glass-card > div:nth-child(1) > button i { font-size: 3.5rem !important; }
+      
+      header.glass-card > div:nth-child(2) { display: flex !important; flex-direction: column !important; gap: 1.5rem !important; width: 100% !important; }
       header.glass-card > div:nth-child(2) > button {
         width: 100% !important;
-        font-size: 1.4rem !important;
-        padding: 1.25rem !important;
+        font-size: 2.2rem !important;
+        padding: 2.5rem !important;
+        border-radius: 1.5rem !important;
         justify-content: center !important;
       }
       header.glass-card #filterSection {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
-        border-left: none !important;
-        padding-left: 0 !important;
-        margin-left: 0 !important;
-        border-top: 2px solid #f3f4f6 !important;
-        padding-top: 1rem !important;
+        border: none !important;
+        padding: 0 !important; margin: 0 !important;
+        border-top: 3px solid #e5e7eb !important;
+        padding-top: 2rem !important;
       }
-      header.glass-card #filterSection select,
-      header.glass-card #filterSection button {
+      header.glass-card #filterSection select, header.glass-card #filterSection button {
         width: 100% !important;
-        font-size: 1.4rem !important;
-        padding: 1.25rem !important;
-        margin-top: 0.5rem !important;
-        min-height: 55px !important;
+        font-size: 2rem !important;
+        padding: 2.5rem !important;
+        min-height: 85px !important;
+        border-radius: 1.5rem !important;
+        margin-bottom: 1rem !important;
       }
 
-      /* 3. แดชบอร์ดประจำวัน/รายเดือน (แยกแถวตัวกรองทีละบรรทัด คนละแถวกับข้อความ) */
-      #daily-dashboard-view .bg-gradient-to-r,
-      #monthly-dashboard-view .bg-gradient-to-r {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 1.5rem !important;
+      /* 4. แดชบอร์ด แยกบรรทัดชัดเจน */
+      #daily-dashboard-view .bg-gradient-to-r, #monthly-dashboard-view .bg-gradient-to-r {
+        flex-direction: column !important; align-items: flex-start !important; gap: 2rem !important; padding: 2.5rem !important;
       }
-      #daily-dashboard-view .bg-gradient-to-r > div:last-child,
-      #monthly-dashboard-view .bg-gradient-to-r > div:last-child {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 0.85rem !important;
-        width: 100% !important;
+      #daily-dashboard-view h1, #monthly-dashboard-view h1 { font-size: 2.8rem !important; line-height: 1.4 !important; }
+      #daily-dashboard-view .bg-gradient-to-r > div:last-child, #monthly-dashboard-view .bg-gradient-to-r > div:last-child {
+        display: flex !important; flex-direction: column !important; width: 100% !important; gap: 1.5rem !important;
       }
       #daily-dashboard-view select, #daily-dashboard-view button,
       #monthly-dashboard-view select, #monthly-dashboard-view button {
-        width: 100% !important;
-        font-size: 1.4rem !important;
-        padding: 1.25rem !important;
-        height: auto !important;
+        width: 100% !important; font-size: 2.2rem !important; padding: 2.5rem !important; min-height: 85px !important; border-radius: 1.5rem !important;
       }
 
-      /* 4. Form Modal (1 แถว 1 คำถาม, ตัวเลือกใหญ่ๆ สะใจ) */
-      #dataForm {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 2rem !important; /* เว้นระยะแต่ละคำถามให้ห่างกันชัดเจน */
-      }
-      #dataForm > div { width: 100% !important; max-width: 100% !important; }
-      #dataForm label {
-        font-size: 1.4rem !important;
-        margin-bottom: 0.85rem !important;
-        display: block !important;
-        white-space: normal !important;
-      }
-      #dataForm input, #dataForm select {
-        width: 100% !important;
-        font-size: 1.4rem !important;
-        padding: 1.25rem 1rem !important;
-        min-height: 65px !important; /* กล่องพิมพ์ใหญ่ๆ */
-      }
-      #formModal .p-4.border-t {
-        flex-direction: column-reverse !important;
-        gap: 1rem !important;
-      }
-      #formModal .p-4.border-t button {
-        width: 100% !important;
-        font-size: 1.5rem !important;
-        padding: 1.25rem !important;
-      }
-      #modal-title { font-size: 1.8rem !important; }
-
-      /* 5. กล่องข้อความ Textarea และปุ่มคัดลอก */
+      /* 5. กล่องข้อความ และปุ่มก็อปปี้ */
       textarea#lineCopyText, textarea#reportCopyText {
-        font-size: 1.4rem !important;
-        padding: 1.25rem !important;
-        min-height: 25rem !important;
+        font-size: 1.8rem !important;
+        line-height: 1.6 !important;
+        padding: 2rem !important;
+        min-height: 40rem !important;
+        border-radius: 1.5rem !important;
       }
       .bg-pink-50 button, .bg-green-50 button {
-        font-size: 1.5rem !important;
-        padding: 1.25rem !important;
+        font-size: 2.4rem !important;
+        padding: 2.5rem !important;
+        border-radius: 1.5rem !important;
+        margin-top: 1.5rem !important;
       }
 
-      /* 6. ข้อมูลประจำวันในหน้าแสดงผล (แถบสีเทา) */
-      #daily-record-content .bg-gray-50 {
-        font-size: 1.4rem !important;
-        padding: 1.25rem !important;
-        margin-bottom: 0.75rem !important;
-      }
-
-      /* 7. การ์ดสถิติ บังคับ 1 คอลัมน์เต็มจอ ใหญ่สะใจ */
+      /* 6. การ์ดสถิติต่างๆ บังคับ 1 คอลัมน์ (เรียงลงมา) */
       .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4,
       .grid.grid-cols-2.sm\:grid-cols-5,
       .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6,
       .grid.grid-cols-2.md\:grid-cols-4,
       #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
         grid-template-columns: 1fr !important;
-        gap: 1.25rem !important;
+        gap: 1.5rem !important;
       }
-
-      /* ตัวหนังสือในการ์ดขยายเต็มที่ */
-      .card-zoom h4 { font-size: 1.8rem !important; line-height: 1.3 !important; }
-      .card-zoom .text-\[10px\] { font-size: 1.3rem !important; padding: 0.75rem !important; }
-      .card-zoom p[class*="text-sm"] { font-size: 1.6rem !important; }
-      .card-zoom p[class*="text-3xl"] { font-size: 4.5rem !important; }
       
-      .disease-card p.text-xs { font-size: 1.6rem !important; }
-      .disease-card p.text-xl { font-size: 4rem !important; }
+      .card-zoom h4 { font-size: 2.4rem !important; line-height: 1.4 !important; }
+      .card-zoom .text-\[10px\] { font-size: 1.8rem !important; padding: 1.2rem !important; margin-top: 1rem !important; border-radius: 1rem !important; }
+      .card-zoom p[class*="text-sm"] { font-size: 2rem !important; }
+      .card-zoom p[class*="text-3xl"] { font-size: 6rem !important; margin-top: 1rem !important;}
       
-      .o2-card p.text-sm { font-size: 1.8rem !important; }
-      .o2-card p.text-3xl { font-size: 4rem !important; }
+      .disease-card p.text-xs { font-size: 2.2rem !important; }
+      .disease-card p.text-xl { font-size: 6rem !important; margin-top: 1rem !important; }
+      
+      .o2-card p.text-sm { font-size: 2.2rem !important; }
+      .o2-card p.text-3xl { font-size: 6rem !important; margin-top: 1rem !important; }
 
-      /* ขยายปุ่มต่างๆ ในตาราง */
-      #table-body td button {
-        font-size: 1.5rem !important;
-        padding: 1rem 1.25rem !important;
-        margin: 0.25rem !important;
+      #daily-record-content .card-zoom { min-height: 16rem !important; padding: 2rem !important; }
+
+      /* 7. SweetAlert (Popup โมเดลแจ้งเตือนต่างๆ) อลังการงานสร้าง */
+      .swal2-popup { width: 100vw !important; padding: 2rem !important; margin: 0 !important; border-radius: 0 !important; min-height: 100vh !important; display: flex !important; flex-direction: column !important; justify-content: center !important;}
+      .swal2-title { font-size: 2.8rem !important; line-height: 1.5 !important; }
+      .swal2-html-container { font-size: 2.2rem !important; line-height: 1.6 !important; }
+      .swal2-input, .swal2-select { font-size: 2.2rem !important; height: auto !important; padding: 2.5rem !important; margin-bottom: 1.5rem !important; border-radius: 1rem !important; }
+      .swal2-actions { flex-direction: column-reverse !important; width: 100% !important; gap: 1.5rem !important; }
+      .swal2-confirm, .swal2-cancel { width: 100% !important; font-size: 2.4rem !important; padding: 2.5rem !important; border-radius: 1.5rem !important; margin: 0 !important; }
+
+      /* 8. ตารางข้อมูล (หน้าแรก/หน้ารวม) */
+      table thead th, table tbody td { font-size: 1.6rem !important; padding: 2rem 1rem !important; }
+      #table-body td button { font-size: 2.4rem !important; padding: 2rem 2.5rem !important; margin: 0.5rem !important; border-radius: 1.5rem !important; }
+      table.dept-stats-table th:not(.col-keep), table.dept-stats-table td:not(.col-keep) { display: none !important; }
+
+      /* 9. ข้อมูลแถบสีเทาหน้าบันทึกเวรประจำวัน */
+      #daily-record-content .bg-gray-50 {
+        font-size: 1.8rem !important;
+        padding: 2rem !important;
+        margin-bottom: 1rem !important;
+        border-radius: 1rem !important;
       }
-      table thead th, table tbody td {
-        font-size: 1.15rem !important;
-        padding: 1.25rem 0.5rem !important;
-      }
+      #daily-record-content .grid.grid-cols-1.md\:grid-cols-2 { grid-template-columns: 1fr !important; gap: 1rem !important; }
+      #daily-record-content h2.text-2xl { font-size: 2.5rem !important; line-height: 1.4 !important; }
+      #daily-record-content label { font-size: 1.8rem !important; }
+      #daily-record-content select { font-size: 2rem !important; padding: 2rem !important; width: 100% !important; margin-top: 1rem; border-radius: 1rem !important; }
     }
   </style>
 </head>
@@ -324,7 +299,6 @@
 
   <main class="w-full min-h-screen flex flex-col p-3 md:p-5 max-w-[1600px] mx-auto">
     <header class="glass-card mb-4 p-4 md:p-5 flex flex-col gap-3">
-      <!-- Row 1: hamburger + title -->
       <div class="flex items-center gap-3 w-full">
         <button onclick="toggleSidebar()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-xl transition flex-shrink-0"><i class="fa-solid fa-bars text-2xl"></i></button>
         <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-teal-800 tracking-wide leading-snug flex-1">
@@ -332,7 +306,6 @@
         </h1>
       </div>
 
-      <!-- Row 2: ปุ่ม + filter -->
       <div class="flex flex-wrap items-center gap-2 w-full">
         <button onclick="openModal(null, 'Data')" class="btn-blink px-5 py-2.5 text-sm md:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-md border border-teal-400">
           <i class="fa-solid fa-plus-circle text-lg md:text-xl"></i> บันทึกข้อมูลประจำวัน
@@ -1800,7 +1773,7 @@
         if (!hidden || !container) return;
         let current = hidden.value ? hidden.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
         container.innerHTML = current.map(val => `
-            <span class="inline-flex items-center gap-1 bg-teal-100 text-teal-800 px-2 py-1 rounded-md text-[11px] md:text-xs font-semibold mb-1 shadow-sm border border-teal-200">
+            <span class="inline-flex items-center gap-1 bg-teal-100 text-teal-800 px-2 py-1 rounded-md font-semibold mb-1 shadow-sm border border-teal-200">
                 ${esc(val)}
                 <button type="button" onclick="removeBadge('${esc(headerId)}', '${esc(val)}')" class="text-teal-500 hover:text-red-500 focus:outline-none ml-1"><i class="fa-solid fa-times"></i></button>
             </span>
@@ -2021,7 +1994,7 @@
 
         if (isShiftCount) {
           if (value === '' || value === undefined) value = 0;
-          inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" placeholder="จำนวนคน" class="w-full border-gray-300 bg-amber-50 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-400 text-sm shadow-sm transition font-bold text-amber-700">`;
+          inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" placeholder="จำนวนคน" class="w-full border-gray-300 bg-amber-50 focus:ring-2 focus:ring-amber-400 font-bold text-amber-700">`;
         }
         else if (primaryHeaders[header]) {
           let pg = primaryHeaders[header];
@@ -2046,11 +2019,11 @@
           
           let hintText = '';
           if (opdUnit === 'porter' && header === 'พนักงานเวรเปล เวรดึก 1') {
-            hintText = '<p class="text-[10px] text-rose-500 mt-0.5">* ลงข้อมูลเฉพาะ "เวรบ่าย" (เพื่อจัดเวรดึก) — เวรเช้าไม่ต้องลง</p>';
+            hintText = '<p class="text-[14px] text-rose-500 mt-2">* ลงข้อมูลเฉพาะ "เวรบ่าย" (เพื่อจัดเวรดึก) — เวรเช้าไม่ต้องลง</p>';
           }
           inputHtml = `<input type="hidden" name="${esc(header)}" id="hidden_${esc(header)}" value="${esc(value)}"/>
-            <div id="badges_${esc(header)}" class="flex flex-wrap gap-1 mb-1.5 min-h-[30px] border border-dashed border-gray-200 p-1.5 rounded-lg bg-gray-50"></div>
-            <select id="sel_${esc(header)}" data-hr-type="${esc(posType)}" onchange="handleMultiSelectChange(this, '${esc(header)}', '${esc(posType)}')" class="w-full rounded-lg px-3 py-2 text-sm shadow-sm font-semibold transition ${colorClass}">
+            <div id="badges_${esc(header)}" class="flex flex-wrap gap-2 mb-2 border border-dashed border-gray-200 p-2 rounded-xl bg-gray-50 min-h-[50px]"></div>
+            <select id="sel_${esc(header)}" data-hr-type="${esc(posType)}" onchange="handleMultiSelectChange(this, '${esc(header)}', '${esc(posType)}')" class="w-full font-semibold transition ${colorClass}">
               <option value="">-- เลือกเพิ่ม ${esc(posType)} --</option>
               ${uniqueHrList.map(h => `<option value="${esc(h[hrNameKey])}">${esc(h[hrNameKey])}</option>`).join('')}
               <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
@@ -2059,7 +2032,7 @@
         else if (isSup) {
           let supNameKey = getNameKey('Sup');
           let supList = globalData.tables['Sup'] || [];
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}'); autoFillPhone(this.value);" class="w-full border-pink-300 bg-pink-50 text-pink-700 font-semibold rounded-lg px-3 py-2 focus:ring-2 focus:ring-pink-400 text-sm shadow-sm">
+          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}'); autoFillPhone(this.value);" class="w-full border-pink-300 bg-pink-50 text-pink-700 font-semibold focus:ring-2 focus:ring-pink-400">
             <option value="">-- เลือกพยาบาลตรวจการ --</option>
             ${supList.map(s => `<option value="${esc(s[supNameKey])}" ${value === s[supNameKey] ? 'selected' : ''}>${esc(s[supNameKey])}</option>`).join('')}
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
@@ -2072,7 +2045,7 @@
           else if (isInternDoc) docList = docList.filter(d => matchDocType(d['ประเภท'], 'INTERN'));
           else if (isERDoc) docList = docList.filter(d => matchDocType(d['ประเภท'], 'ER'));
           let docType = isMedDoc ? 'MED' : (isInternDoc ? 'INTERN' : 'ER');
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Doc', '${docType}', '', '${esc(header)}')" class="w-full border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-400 text-sm shadow-sm">
+          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Doc', '${docType}', '', '${esc(header)}')" class="w-full border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold focus:ring-2 focus:ring-emerald-400">
             <option value="">-- เลือกแพทย์ --</option>
             ${docList.map(d => `<option value="${esc(d[docNameKey])}" ${value === d[docNameKey] ? 'selected' : ''}>${esc(d[docNameKey])}</option>`).join('')}
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
@@ -2082,37 +2055,37 @@
           let docNameKey = getNameKey('Doc');
           let expectedType = getDocTypeForDept(currentDept);
           let docList = (globalData.tables['Doc'] || []).filter(d => matchDocType(d['ประเภท'], expectedType));
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" onchange="checkAddNew(this, 'Doc', '${esc(expectedType)}', '', '${esc(header)}')" class="w-full border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-400 text-sm shadow-sm">
+          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" onchange="checkAddNew(this, 'Doc', '${esc(expectedType)}', '', '${esc(header)}')" class="w-full border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold focus:ring-2 focus:ring-emerald-400">
             <option value="">-- เลือกแพทย์ (${esc(expectedType||'-')}) --</option>
             ${docList.map(d => `<option value="${esc(d[docNameKey])}" ${value === d[docNameKey] ? 'selected' : ''}>${esc(d[docNameKey])}</option>`).join('')}
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อแพทย์ใหม่</option>
           </select>`;
         }
         else if (isEKG) {
-          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" placeholder="พิมพ์รายชื่อ" class="w-full border-rose-200 bg-rose-50 rounded-lg px-3 py-2 focus:ring-2 focus:ring-rose-400 text-sm shadow-sm text-rose-700 font-semibold">`;
+          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" placeholder="พิมพ์รายชื่อ" class="w-full border-rose-200 bg-rose-50 focus:ring-2 focus:ring-rose-400 text-rose-700 font-semibold">`;
         }
         else if (isImageField) {
           let previewHtml = '';
           if (value && String(value).trim() !== '') {
-            previewHtml = `<a href="${esc(value)}" target="_blank" class="text-cyan-600 underline text-xs break-all"><i class="fa-solid fa-image"></i> ดูรูปเดิม</a>`;
+            previewHtml = `<a href="${esc(value)}" target="_blank" class="text-cyan-600 underline break-all"><i class="fa-solid fa-image"></i> ดูรูปเดิม</a>`;
           }
           inputHtml = `<input type="hidden" name="${esc(header)}" id="hidden_img_${esc(header)}" value="${esc(value)}"/>
-            <input type="file" accept="image/*" onchange="handleImageUpload(this, '${esc(header)}')" class="w-full text-xs border border-gray-300 bg-white rounded-lg px-3 py-2 cursor-pointer file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-cyan-100 file:text-cyan-700"/>
-            <div id="preview_img_${esc(header)}" class="mt-1 text-xs">${previewHtml}</div>
-            <p class="text-[10px] text-gray-500 mt-0.5">รองรับ jpg/png — อัปโหลดเข้า Google Drive อัตโนมัติ</p>`;
+            <input type="file" accept="image/*" onchange="handleImageUpload(this, '${esc(header)}')" class="w-full bg-white cursor-pointer"/>
+            <div id="preview_img_${esc(header)}" class="mt-2 text-lg">${previewHtml}</div>
+            <p class="text-[12px] text-gray-500 mt-2">รองรับ jpg/png — อัปโหลดเข้า Google Drive อัตโนมัติ</p>`;
         }
         else if (header.includes('วันที่')) {
           if (!value) value = getTodayString();
-          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" placeholder="เช่น 14/4/2568" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm transition font-bold text-teal-700">`;
+          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" placeholder="เช่น 14/4/2568" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700">`;
         }
         else if (header.includes('เวร') && targetSheet !== 'HR' && !header.includes('เวรเปล') && !header.includes('เวรดึก') && !header.includes('เวรเช้า') && !header.includes('EKG')) {
-          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm font-bold text-teal-700">
+          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700">
             <option value="">-- เลือกระบุเวร --</option>
             ${['เวรเช้า', 'เวรบ่าย', 'เวรดึก'].map(s => `<option value="${s}" ${value === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>`;
         }
         else if (header === 'หน่วยงาน' || header === 'แผนก') {
-          inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm">
+          inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400">
             <option value="">-- เลือก --</option>
             ${(globalData.dropdowns.departments||[]).map(d => `<option value="${esc(d)}" ${value === d ? 'selected' : ''}>${esc(d)}</option>`).join('')}
           </select>`;
@@ -2123,21 +2096,21 @@
           let isNumber = !isText;
           if (isTotalField) {
             if (value === '' || value === undefined) value = 0;
-            inputHtml = `<input type="number" name="${esc(header)}" id="total_patients_readonly" value="${esc(value)}" readonly class="w-full border-gray-300 bg-teal-50 rounded-lg px-3 py-2 text-teal-700 font-bold text-sm shadow-sm cursor-not-allowed border-2 border-teal-200">`;
+            inputHtml = `<input type="number" name="${esc(header)}" id="total_patients_readonly" value="${esc(value)}" readonly class="w-full border-gray-300 bg-teal-50 text-teal-700 font-bold cursor-not-allowed border-2 border-teal-200">`;
           } else if (isPatientType) {
             if (value === '' || value === undefined) value = 0;
-            inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" oninput="calcTotalPatient()" class="patient-type-input w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm transition">`;
+            inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" oninput="calcTotalPatient()" class="patient-type-input w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 transition">`;
           } else if (isNumber) {
             if (value === '' || value === undefined) value = 0;
-            inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" ${isRequired} class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm transition">`;
+            inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" ${isRequired} class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 transition">`;
           } else {
-            inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" class="w-full border-gray-300 bg-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-400 text-sm shadow-sm transition">`;
+            inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 transition">`;
           }
         }
 
         let widthClass = (header.length > 20 || header.includes('หมายเหตุ') || header === 'แนบรูป') ? 'md:col-span-2 lg:col-span-3' : '';
         form.innerHTML += `<div class="${widthClass}">
-            <label class="block text-xs font-bold ${labelColor} mb-1 ml-1 truncate" title="${esc(header)}">${iconHtml} ${esc(header)} ${labelStar}</label>
+            <label class="block font-bold ${labelColor}" title="${esc(header)}">${iconHtml} ${esc(header)} ${labelStar}</label>
             ${inputHtml}
           </div>`;
       });
