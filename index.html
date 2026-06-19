@@ -52,7 +52,7 @@
     .disease-card i { font-size: 1.5rem !important; }
     
     .o2-card { padding: 1.25rem !important; min-height: 130px; }
-    .o2-card p.text-sm { font-size: 1.1rem !important; font-weight: 700 !important; } /* แก้ไขขนาดตัวหนังสือการ์ด O2 */
+    .o2-card p.text-sm { font-size: 1.1rem !important; font-weight: 700 !important; }
     .o2-card p.text-3xl { font-size: clamp(1.8rem, 4vw, 2.5rem) !important; }
     .o2-card i { font-size: 2.5rem !important; }
 
@@ -65,12 +65,6 @@
     /* ===== 📊 Tables — เซลล์ใหญ่ ห่างจากกัน อ่านง่าย ===== */
     table thead th { padding: 0.9rem 1rem !important; font-size: 0.95rem !important; }
     table tbody td { padding: 0.85rem 1rem !important; font-size: 1rem !important; line-height: 1.5; }
-    @media (max-width: 640px) {
-      body { font-size: 1.8rem !important; }
-      .grid { grid-template-columns: 1fr !important; }
-      #dataForm { grid-template-columns: 1fr !important; }
-      #lineCopyText, #reportCopyText { font-size: 1rem !important; }
-    }
 
     /* ===== 🔘 Buttons — เป้ากดใหญ่ขึ้นสำหรับมือถือ ===== */
     button { min-height: 38px; }
@@ -157,18 +151,6 @@
       #daily-dashboard-view > div > .bg-gradient-to-r h1, #monthly-dashboard-view > div > .bg-gradient-to-r h1 { font-size: 1.6rem !important; }
     }
 
-    /* ===== 💪 EXTRA SMARTPHONE OVERRIDE ===== */
-    @media (max-width: 640px) {
-      .card-zoom, .disease-card, .o2-card { padding: 1.5rem !important; }
-      .card-zoom p[class*="text-3xl"], .o2-card p[class*="text-3xl"] { font-size: 4rem !important; line-height: 1.05 !important; }
-      .card-zoom p[class*="text-xl"], .disease-card p[class*="text-xl"] { font-size: 2.3rem !important; line-height: 1.05 !important; }
-      .card-zoom p[class*="text-sm"], .o2-card p[class*="text-sm"] { font-size: 1.1rem !important; }
-      .disease-card p[class*="text-xs"] { font-size: 0.95rem !important; }
-      header.glass-card { padding: 1rem !important; gap: 0.75rem !important; }
-      header.glass-card h1 { font-size: 1.05rem !important; line-height: 1.3 !important; }
-      header.glass-card button { padding: 0.55rem 0.85rem !important; font-size: 0.85rem !important; }
-    }
-
     /* ===== 💻 PC OVERRIDE ===== */
     @media (min-width: 1024px) {
       header.glass-card { padding: 1.25rem 1.5rem !important; flex-direction: column !important; align-items: stretch !important; gap: 0.85rem !important; }
@@ -179,59 +161,152 @@
       header.glass-card select { padding: 0.55rem 0.85rem !important; }
     }
 
-    /* ===== 📱 Mobile header ===== */
-    @media (max-width: 640px) {
-      header.glass-card { padding: 1rem !important; }
-      header.glass-card > div:nth-child(1) { gap: 0.75rem !important; align-items: flex-start !important; }
-      header.glass-card h1 { font-size: 1.5rem !important; line-height: 1.3 !important; white-space: normal !important; overflow: visible !important; word-wrap: break-word !important; font-weight: 800 !important; }
-      header.glass-card > div:nth-child(1) > button i { font-size: 1.75rem !important; }
-      header.glass-card > div:nth-child(2) { display: grid !important; grid-template-columns: 1fr !important; gap: 0.6rem !important; width: 100% !important; }
-      header.glass-card > div:nth-child(2) > button { width: 100% !important; padding: 0.95rem 0.5rem !important; font-size: 1rem !important; justify-content: center !important; text-align: center !important; line-height: 1.25 !important; }
-      header.glass-card #filterSection { grid-column: span 1 !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 0.5rem !important; border-left: none !important; padding-left: 0 !important; margin-left: 0 !important; width: 100% !important; margin-top: 0.25rem !important; padding-top: 0.6rem !important; border-top: 2px solid #f3f4f6 !important; }
-      header.glass-card #filterSection select { font-size: 1.05rem !important; padding: 0.85rem 0.6rem !important; font-weight: 600 !important; }
-      header.glass-card #filterSection button { grid-column: span 2 !important; padding: 0.95rem !important; font-size: 1.1rem !important; font-weight: 700 !important; }
-    }
-
-    @media (max-width: 1023px) {
-      #lineCopyText { min-height: 22rem !important; font-size: 1rem !important; line-height: 1.6 !important; }
-      #reportCopyText { min-height: 38rem !important; font-size: 1rem !important; }
-      aside#sidebar { width: 88vw !important; max-width: 28rem !important; }
-      aside#sidebar h2 { font-size: 1.7rem !important; }
-      aside#sidebar nav button { font-size: 1.25rem !important; padding: 1.1rem 1.25rem !important; line-height: 1.3 !important; }
-      aside#sidebar nav button i { font-size: 1.5rem !important; margin-right: 0.5rem; }
-      aside#sidebar .p-6 { padding: 1.5rem 1.25rem !important; }
-    }
-
+    /* ============================================
+       📱 EXTRA ACCESSIBILITY FOR MOBILE ONLY (≤ 768px)
+       (ปรับปรุงพิเศษให้ใหญ่สะใจ แยกบรรทัดสำหรับผู้สูงอายุ เฉพาะบนสมาร์ทโฟน)
+       ============================================ */
     @media (max-width: 768px) {
-      #table-body tr td, #table-head tr th { font-size: 1rem !important; padding: 0.85rem 0.4rem !important; }
-      #table-head th:nth-child(n+3):not(:last-child), #table-body td:nth-child(n+3):not(:last-child) { display: none !important; }
-      #table-head th:nth-child(1), #table-body td:nth-child(1) { font-weight: 700 !important; }
-      #table-head th:nth-child(2), #table-body td:nth-child(2) { font-weight: 700 !important; color: #0f766e; }
-      #daily-record-content .grid.grid-cols-1.md\:grid-cols-2 { grid-template-columns: 1fr !important; gap: 0.65rem !important; }
-      #daily-record-content .bg-gray-50.p-2.rounded-lg { padding: 1rem !important; font-size: 1.1rem !important; line-height: 1.5 !important; }
-      #daily-record-content h2.text-2xl { font-size: 1.6rem !important; }
-      #daily-record-content label { font-size: 1.1rem !important; }
-      #daily-record-content select { font-size: 1.05rem !important; padding: 0.85rem !important; width: 100% !important; margin-top: 0.5rem; }
-      table.dept-stats-table th:not(.col-keep), table.dept-stats-table td:not(.col-keep) { display: none !important; }
-      table.dept-stats-table th, table.dept-stats-table td { font-size: 1.05rem !important; padding: 0.9rem 0.5rem !important; }
-    }
+      /* 1. ปุ่มเมนู Sidebar (นิ้วจิ้มได้พอดี แบบไม่เล็ง) */
+      aside#sidebar nav button {
+        font-size: 1.5rem !important;
+        padding: 1.35rem 1.25rem !important;
+        margin-bottom: 0.75rem !important;
+      }
+      aside#sidebar nav button i { font-size: 1.8rem !important; margin-right: 1rem !important; }
 
-    @media (max-width: 1023px) {
-      .card-zoom p[class*="text-3xl"] { font-size: 4.5rem !important; line-height: 1 !important; font-weight: 900 !important; }
-      .card-zoom p[class*="text-2xl"] { font-size: 3.5rem !important; line-height: 1 !important; }
-      .card-zoom p[class*="text-xl"] { font-size: 2.6rem !important; line-height: 1.05 !important; }
-      .card-zoom p[class*="text-sm"] { font-size: 1.25rem !important; font-weight: 600; }
-      .card-zoom p[class*="text-xs"] { font-size: 1.1rem !important; }
-      .card-zoom i { font-size: 2.5rem !important; }
-    }
+      /* 2. Header หลัก: ปุ่มและตัวกรองแยกบรรทัดกัน (1 ตัวต่อบรรทัด ใหญ่ๆ) */
+      header.glass-card > div:nth-child(2) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+      }
+      header.glass-card > div:nth-child(2) > button {
+        width: 100% !important;
+        font-size: 1.4rem !important;
+        padding: 1.25rem !important;
+        justify-content: center !important;
+      }
+      header.glass-card #filterSection {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        border-left: none !important;
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+        border-top: 2px solid #f3f4f6 !important;
+        padding-top: 1rem !important;
+      }
+      header.glass-card #filterSection select,
+      header.glass-card #filterSection button {
+        width: 100% !important;
+        font-size: 1.4rem !important;
+        padding: 1.25rem !important;
+        margin-top: 0.5rem !important;
+        min-height: 55px !important;
+      }
 
-    @media (max-width: 380px) {
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom { padding: 1.5rem !important; }
-      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 > .card-zoom p.text-3xl { font-size: 4.5rem !important; }
-      .disease-card { padding: 1.1rem !important; min-height: 145px; }
-      .disease-card p.text-xl { font-size: 2.3rem !important; }
-      .o2-card { padding: 1.2rem !important; min-height: 160px; }
-      .o2-card p.text-3xl { font-size: 2.6rem !important; }
+      /* 3. แดชบอร์ดประจำวัน/รายเดือน (แยกแถวตัวกรองทีละบรรทัด คนละแถวกับข้อความ) */
+      #daily-dashboard-view .bg-gradient-to-r,
+      #monthly-dashboard-view .bg-gradient-to-r {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 1.5rem !important;
+      }
+      #daily-dashboard-view .bg-gradient-to-r > div:last-child,
+      #monthly-dashboard-view .bg-gradient-to-r > div:last-child {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.85rem !important;
+        width: 100% !important;
+      }
+      #daily-dashboard-view select, #daily-dashboard-view button,
+      #monthly-dashboard-view select, #monthly-dashboard-view button {
+        width: 100% !important;
+        font-size: 1.4rem !important;
+        padding: 1.25rem !important;
+        height: auto !important;
+      }
+
+      /* 4. Form Modal (1 แถว 1 คำถาม, ตัวเลือกใหญ่ๆ สะใจ) */
+      #dataForm {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2rem !important; /* เว้นระยะแต่ละคำถามให้ห่างกันชัดเจน */
+      }
+      #dataForm > div { width: 100% !important; max-width: 100% !important; }
+      #dataForm label {
+        font-size: 1.4rem !important;
+        margin-bottom: 0.85rem !important;
+        display: block !important;
+        white-space: normal !important;
+      }
+      #dataForm input, #dataForm select {
+        width: 100% !important;
+        font-size: 1.4rem !important;
+        padding: 1.25rem 1rem !important;
+        min-height: 65px !important; /* กล่องพิมพ์ใหญ่ๆ */
+      }
+      #formModal .p-4.border-t {
+        flex-direction: column-reverse !important;
+        gap: 1rem !important;
+      }
+      #formModal .p-4.border-t button {
+        width: 100% !important;
+        font-size: 1.5rem !important;
+        padding: 1.25rem !important;
+      }
+      #modal-title { font-size: 1.8rem !important; }
+
+      /* 5. กล่องข้อความ Textarea และปุ่มคัดลอก */
+      textarea#lineCopyText, textarea#reportCopyText {
+        font-size: 1.4rem !important;
+        padding: 1.25rem !important;
+        min-height: 25rem !important;
+      }
+      .bg-pink-50 button, .bg-green-50 button {
+        font-size: 1.5rem !important;
+        padding: 1.25rem !important;
+      }
+
+      /* 6. ข้อมูลประจำวันในหน้าแสดงผล (แถบสีเทา) */
+      #daily-record-content .bg-gray-50 {
+        font-size: 1.4rem !important;
+        padding: 1.25rem !important;
+        margin-bottom: 0.75rem !important;
+      }
+
+      /* 7. การ์ดสถิติ บังคับ 1 คอลัมน์เต็มจอ ใหญ่สะใจ */
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4,
+      .grid.grid-cols-2.sm\:grid-cols-5,
+      .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.lg\:grid-cols-6,
+      .grid.grid-cols-2.md\:grid-cols-4,
+      #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+      }
+
+      /* ตัวหนังสือในการ์ดขยายเต็มที่ */
+      .card-zoom h4 { font-size: 1.8rem !important; line-height: 1.3 !important; }
+      .card-zoom .text-\[10px\] { font-size: 1.3rem !important; padding: 0.75rem !important; }
+      .card-zoom p[class*="text-sm"] { font-size: 1.6rem !important; }
+      .card-zoom p[class*="text-3xl"] { font-size: 4.5rem !important; }
+      
+      .disease-card p.text-xs { font-size: 1.6rem !important; }
+      .disease-card p.text-xl { font-size: 4rem !important; }
+      
+      .o2-card p.text-sm { font-size: 1.8rem !important; }
+      .o2-card p.text-3xl { font-size: 4rem !important; }
+
+      /* ขยายปุ่มต่างๆ ในตาราง */
+      #table-body td button {
+        font-size: 1.5rem !important;
+        padding: 1rem 1.25rem !important;
+        margin: 0.25rem !important;
+      }
+      table thead th, table tbody td {
+        font-size: 1.15rem !important;
+        padding: 1.25rem 0.5rem !important;
+      }
     }
   </style>
 </head>
@@ -249,6 +324,7 @@
 
   <main class="w-full min-h-screen flex flex-col p-3 md:p-5 max-w-[1600px] mx-auto">
     <header class="glass-card mb-4 p-4 md:p-5 flex flex-col gap-3">
+      <!-- Row 1: hamburger + title -->
       <div class="flex items-center gap-3 w-full">
         <button onclick="toggleSidebar()" class="text-teal-600 hover:bg-teal-50 p-2 rounded-xl transition flex-shrink-0"><i class="fa-solid fa-bars text-2xl"></i></button>
         <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-teal-800 tracking-wide leading-snug flex-1">
@@ -256,6 +332,7 @@
         </h1>
       </div>
 
+      <!-- Row 2: ปุ่ม + filter -->
       <div class="flex flex-wrap items-center gap-2 w-full">
         <button onclick="openModal(null, 'Data')" class="btn-blink px-5 py-2.5 text-sm md:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-md border border-teal-400">
           <i class="fa-solid fa-plus-circle text-lg md:text-xl"></i> บันทึกข้อมูลประจำวัน
@@ -798,7 +875,6 @@
 
     function fetchData() {
       console.log('[fetchData] เริ่มดึงข้อมูล... hostname=', window.location.hostname);
-      // นำข้อความ "ถ้านานเกิน 30 วิ" ออกตามที่ขอ
       Swal.fire({ title: 'กำลังโหลดข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
       let fetchDone = false;
