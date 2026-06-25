@@ -115,6 +115,16 @@
       #filterSection select, #filterSection button { width: 100% !important; font-size: 1.2rem !important; padding: 1rem !important; min-height: 48px !important; margin-bottom: 0.5rem !important; border-radius: 0.8rem !important; }
       #filterSection.hidden { display: none !important; } /* ✅ แก้ไข: ต้องมาทีหลังกฎ flex ด้านบน เพื่อให้ JS ซ่อนตัวกรองในหน้า "บันทึกข้อมูลรายวัน" ได้บนมือถือด้วย */
       #headerAddBtnContainer.hidden, #headerAddBtn.hidden { display: none !important; }
+      /* ✅ แก้ไข: dropdown "เลือกเวรที่จะบันทึก" ไม่ให้ล้นจอบนมือถือ แยกเป็น 2 แถว (label บน, select ล่าง เต็มความกว้าง) */
+      #shiftSelectorRow { width: 100% !important; }
+      #shiftSelectorRow select {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
 
       /* 3. แดชบอร์ด Header & ตัวกรอง */
       .bg-gradient-to-r { flex-direction: column !important; align-items: stretch !important; padding: 1.5rem !important; gap: 1.5rem !important; }
@@ -544,12 +554,34 @@
     // ==========================================
     // 📲 LINE LIFF (สำหรับปุ่ม Share รายงาน/ข้อความไปกลุ่มไลน์)
     // ==========================================
-    const LIFF_ID = 'YOUR_LIFF_ID_HERE'; // ⚠️ รอใส่ LIFF ID จริงจาก LINE Developers Console
+    const LIFF_ID = '2007625222-ziw8Ty7N';
     let liffReady = false;
-    if (typeof liff !== 'undefined' && LIFF_ID && LIFF_ID !== 'YOUR_LIFF_ID_HERE') {
+    let liffInitError = null;
+
+    // หมายเหตุ: liff.init() ต้องรอให้ LIFF SDK (<script src="...sdk.js">) โหลดเสร็จก่อนแน่นอน
+    // จึงเรียกจาก initLiff() ภายใน window.onload เท่านั้น ไม่เรียกตอน parse script ตรงๆ
+    // เพื่อป้องกัน race condition ที่ทำให้ liff เป็น undefined อยู่ตลอด แม้ SDK โหลดเสร็จแล้วก็ตาม
+    function initLiff() {
+      if (typeof liff === 'undefined') {
+        liffInitError = 'LIFF SDK โหลดไม่สำเร็จ (สคริปต์จาก static.line-scdn.net อาจถูกบล็อกหรือเน็ตช้า)';
+        console.error('[LIFF]', liffInitError);
+        return;
+      }
+      if (!LIFF_ID || LIFF_ID === 'YOUR_LIFF_ID_HERE') {
+        liffInitError = 'ยังไม่ได้ตั้งค่า LIFF_ID ในโค้ด';
+        console.warn('[LIFF]', liffInitError);
+        return;
+      }
       liff.init({ liffId: LIFF_ID })
-        .then(() => { liffReady = true; console.log('[LIFF] init สำเร็จ'); })
-        .catch(err => { console.error('[LIFF] init ไม่สำเร็จ:', err); });
+        .then(() => {
+          liffReady = true;
+          liffInitError = null;
+          console.log('[LIFF] init สำเร็จ — isInClient:', liff.isInClient(), '| isLoggedIn:', liff.isLoggedIn());
+        })
+        .catch(err => {
+          liffInitError = (err && err.message) || String(err);
+          console.error('[LIFF] init ไม่สำเร็จ:', err);
+        });
     }
 
     const API_ACTIONS = {
@@ -850,12 +882,23 @@
         Swal.fire('ไม่มีข้อความให้แชร์', 'กรุณาตรวจสอบว่ามีข้อมูลในกล่องก่อนแชร์', 'warning');
         return;
       }
-      if (LIFF_ID === '2007625222-ziw8Ty7N' || !LIFF_ID) {
+      if (LIFF_ID === 'YOUR_LIFF_ID_HERE' || !LIFF_ID) {
         Swal.fire({ icon: 'info', title: 'ยังไม่ได้ตั้งค่า LIFF ID', text: 'กรุณาตั้งค่า LIFF_ID ในโค้ดก่อนใช้งานฟีเจอร์ Share ไปไลน์', confirmButtonColor: '#06C755' });
         return;
       }
       if (typeof liff === 'undefined' || !liffReady) {
-        Swal.fire({ icon: 'warning', title: 'LIFF ยังไม่พร้อมใช้งาน', text: 'กรุณาเปิดหน้านี้ผ่านแอป LINE หรือลิงก์ LIFF อีกครั้ง', confirmButtonColor: '#06C755' });
+        // ลองเรียก initLiff() ใหม่อีกครั้งเผื่อกรณี SDK โหลดเสร็จช้ากว่า window.onload (เช่นเน็ตช้า)
+        if (typeof liff !== 'undefined' && !liffReady) initLiff();
+        let detail = liffInitError ? `\n\nรายละเอียด: ${liffInitError}` : '';
+        Swal.fire({
+          icon: 'warning',
+          title: 'LIFF ยังไม่พร้อมใช้งาน',
+          html: `<div class="text-left text-sm">
+                   <p>กรุณาเปิดหน้านี้ผ่านลิงก์ <code class="bg-gray-100 px-1 rounded">https://liff.line.me/${esc(LIFF_ID)}</code> จากในแอป LINE แล้วลองใหม่</p>
+                   ${liffInitError ? `<p class="text-xs text-gray-500 mt-3 font-mono whitespace-pre-line">${esc(liffInitError)}</p>` : ''}
+                 </div>`,
+          confirmButtonColor: '#06C755'
+        });
         return;
       }
       if (!liff.isApiAvailable('shareTargetPicker')) {
@@ -1025,6 +1068,7 @@
       renderMenus();
       try { switchTab('DailyRecord'); } catch(e) { console.error(e); }
       fetchData();
+      initLiff(); // ✅ แก้ไข: เรียก LIFF init ตอนนี้ที่แน่ใจว่า SDK โหลดเสร็จแล้ว (กัน race condition)
     };
 
     function toggleSidebar() {
@@ -1228,9 +1272,9 @@
                 </button>
               </div>
             </div>
-            <div class="mb-4 flex flex-wrap gap-2 items-center">
-              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวรที่จะบันทึก:</label>
-              <select onchange="showDailyRecord(this.value)" class="border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800">${shiftOptions}</select>
+            <div class="mb-4 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:items-center" id="shiftSelectorRow">
+              <label class="text-sm font-bold text-teal-700 flex-shrink-0"><i class="fa-solid fa-list"></i> เลือกเวรที่จะบันทึก:</label>
+              <select onchange="showDailyRecord(this.value)" class="w-full sm:w-auto max-w-full border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 truncate">${shiftOptions}</select>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm md:text-base text-gray-700 info-grid">
               <div class="bg-gray-50 p-2 rounded-lg info-item flex flex-col md:flex-row md:items-center justify-between">
