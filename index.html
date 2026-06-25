@@ -929,6 +929,15 @@
     // ==========================================
     let currentDailyRecordId = null;
 
+    // dropdown "เลือกเวร" ที่รวมตัวเลือก "สร้างเวรใหม่" ไว้บนสุด
+    function onShiftSelectorChange(value) {
+      if (value === '__NEW__') {
+        renderInlineDataForm(null, null);
+      } else {
+        showDailyRecord(value);
+      }
+    }
+
     function showDailyRecord(dataId = null) {
       currentSheet = 'DailyRecord';
       ['table-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -960,7 +969,8 @@
         let cur = dataRows.find(r => r['ID'] === currentDailyRecordId);
         if (cur) filteredShifts = [cur, ...filteredShifts];
       }
-      let shiftOptions = filteredShifts.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
+      let shiftOptions = `<option value="__NEW__" class="font-bold text-teal-700 bg-teal-50">➕ สร้างเวรใหม่</option>` +
+        filteredShifts.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
       let depts = globalData.tables['แผนก'] || [];
       let ipdDepts = depts.filter(d => d['ประเภท'] === 'IPD');
       let opdDepts = depts.filter(d => d['ประเภท'] === 'OPD');
@@ -981,8 +991,8 @@
               </button>
             </div>
             <div class="mb-4 flex flex-wrap gap-2 items-center">
-              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวรที่จะบันทึก:</label>
-              <select onchange="showDailyRecord(this.value)" class="border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800">${shiftOptions}</select>
+              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวร:</label>
+              <select onchange="onShiftSelectorChange(this.value)" class="border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800">${shiftOptions}</select>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm md:text-base text-gray-700 info-grid">
               <div class="bg-gray-50 p-2 rounded-lg info-item flex flex-col md:flex-row md:items-center justify-between">
