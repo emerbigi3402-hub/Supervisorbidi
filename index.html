@@ -757,12 +757,29 @@
       return 0;
     }
 
+    // แปลงค่า "Staff/Train" หรือ "Staff" เพียงอย่างเดียว ให้แสดงผลสวยงามทั้งในข้อความไลน์และรายงาน
+    // multiline = true จะคืนเป็นหลายบรรทัด (ใช้กับข้อความสรุปส่งไลน์), false จะคืนบรรทัดเดียว (ใช้กับรายงาน)
+    function formatSupervisorLabel(value, multiline) {
+      let parts = String(value || '').split('/').map(s => s.trim()).filter(Boolean);
+      let staff = parts[0] || '-';
+      let train = parts[1] || '';
+      if (multiline) {
+        let out = `พยาบาลตรวจการ (Staff) : \n${staff}`;
+        if (train) out += `\n\nพยาบาลตรวจการ (Train) : \n${train}`;
+        return out;
+      } else {
+        let out = `พยาบาลตรวจการ (Staff) : ${staff}`;
+        if (train) out += ` / พยาบาลตรวจการ (Train) : ${train}`;
+        return out;
+      }
+    }
+
     function buildReportText(targetData, sumRec) {
       let lines = [];
       let shiftTime = SHIFT_TIME_LABEL[String(targetData['เวร']||'').trim()] || '';
       lines.push(`วันที่ ${targetData['วันที่']||'-'}`);
       lines.push(`เวร ${targetData['เวร']||'-'}${shiftTime ? ' ' + shiftTime : ''}`);
-      lines.push(`พยาบาลตรวจการ : ${targetData['พยาบาลตรวจการ']||'-'}`);
+      lines.push(formatSupervisorLabel(targetData['พยาบาลตรวจการ'], false));
       lines.push(`แพทย์เวร MED : ${targetData['แพทย์เวร MED']||'-'}`);
       lines.push(`แพทย์เวร ER : ${targetData['แพทย์เวร ER']||'-'}`);
 
@@ -988,7 +1005,7 @@
       let ipdDepts = depts.filter(d => d['ประเภท'] === 'IPD');
       let opdDepts = depts.filter(d => d['ประเภท'] === 'OPD');
 
-      let lineText = `วันที่ ${date}\nเวร ${shift}\n\nพยาบาลตรวจการ : \n${targetData['พยาบาลตรวจการ']||'-'}\n\nแพทย์เวร MED : \n${targetData['แพทย์เวร MED']||'-'}\n\nแพทย์เวร ER : \n${targetData['แพทย์เวร ER']||'-'}\n\nแพทย์ Intern/Extern : \n${targetData['แพทย์ Intern/Extern']||'-'}`;
+      let lineText = `วันที่ ${date}\nเวร ${shift}\n\n${formatSupervisorLabel(targetData['พยาบาลตรวจการ'], true)}\n\nแพทย์เวร MED : \n${targetData['แพทย์เวร MED']||'-'}\n\nแพทย์เวร ER : \n${targetData['แพทย์เวร ER']||'-'}\n\nแพทย์ Intern/Extern : \n${targetData['แพทย์ Intern/Extern']||'-'}`;
 
       let sumRecord = (globalData.tables['สรุป']||[]).find(r => String(r['ID']||'').trim() === String(targetData['ID']||'').trim());
       let reportText = buildReportText(targetData, sumRecord);
@@ -1018,9 +1035,17 @@
                 <span class="info-value font-medium">${esc(shift)}</span>
               </div>
               <div class="bg-gray-50 p-2 rounded-lg info-item flex flex-col md:flex-row md:items-center justify-between">
-                <span class="text-teal-600 font-bold info-label"><i class="fa-solid fa-user-nurse text-pink-500 mr-2"></i>พยาบาลตรวจการ</span>
-                <span class="info-value font-medium">${esc(targetData['พยาบาลตรวจการ']||'-')}</span>
+                <span class="text-teal-600 font-bold info-label"><i class="fa-solid fa-user-shield text-pink-500 mr-2"></i>พยาบาลตรวจการ (Staff)</span>
+                <span class="info-value font-medium">${esc(String(targetData['พยาบาลตรวจการ']||'-').split('/')[0].trim() || '-')}</span>
               </div>
+              ${(() => {
+                let trainName = String(targetData['พยาบาลตรวจการ']||'').split('/')[1];
+                if (!trainName || !trainName.trim()) return '';
+                return `<div class="bg-gray-50 p-2 rounded-lg info-item flex flex-col md:flex-row md:items-center justify-between">
+                <span class="text-teal-600 font-bold info-label"><i class="fa-solid fa-graduation-cap text-violet-500 mr-2"></i>พยาบาลตรวจการ (Train)</span>
+                <span class="info-value font-medium">${esc(trainName.trim())}</span>
+              </div>`;
+              })()}
               <div class="bg-gray-50 p-2 rounded-lg info-item flex flex-col md:flex-row md:items-center justify-between">
                 <span class="text-teal-600 font-bold info-label"><i class="fa-solid fa-user-doctor text-emerald-500 mr-2"></i>แพทย์เวร MED</span>
                 <span class="info-value font-medium">${esc(targetData['แพทย์เวร MED']||'-')}</span>
@@ -2084,11 +2109,30 @@
         else if (isSup) {
           let supNameKey = getNameKey('Sup');
           let supList = globalData.tables['Sup'] || [];
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}'); autoFillPhone(this.value);" class="w-full bg-pink-50 text-pink-700 font-semibold focus:ring-2 focus:ring-pink-400 border-pink-300 rounded-xl px-4 py-3 border">
-            <option value="">-- เลือกพยาบาลตรวจการ --</option>
-            ${supList.map(s => `<option value="${esc(s[supNameKey])}" ${value === s[supNameKey] ? 'selected' : ''}>${esc(s[supNameKey])}</option>`).join('')}
-            <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
-          </select>`;
+          // แยกค่าที่เก็บไว้ "Staff/Train" กลับเป็น 2 ส่วน เพื่อใส่ค่าเดิมตอนแก้ไข
+          let supParts = String(value || '').split('/').map(s => s.trim()).filter(Boolean);
+          let staffVal = supParts[0] || '';
+          let trainVal = supParts[1] || '';
+          let supOptionsHtml = (selectedVal) => supList.map(s => `<option value="${esc(s[supNameKey])}" ${selectedVal === s[supNameKey] ? 'selected' : ''}>${esc(s[supNameKey])}</option>`).join('');
+
+          inputHtml = `
+            <input type="hidden" name="${esc(header)}" id="hidden_${esc(header)}_merged" value="${esc(value)}"/>
+            <div class="mb-3">
+              <label class="text-xs font-bold text-pink-600 mb-1 block"><i class="fa-solid fa-user-shield mr-1"></i> พยาบาลตรวจการ (Staff)<span class="text-red-500">*</span></label>
+              <select id="sel_${esc(header)}_staff" ${isRequired} onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}_staff'); autoFillPhone(this.value); onSupervisorFieldChange();" class="w-full bg-pink-50 text-pink-700 font-semibold focus:ring-2 focus:ring-pink-400 border-pink-300 rounded-xl px-4 py-3 border">
+                <option value="">-- เลือกพยาบาลตรวจการ (Staff) --</option>
+                ${supOptionsHtml(staffVal)}
+                <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-violet-600 mb-1 block"><i class="fa-solid fa-graduation-cap mr-1"></i> พยาบาลตรวจการ (Train) <span class="text-gray-400 font-normal">(ถ้ามี)</span></label>
+              <select id="sel_${esc(header)}_train" onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}_train'); onSupervisorFieldChange();" class="w-full bg-violet-50 text-violet-700 font-semibold focus:ring-2 focus:ring-violet-400 border-violet-300 rounded-xl px-4 py-3 border">
+                <option value="">-- ไม่มี Train ในเวรนี้ --</option>
+                ${supOptionsHtml(trainVal)}
+                <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
+              </select>
+            </div>`;
         }
         else if (isMedDoc || isInternDoc || isERDoc) {
           let docNameKey = getNameKey('Doc');
@@ -2159,7 +2203,12 @@
           }
         }
 
-        form.innerHTML += `<div>
+        form.innerHTML += isSup
+          ? `<div class="md:col-span-2 lg:col-span-2 bg-pink-50/40 border border-pink-100 rounded-2xl p-3">
+              <label class="font-bold ${labelColor} mb-2 block" title="${esc(header)}"><i class="fa-solid fa-user-shield mr-1"></i> พยาบาลตรวจการประจำเวร ${labelStar}</label>
+              ${inputHtml}
+            </div>`
+          : `<div>
             <label class="font-bold ${labelColor}" title="${esc(header)}">${iconHtml} ${esc(header)} ${labelStar}</label>
             ${inputHtml}
           </div>`;
@@ -2179,6 +2228,19 @@
       let nameKey = getNameKey('Sup');
       let sup = (globalData.tables['Sup'] || []).find(s => s[nameKey] === supName);
       if (sup) { let phoneInput = document.getElementById('input_โทร'); if (phoneInput) phoneInput.value = sup['โทร'] || ''; }
+    }
+
+    // รวมชื่อ "พยาบาลตรวจการ (Staff)" และ "(Train)" เป็นค่าเดียวกัน รูปแบบ "Staff/Train"
+    // เก็บลงคอลัมน์ "พยาบาลตรวจการ" คอลัมน์เดียว (ถ้าไม่มี Train จะเหลือแค่ "Staff")
+    function onSupervisorFieldChange() {
+      let staffSel = document.getElementById('sel_พยาบาลตรวจการ_staff');
+      let trainSel = document.getElementById('sel_พยาบาลตรวจการ_train');
+      let hidden = document.getElementById('hidden_พยาบาลตรวจการ_merged');
+      if (!staffSel || !hidden) return;
+      let staffVal = String(staffSel.value || '').trim();
+      let trainVal = trainSel ? String(trainSel.value || '').trim() : '';
+      if (staffVal === '__ADD_NEW__' || trainVal === '__ADD_NEW__') return; // checkAddNew กำลังเปิดอยู่ ยังไม่ต้องรวมค่า
+      hidden.value = trainVal ? `${staffVal}/${trainVal}` : staffVal;
     }
 
     function checkAddNew(selectElem, tableType, param1, param2, headerName, isMulti = false) {
@@ -2223,7 +2285,9 @@
                 selectElem.add(newOption, selectElem.options[selectElem.options.length - 1]);
                 if (isMulti) { addBadge(headerName, newData[nameKey]); selectElem.value = ''; }
                 else { selectElem.value = newData[nameKey]; }
-                if (tableType === 'Sup') autoFillPhone(newData[nameKey]);
+                // ดึงเบอร์โทรอัตโนมัติเฉพาะตอนเพิ่มชื่อใหม่ผ่านช่อง "พยาบาลตรวจการ (Staff)" เท่านั้น
+                if (tableType === 'Sup' && headerName !== 'พยาบาลตรวจการ_train') autoFillPhone(newData[nameKey]);
+                if (headerName === 'พยาบาลตรวจการ_staff' || headerName === 'พยาบาลตรวจการ_train') onSupervisorFieldChange();
                 Swal.fire({ icon: 'success', title: 'เพิ่มสำเร็จ!', timer: 1000, showConfirmButton: false });
               } catch(e) { Swal.fire('ข้อผิดพลาด', e.message, 'error'); }
             }).saveRecord(tableType, newData, 'all', 'all');
@@ -2259,6 +2323,25 @@
 
     function saveData(event) {
       event.preventDefault();
+
+      // 🔥 ตรวจสอบว่าชื่อพยาบาลตรวจการ (Staff) และ (Train) ไม่ใช่คนเดียวกัน
+      let staffSelCheck = document.getElementById('sel_พยาบาลตรวจการ_staff');
+      let trainSelCheck = document.getElementById('sel_พยาบาลตรวจการ_train');
+      if (staffSelCheck && trainSelCheck) {
+        let staffNameCheck = String(staffSelCheck.value || '').trim();
+        let trainNameCheck = String(trainSelCheck.value || '').trim();
+        if (staffNameCheck && trainNameCheck && staffNameCheck === trainNameCheck) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'ชื่อซ้ำกัน!',
+            text: 'พยาบาลตรวจการ (Staff) และ (Train) ต้องไม่ใช่คนเดียวกัน กรุณาตรวจสอบชื่อที่เลือกอีกครั้ง',
+            confirmButtonColor: '#0ea5e9'
+          });
+          return; // หยุดการทำงาน ไม่ให้บันทึก
+        }
+        onSupervisorFieldChange(); // เผื่อกรณี onchange ยังไม่ทันอัปเดตค่าที่จะส่ง
+      }
+
       const formData = new FormData(event.target);
       const dataObj = Object.fromEntries(formData.entries());
       const targetSheet = dataObj['_targetSheet'];
@@ -2274,7 +2357,8 @@
         
         if (isDuplicate) {
           let lastRow = dataRows[dataRows.length - 1];
-          let nurseName = lastRow ? (lastRow['พยาบาลตรวจการ'] || '') : '';
+          let nurseFull = lastRow ? (lastRow['พยาบาลตรวจการ'] || '') : '';
+          let nurseName = String(nurseFull).split('/')[0].trim(); // แสดงเฉพาะชื่อ Staff ให้อ่านง่าย
           
           Swal.fire({
             icon: 'warning',
