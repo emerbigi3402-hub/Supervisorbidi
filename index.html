@@ -2,6 +2,8 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
+  <!-- 👈 เพิ่มบรรทัดนี้เพื่อให้ GitHub Pages แสดงผลบนมือถือเป็นตัวใหญ่สะใจตามที่ตั้งค่าไว้ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
   <title>ระบบบันทึกข้อมูลเวรพยาบาลตรวจการ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -484,11 +486,10 @@
 
   <script>
     // ==========================================
-    // 🌐 GAS Web App URL — ใส่ URL ของ Apps Script Web App ที่ Deploy แล้ว
+    // 🌐 GAS Web App URL
     // ==========================================
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwvcP4hBVE6bUi0zM9_8pJ1bNSwZtqfSIvEO2rHq2vycReCSITPD7ZASYEppV4RWEEk/exec';
 
-    // ----- รายการ action ที่ฝั่ง backend รองรับ -----
     const API_ACTIONS = {
       getAppData:         { method: 'GET',  args: ['filterMonth', 'filterYear'] },
       saveRecord:         { method: 'POST', args: ['sheetName', 'data', 'filterMonth', 'filterYear'] },
@@ -496,7 +497,6 @@
       uploadImageToDrive: { method: 'POST', args: ['base64', 'fileName', 'mimeType'] }
     };
 
-    // ----- API client (JSONP สำหรับ GET, FormData POST สำหรับ write) -----
     function apiCall(action, positionalArgs) {
       const cfg = API_ACTIONS[action];
       if (!cfg) return Promise.reject(new Error('Unknown action: ' + action));
@@ -539,22 +539,14 @@
       }
     }
 
-    // ----- Polyfill google.script.run -----
     window.__IS_POLYFILL__ = false;
     window.__GS_HOST__ = (window.location && window.location.hostname) || '';
     (function setupPolyfill() {
       try {
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          console.log('[Setup] google.script.run พบของจริงจาก GAS — ไม่ polyfill (host=' + window.__GS_HOST__ + ')');
-          return;
-        }
+        if (typeof google !== 'undefined' && google.script && google.script.run) { return; }
         const h = window.__GS_HOST__;
-        if (h.endsWith('script.google.com') || h.endsWith('googleusercontent.com')) {
-          console.log('[Setup] รันบน GAS host แต่ google.script ยังไม่พร้อม — รอ GAS โหลด (host=' + h + ')');
-          return;
-        }
-      } catch (e) { console.warn('[Setup] polyfill check error:', e); }
-      console.log('[Setup] ⚠ ใช้ polyfill (HTTP API ตรงไป GAS_WEB_APP_URL) — host=' + window.__GS_HOST__);
+        if (h.endsWith('script.google.com') || h.endsWith('googleusercontent.com')) { return; }
+      } catch (e) {}
       window.__IS_POLYFILL__ = true;
       const makeRunner = (success, failure) => {
         const r = {
@@ -576,21 +568,8 @@
       window.google.script = { run: makeRunner(null, null) };
     })();
 
-    // ==========================================
-    // 🎯 COLUMN MAPPING — ชีต IPD/OPD
-    // ==========================================
-    const IPD_COL_INDEX = {
-      pat:  14, // O = ยอดผู้ป่วย
-      help: 50, // AY = จำนวนผู้ป่วยที่ต้องการช่วยเหลือเคลื่อนย้าย
-      res:  54, // BC = On Respirator
-      hfnc: 55, // BD = On HFNC
-      mask: 56, // BE = Mask c bag
-      can:  57  // BF = Cannular
-    };
-    const STAFF_RANGES = {
-      IPD: { rn: [4, 9],  na: [12, 13] },  // RN = E-J, NA = M-N
-      OPD: { rn: [5, 9],  na: [12, 13] }   // RN = F-J, NA = M-N
-    };
+    const IPD_COL_INDEX = { pat: 14, help: 50, res: 54, hfnc: 55, mask: 56, can: 57 };
+    const STAFF_RANGES = { IPD: { rn: [4, 9], na: [12, 13] }, OPD: { rn: [5, 9], na: [12, 13] } };
 
     function ipdVal(record, ipdHdrs, kind, ...nameFallbacks) {
       let idx = IPD_COL_INDEX[kind];
@@ -653,11 +632,8 @@
       headers.forEach(h => {
         if (typeof h !== 'string') return;
         let cleaned = h.replace(/\s+/g, ' ').trim();
-        if (cleaned.startsWith('ตึก ')) {
-          depts.push({ col: h, deptId: cleaned.substring(4).trim(), display: cleaned });
-        } else if (PLAIN_DEPTS.includes(cleaned)) {
-          depts.push({ col: h, deptId: cleaned, display: cleaned });
-        }
+        if (cleaned.startsWith('ตึก ')) { depts.push({ col: h, deptId: cleaned.substring(4).trim(), display: cleaned }); } 
+        else if (PLAIN_DEPTS.includes(cleaned)) { depts.push({ col: h, deptId: cleaned, display: cleaned }); }
       });
       return depts;
     }
@@ -707,62 +683,19 @@
       });
     }
 
-    // เวลาเวร (ใช้เติมในรายงาน)
-    const SHIFT_TIME_LABEL = {
-      'เวรเช้า': '08.30 - 16.30 น.',
-      'เวรบ่าย': '16.30 - 00.30 น.',
-      'เวรดึก': '00.30 - 08.30 น.'
-    };
+    const SHIFT_TIME_LABEL = { 'เวรเช้า': '08.30 - 16.30 น.', 'เวรบ่าย': '16.30 - 00.30 น.', 'เวรดึก': '00.30 - 08.30 น.' };
 
-    // ลำดับคอลัมน์ออกซิเจนตามสรุป
-    const REPORT_O2_COLS = [
-      '3/2 On Respirator', '3/2 On HFNC',
-      '7/4 On Respirator', '7/4 On HFNC',
-      '7/2 On HFNC', '7/6 On HFNC',
-      '5/3 On HFNC', '5/4 On HFNC', '5/5 On HFNC',
-      'ICU On Respirator', 'ICU On HFNC',
-      'NICU On Respirator', 'NICU On HFNC'
-    ];
+    const REPORT_O2_COLS = [ '3/2 On Respirator', '3/2 On HFNC', '7/4 On Respirator', '7/4 On HFNC', '7/2 On HFNC', '7/6 On HFNC', '5/3 On HFNC', '5/4 On HFNC', '5/5 On HFNC', 'ICU On Respirator', 'ICU On HFNC', 'NICU On Respirator', 'NICU On HFNC' ];
 
-    // ลำดับโรคในรายงาน
     const REPORT_DISEASE_COLS = [
-      { label: 'DHF', keys: ['DHF'] },
-      { label: 'DF',  keys: ['DF'] },
-      { label: 'Influenza A,B', keys: ['Influenza A,B', 'Influenza A B', 'FLU'] },
-      { label: 'Acute Diarrhea', keys: ['Acute Diarrhea', 'AD'] },
-      { label: 'TB',  keys: ['TB', 'TB&MDR TB'] },
-      { label: 'HIV', keys: ['HIV'] },
-      { label: 'RSV', keys: ['RSV'] },
-      { label: 'PUI Covid-19', keys: ['PUI Covid-19', 'PUI'] },
-      { label: 'Confirm Covid-19', keys: ['Confirm Covid-19'] },
-      { label: 'Monkeypox', keys: ['Monkeypox', 'Mpox'] }
+      { label: 'DHF', keys: ['DHF'] }, { label: 'DF',  keys: ['DF'] }, { label: 'Influenza A,B', keys: ['Influenza A,B', 'Influenza A B', 'FLU'] }, { label: 'Acute Diarrhea', keys: ['Acute Diarrhea', 'AD'] }, { label: 'TB',  keys: ['TB', 'TB&MDR TB'] }, { label: 'HIV', keys: ['HIV'] }, { label: 'RSV', keys: ['RSV'] }, { label: 'PUI Covid-19', keys: ['PUI Covid-19', 'PUI'] }, { label: 'Confirm Covid-19', keys: ['Confirm Covid-19'] }, { label: 'Monkeypox', keys: ['Monkeypox', 'Mpox'] }
     ];
 
-    // ลำดับตึก + ย่อย
     const REPORT_WARDS = [
-      { ward: 'ตึก 3/2' },
-      { ward: 'ตึก 3/3' },
-      { ward: 'ตึก 3/4' },
-      { ward: 'ตึก 3/5', subs: [
-        { partials: ['OBS'], label: 'OBS' },
-        { partials: ['NB'], label: 'NB', excludePartials: ['lr/pp/nb','หลังคลอด','เด็กป่วย'] },
-        { partials: ['เด็กป่วย'], label: 'เด็กป่วย', excludePartials: ['lr/pp/nb','หลังคลอด'] }
-      ]},
-      { ward: 'ตึก 5/3' },
-      { ward: 'ตึก 5/4' },
-      { ward: 'ตึก 5/5' },
-      { ward: 'ตึก 7/2' },
-      { ward: 'ตึก 7/3' },
-      { ward: 'ตึก 7/4' },
-      { ward: 'ตึก 7/5' },
-      { ward: 'ตึก 7/6' },
-      { ward: 'ตึก ICU' },
-      { ward: 'ตึก NICU' },
-      { ward: 'ตึก LR/PP/NB', subs: [
-        { partials: ['lr/pp/nb','หลังคลอด'], label: 'หลังคลอด' },
-        { partials: ['lr/pp/nb','nb'], label: 'NB', excludePartials: ['หลังคลอด','เด็กป่วย'] },
-        { partials: ['lr/pp/nb','เด็กป่วย'], label: 'เด็กป่วย' }
-      ]}
+      { ward: 'ตึก 3/2' }, { ward: 'ตึก 3/3' }, { ward: 'ตึก 3/4' },
+      { ward: 'ตึก 3/5', subs: [ { partials: ['OBS'], label: 'OBS' }, { partials: ['NB'], label: 'NB', excludePartials: ['lr/pp/nb','หลังคลอด','เด็กป่วย'] }, { partials: ['เด็กป่วย'], label: 'เด็กป่วย', excludePartials: ['lr/pp/nb','หลังคลอด'] } ]},
+      { ward: 'ตึก 5/3' }, { ward: 'ตึก 5/4' }, { ward: 'ตึก 5/5' }, { ward: 'ตึก 7/2' }, { ward: 'ตึก 7/3' }, { ward: 'ตึก 7/4' }, { ward: 'ตึก 7/5' }, { ward: 'ตึก 7/6' }, { ward: 'ตึก ICU' }, { ward: 'ตึก NICU' },
+      { ward: 'ตึก LR/PP/NB', subs: [ { partials: ['lr/pp/nb','หลังคลอด'], label: 'หลังคลอด' }, { partials: ['lr/pp/nb','nb'], label: 'NB', excludePartials: ['หลังคลอด','เด็กป่วย'] }, { partials: ['lr/pp/nb','เด็กป่วย'], label: 'เด็กป่วย' } ]}
     ];
 
     function findColByPartials(rec, partials, excludePartials) {
@@ -799,23 +732,13 @@
         return lines.join('\n');
       }
 
-      // O2 by ward
-      REPORT_O2_COLS.forEach(col => {
-        let v = num(sumRec[col] || 0);
-        lines.push(`${col} ${v} ราย`);
-      });
+      REPORT_O2_COLS.forEach(col => { let v = num(sumRec[col] || 0); lines.push(`${col} ${v} ราย`); });
 
-      // Diseases
       lines.push('โรคหลักตามยุทธศาสตร์ของสถาบัน');
-      REPORT_DISEASE_COLS.forEach(d => {
-        let v = firstKeyVal(sumRec, d.keys);
-        lines.push(`${d.label} ${v} ราย`);
-      });
+      REPORT_DISEASE_COLS.forEach(d => { let v = firstKeyVal(sumRec, d.keys); lines.push(`${d.label} ${v} ราย`); });
 
-      // Total
       lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${num(sumRec['รวมยอดผู้ป่วยในทั้งหมด']||0)} ราย`);
 
-      // Per-ward + sub-items
       REPORT_WARDS.forEach(g => {
         let v = num(sumRec[g.ward] || 0);
         lines.push(`${g.ward} ${v} ราย`);
