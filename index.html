@@ -394,7 +394,7 @@
       </div>
 
       <!-- Row 2: filter -->
-      <div class="flex flex-wrap items-center gap-2 w-full">
+      <div id="headerFilterRow" class="flex flex-wrap items-center gap-2 w-full">
         <div id="filterSection" class="flex items-center gap-2">
           <select id="filterMonth" class="bg-white border border-teal-200 rounded-xl px-2 py-2 text-sm focus:ring-2 focus:ring-teal-400">
             <option value="all">เดือนทั้งหมด</option>
@@ -818,9 +818,16 @@
       `).join('');
     }
 
+    // ซ่อนตัวกรองเดือน/ปี/ค้นหาบน header เฉพาะตอนอยู่หน้า "บันทึกข้อมูลประจำเวร"
+    function setHeaderFilterVisible(visible) {
+      const row = document.getElementById('headerFilterRow');
+      if (row) row.classList.toggle('hidden', !visible);
+    }
+
     function switchTab(sheetName) {
       currentSheet = sheetName;
       ['table-view','daily-record-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      setHeaderFilterVisible(sheetName !== 'DailyRecord');
 
       if (sheetName === 'DailyRecord') {
         document.getElementById('daily-record-view').classList.remove('hidden');
@@ -930,18 +937,11 @@
     let currentDailyRecordId = null;
 
     // dropdown "เลือกเวร" ที่รวมตัวเลือก "สร้างเวรใหม่" ไว้บนสุด
-    function onShiftSelectorChange(value) {
-      if (value === '__NEW__') {
-        renderInlineDataForm(null, null);
-      } else {
-        showDailyRecord(value);
-      }
-    }
-
     function showDailyRecord(dataId = null) {
       currentSheet = 'DailyRecord';
       ['table-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.getElementById('daily-record-view').classList.remove('hidden');
+      setHeaderFilterVisible(false);
       renderMenus();
 
       let dataRows = globalData.tables['Data'] || [];
@@ -969,8 +969,7 @@
         let cur = dataRows.find(r => r['ID'] === currentDailyRecordId);
         if (cur) filteredShifts = [cur, ...filteredShifts];
       }
-      let shiftOptions = `<option value="__NEW__" class="font-bold text-teal-700 bg-teal-50">➕ สร้างเวรใหม่</option>` +
-        filteredShifts.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
+      let shiftOptions = filteredShifts.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
       let depts = globalData.tables['แผนก'] || [];
       let ipdDepts = depts.filter(d => d['ประเภท'] === 'IPD');
       let opdDepts = depts.filter(d => d['ประเภท'] === 'OPD');
@@ -984,15 +983,20 @@
       let html = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div class="lg:col-span-2 bg-white border-l-4 border-cyan-500 p-5 md:p-6 rounded-xl shadow-sm h-full">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-3 mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-gray-100 pb-3 mb-4">
               <h2 class="text-2xl font-bold text-teal-800"><i class="fa-solid fa-calendar-check text-cyan-500 mr-2"></i> ข้อมูลบันทึกเวรประจำวัน</h2>
-              <button onclick="editDataByRowId('Data', '${esc(targetData['ID'])}')" class="bg-amber-100 text-amber-700 px-4 py-2 rounded-xl text-sm hover:bg-amber-200 transition font-bold shadow-sm border border-amber-200 w-full md:w-auto">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลเวร
-              </button>
+              <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                <button onclick="renderInlineDataForm(null, null)" class="btn-blink bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-xl text-sm hover:from-teal-600 hover:to-cyan-600 transition font-bold shadow-sm border border-teal-400 flex-1 md:flex-initial">
+                  <i class="fa-solid fa-plus-circle mr-1"></i> สร้างเวรใหม่
+                </button>
+                <button onclick="editDataByRowId('Data', '${esc(targetData['ID'])}')" class="bg-amber-100 text-amber-700 px-4 py-2 rounded-xl text-sm hover:bg-amber-200 transition font-bold shadow-sm border border-amber-200 flex-1 md:flex-initial">
+                  <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลเวร
+                </button>
+              </div>
             </div>
             <div class="mb-4 flex flex-wrap gap-2 items-center">
-              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวร:</label>
-              <select onchange="onShiftSelectorChange(this.value)" class="border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800">${shiftOptions}</select>
+              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวรเก่าเพื่อดู/แก้ไข:</label>
+              <select onchange="showDailyRecord(this.value)" class="border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800">${shiftOptions}</select>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm md:text-base text-gray-700 info-grid">
               <div class="bg-gray-50 p-2 rounded-lg info-item flex flex-col md:flex-row md:items-center justify-between">
@@ -2201,6 +2205,7 @@
       currentSheet = 'DailyRecord';
       ['table-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.getElementById('daily-record-view').classList.remove('hidden');
+      setHeaderFilterVisible(false);
       renderMenus();
 
       let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
