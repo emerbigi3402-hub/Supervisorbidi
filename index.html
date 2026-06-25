@@ -393,12 +393,8 @@
         </h1>
       </div>
 
-      <!-- Row 2: ปุ่ม + filter -->
+      <!-- Row 2: filter -->
       <div class="flex flex-wrap items-center gap-2 w-full">
-        <button onclick="openModal(null, 'Data')" class="btn-blink px-5 py-2.5 text-sm md:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-md border border-teal-400">
-          <i class="fa-solid fa-plus-circle text-lg md:text-xl"></i> บันทึกข้อมูลประจำวัน
-        </button>
-
         <div id="filterSection" class="flex items-center gap-2">
           <select id="filterMonth" class="bg-white border border-teal-200 rounded-xl px-2 py-2 text-sm focus:ring-2 focus:ring-teal-400">
             <option value="all">เดือนทั้งหมด</option>
@@ -624,7 +620,7 @@
     let monthlyDefaultsSet = false;
 
     const menuItems = [
-      { label: 'ประจำเวร', sheet: 'DailyRecord', icon: 'fa-clipboard-list', color: 'text-rose-500' },
+      { label: 'บันทึกข้อมูลประจำเวร', sheet: 'DailyRecord', icon: 'fa-clipboard-list', color: 'text-rose-500' },
       { label: 'ข้อมูลรายเวร', sheet: 'Data', icon: 'fa-calendar-check', color: 'text-rose-600' },
       { label: 'รายชื่อบุคลากร', sheet: 'HR', icon: 'fa-users', color: 'text-blue-500' },
       { label: 'รายชื่อพยาบาลตรวจการ', sheet: 'Sup', icon: 'fa-user-nurse', color: 'text-pink-500' },
@@ -948,7 +944,10 @@
         container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-500">
           <i class="fa-solid fa-box-open text-6xl mb-4 text-gray-300"></i>
           <h2 class="text-xl font-bold">ยังไม่มีข้อมูลเวรประจำวัน</h2>
-          <p>กรุณากดปุ่ม "บันทึกข้อมูลประจำวัน" ด้านบน เพื่อสร้างเวรใหม่</p>
+          <p class="mb-4">กรุณาเริ่มสร้างเวรใหม่เพื่อบันทึกข้อมูลประจำเวร</p>
+          <button onclick="renderInlineDataForm(null, null)" class="btn-blink px-5 py-2.5 text-sm md:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-md border border-teal-400">
+            <i class="fa-solid fa-plus-circle text-lg md:text-xl"></i> สร้างเวรใหม่
+          </button>
         </div>`;
         return;
       }
@@ -1094,21 +1093,21 @@
       let statLine = `RN: ${rnCount} | NA: ${naCount} | PT: ${patCount}`;
 
       if (isReallyFilled) {
-        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-300 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36">
+        return `<div onclick="renderInlineForm(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-300 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-check text-emerald-500 text-lg shadow-sm bg-white rounded-full"></i></div>
           <h4 class="font-bold text-emerald-800 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-emerald-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">${statLine}</div>
           <div class="text-xs text-emerald-600 mt-2 bg-emerald-200/50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
         </div>`;
       } else if (record) {
-        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
+        return `<div onclick="renderInlineForm(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-exclamation text-rose-400 text-lg bg-white rounded-full"></i></div>
           <h4 class="font-bold text-rose-700 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-rose-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">${statLine}</div>
           <div class="text-xs text-rose-500 mt-2 bg-rose-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
         </div>`;
       } else {
-        return `<div onclick="openPreFilledModal('${esc(type)}', '${esc(date)}', '${esc(shift)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
+        return `<div onclick="openPreFilledInlineForm('${esc(type)}', '${esc(date)}', '${esc(shift)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-exclamation text-rose-400 text-lg bg-white rounded-full"></i></div>
           <h4 class="font-bold text-rose-700 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-rose-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">ยังไม่ลงข้อมูล</div>
@@ -1920,22 +1919,31 @@
       openModal(idx !== -1 ? idx : null, targetSheet, data['หน่วยงาน'] || data['แผนก']);
     }
 
-    function openModal(idx = null, forceSheet = null, contextDept = null) {
-      const targetSheet = forceSheet || currentSheet;
-      const form = document.getElementById('dataForm');
-      form.innerHTML = '';
-      let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
-      if (targetSheet === 'Data') sheetLabel = 'ข้อมูลเวรหลักพยาบาลตรวจการ';
-      document.getElementById('modal-title').innerHTML = idx !== null
-        ? `<i class="fa-solid fa-pen-to-square text-amber-300"></i> บันทึกข้อมูล (${esc(sheetLabel)})`
-        : `<i class="fa-solid fa-plus-circle text-cyan-300"></i> เพิ่มข้อมูล (${esc(sheetLabel)})`;
-
-      const headers = globalData.headers[targetSheet] || [];
-      let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
-      if (window._modalSavedData) {
-        Object.assign(rowData, window._modalSavedData);
-        delete window._modalSavedData;
+    // ฟอร์มเต็มหน้า (inline): เก็บค่าที่กรอกไว้แล้ว re-render ฟิลด์ใหม่ตามเวร/หน่วยงานที่เปลี่ยน
+    function onInlineFieldChange() {
+      const form = document.getElementById('inlineDataForm');
+      if (!form) return;
+      const fd = new FormData(form);
+      const data = Object.fromEntries(fd.entries());
+      const targetSheet = data['_targetSheet'];
+      delete data['_targetSheet'];
+      const pk = data['Code'] || data['ID'];
+      let idx = null;
+      if (pk) {
+        const arr = globalData.tables[targetSheet] || [];
+        idx = arr.findIndex(r => String(r['Code']||r['ID']) === String(pk));
       }
+      window._inlineSavedData = data;
+      renderInlineForm(idx !== -1 ? idx : null, targetSheet, data['หน่วยงาน'] || data['แผนก']);
+    }
+
+    // ==========================================================================
+    // 🧩 ฟังก์ชันกลางสร้างฟิลด์ฟอร์ม (ใช้ร่วมกันทั้งโมเดล และฟอร์มเต็มหน้า)
+    // ==========================================================================
+    // คืนค่า primaryHeaders เพื่อให้ผู้เรียกไปวาด badge ต่อได้
+    function buildFormFields(targetSheet, form, rowData, contextDept) {
+      form.innerHTML = '';
+      const headers = globalData.headers[targetSheet] || [];
       let currentDept = rowData['หน่วยงาน'] || rowData['แผนก'] || contextDept || '';
       let currentShift = String(rowData['เวร']||'').trim();
 
@@ -2045,7 +2053,7 @@
           else if (isPN) colorClass = 'text-green-700 bg-green-50 border-green-300 focus:ring-green-400';
           else if (isNA) colorClass = 'text-amber-600 bg-amber-50 border-amber-300 focus:ring-amber-400';
           else colorClass = 'text-gray-700 bg-gray-100 border-gray-400 focus:ring-gray-400';
-          
+
           let hintText = '';
           if (opdUnit === 'porter' && header === 'พนักงานเวรเปล เวรดึก 1') {
             hintText = '<p class="text-[1.2rem] text-rose-500 mt-2">* ลงข้อมูลเฉพาะ "เวรบ่าย" (เพื่อจัดเวรดึก) — เวรเช้าไม่ต้องลง</p>';
@@ -2107,13 +2115,15 @@
           inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" placeholder="เช่น 14/4/2568" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700 rounded-xl px-4 py-3 border">`;
         }
         else if (header.includes('เวร') && targetSheet !== 'HR' && !header.includes('เวรเปล') && !header.includes('เวรดึก') && !header.includes('เวรเช้า') && !header.includes('EKG')) {
-          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700 rounded-xl px-4 py-3 border">
+          let onChangeFn = (targetSheet === 'Data' || targetSheet === 'IPD' || targetSheet === 'OPD') && form.id === 'inlineDataForm' ? 'onInlineFieldChange()' : 'onModalFieldChange()';
+          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="${onChangeFn}" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700 rounded-xl px-4 py-3 border">
             <option value="">-- เลือกระบุเวร --</option>
             ${['เวรเช้า', 'เวรบ่าย', 'เวรดึก'].map(s => `<option value="${s}" ${value === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>`;
         }
         else if (header === 'หน่วยงาน' || header === 'แผนก') {
-          inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
+          let onChangeFn = form.id === 'inlineDataForm' ? 'onInlineFieldChange()' : 'onModalFieldChange()';
+          inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="${onChangeFn}" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
             <option value="">-- เลือก --</option>
             ${(globalData.dropdowns.departments||[]).map(d => `<option value="${esc(d)}" ${value === d ? 'selected' : ''}>${esc(d)}</option>`).join('')}
           </select>`;
@@ -2142,12 +2152,116 @@
           </div>`;
       });
       form.innerHTML += `<input type="hidden" name="_targetSheet" value="${esc(targetSheet)}">`;
+      return primaryHeaders;
+    }
+
+    function openModal(idx = null, forceSheet = null, contextDept = null) {
+      const targetSheet = forceSheet || currentSheet;
+      const form = document.getElementById('dataForm');
+      let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
+      if (targetSheet === 'Data') sheetLabel = 'ข้อมูลเวรหลักพยาบาลตรวจการ';
+      document.getElementById('modal-title').innerHTML = idx !== null
+        ? `<i class="fa-solid fa-pen-to-square text-amber-300"></i> บันทึกข้อมูล (${esc(sheetLabel)})`
+        : `<i class="fa-solid fa-plus-circle text-cyan-300"></i> เพิ่มข้อมูล (${esc(sheetLabel)})`;
+
+      let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
+      if (window._modalSavedData) {
+        Object.assign(rowData, window._modalSavedData);
+        delete window._modalSavedData;
+      }
+
+      let primaryHeaders = buildFormFields(targetSheet, form, rowData, contextDept);
 
       const modal = document.getElementById('formModal');
       const modalContent = document.getElementById('modalContent');
       modal.classList.remove('hidden');
       setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); }, 10);
       setTimeout(() => { Object.keys(primaryHeaders).forEach(h => renderBadges(h)); }, 50);
+    }
+
+    // ==========================================================================
+    // 📝 ฟอร์มเต็มหน้า (Inline Form) — ใช้แทนโมเดลสำหรับ Data / IPD / OPD
+    // ==========================================================================
+    // alias ที่เรียกจากปุ่ม "สร้างเวรใหม่" เมื่อยังไม่มีข้อมูลเวรเลย
+    function renderInlineDataForm(idx, contextDept) {
+      renderInlineForm(idx, 'Data', contextDept);
+    }
+
+    function renderInlineForm(idx, targetSheet, contextDept = null) {
+      currentSheet = 'DailyRecord';
+      ['table-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('daily-record-view').classList.remove('hidden');
+      renderMenus();
+
+      let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
+      if (targetSheet === 'Data') sheetLabel = 'ข้อมูลเวรหลักพยาบาลตรวจการ';
+
+      let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
+      if (window._inlineSavedData) {
+        Object.assign(rowData, window._inlineSavedData);
+        delete window._inlineSavedData;
+      }
+
+      const container = document.getElementById('daily-record-content');
+      container.innerHTML = `
+        <div class="bg-white border-l-4 border-cyan-500 rounded-xl shadow-sm mb-6 overflow-hidden">
+          <div class="p-4 md:p-5 border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+            <h2 class="text-lg md:text-xl font-bold tracking-wide truncate">
+              <i class="fa-solid ${idx !== null ? 'fa-pen-to-square' : 'fa-plus-circle'} mr-2"></i>
+              ${idx !== null ? 'บันทึกข้อมูล' : 'เพิ่มข้อมูล'} (${esc(sheetLabel)})
+            </h2>
+            <button type="button" onclick="cancelInlineForm()" class="text-white hover:text-red-200 text-2xl transition flex-shrink-0 ml-3"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="p-4 md:p-6 bg-gray-50/50">
+            <form id="inlineDataForm" onsubmit="saveInlineForm(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></form>
+          </div>
+          <div class="p-4 border-t flex justify-end gap-3 bg-white shadow-inner">
+            <button type="button" onclick="cancelInlineForm()" class="px-5 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 transition font-semibold">ยกเลิก</button>
+            <button type="submit" form="inlineDataForm" class="px-5 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:shadow-lg transition font-bold"><i class="fa-solid fa-save"></i> บันทึกข้อมูล</button>
+          </div>
+        </div>`;
+
+      const form = document.getElementById('inlineDataForm');
+      let primaryHeaders = buildFormFields(targetSheet, form, rowData, contextDept);
+      Object.keys(primaryHeaders).forEach(h => renderBadges(h));
+    }
+
+    // ยกเลิกฟอร์มเต็มหน้า กลับไปหน้าแสดงข้อมูลประจำเวรตามปกติ
+    function cancelInlineForm() {
+      delete window._inlineSavedData;
+      showDailyRecord(currentDailyRecordId);
+    }
+
+    function saveInlineForm(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const dataObj = Object.fromEntries(formData.entries());
+      const targetSheet = dataObj['_targetSheet'];
+      delete dataObj['_targetSheet'];
+      const m = 'all'; const y = 'all';
+      if (targetSheet === 'Data' && !dataObj['ID']) {
+        Swal.fire({ title: 'กำลังสร้างฟอร์มตึกอัตโนมัติ...', text: `กรุณารอสักครู่...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      } else {
+        Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      }
+      google.script.run
+        .withSuccessHandler(res => {
+          try {
+            if (!res || !res.tables) throw new Error("บันทึกข้อมูลไม่สมบูรณ์");
+            globalData = res;
+            Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', timer: 1500, showConfirmButton: false });
+            if (targetSheet === 'Data') {
+              let savedId = (dataObj['วันที่'] || '') + (dataObj['เวร'] || '');
+              if (!savedId && globalData.tables['Data'] && globalData.tables['Data'][0]) savedId = globalData.tables['Data'][0]['ID'];
+              showDailyRecord(savedId);
+            } else {
+              // IPD / OPD: กลับไปแสดงหน้าประจำเวรเดิม การ์ดแผนกจะอัปเดตสถานะอัตโนมัติ
+              showDailyRecord(currentDailyRecordId);
+            }
+          } catch(e) { Swal.fire('ข้อผิดพลาด', e.message, 'error'); }
+        })
+        .withFailureHandler(err => Swal.fire('ข้อผิดพลาด', err.message, 'error'))
+        .saveRecord(targetSheet, dataObj, m, y);
     }
 
     function autoFillPhone(supName) {
@@ -2218,9 +2332,20 @@
       }, 100);
     }
 
+    // เวอร์ชันฟอร์มเต็มหน้า: เปิดฟอร์มลงข้อมูลแผนกที่ยังไม่มีข้อมูล พร้อมกรอกวันที่/เวร/หน่วยงานไว้ล่วงหน้า
+    function openPreFilledInlineForm(targetSheet, date, shift, deptName) {
+      renderInlineForm(null, targetSheet, deptName);
+      setTimeout(() => {
+        if (document.getElementById('input_วันที่')) document.getElementById('input_วันที่').value = date;
+        if (document.getElementById('input_เวร')) document.getElementById('input_เวร').value = shift;
+        if (document.getElementById('input_หน่วยงาน')) document.getElementById('input_หน่วยงาน').value = deptName;
+        updateHRDropdowns();
+      }, 100);
+    }
+
     function editDataByRowId(targetSheet, rowId) {
       const idx = globalData.tables[targetSheet].findIndex(r => r['ID'] === rowId);
-      if (idx !== -1) openModal(idx, targetSheet);
+      if (idx !== -1) renderInlineForm(idx, targetSheet);
     }
 
     function closeModal() {
