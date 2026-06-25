@@ -2,7 +2,6 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <!-- 👈 เพิ่มบรรทัดนี้เพื่อให้ GitHub Pages แสดงผลบนมือถือเป็นตัวใหญ่สะใจตามที่ตั้งค่าไว้ -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
   <title>ระบบบันทึกข้อมูลเวรพยาบาลตรวจการ</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -81,6 +80,8 @@
 
     /* =========================================================================
        📱 SMARTPHONE OVERRIDE ONLY (max-width: 768px)
+       แก้ไขเสร็จสมบูรณ์: เมนูแถวเดียว, กล่องรายงานฟอนต์เล็กพร้อมสโครลบาร์, การ์ดแผนกกระชับ,
+       หัวข้อเว้นแถวที่เครื่องหมาย ":", ตัวหนังสือโรคไม่โดนตัดขา และหัวตารางเลื่อนล็อกตรงคอลัมน์
        ========================================================================= */
     @media (max-width: 768px) {
       /* เลื่อนหน้าจอได้อิสระ ไม่ล็อค Body */
@@ -119,12 +120,10 @@
       .bg-gradient-to-r > div:last-child { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 0.8rem !important; }
       .bg-gradient-to-r select, .bg-gradient-to-r button { width: 100% !important; font-size: 1.3rem !important; padding: 1.2rem !important; min-height: 55px !important; border-radius: 1rem !important; }
 
-      /* 4. การ์ดโมเดลฟอร์มบันทึกข้อมูล (Responsive Card Modal สวยงาม ไม่บังเต็มจอจนพิมพ์ยาก) */
+      /* 4. การ์ดโมเดลฟอร์มบันทึกข้อมูล (Responsive Card Modal สวยงาม) */
+      /* ✅ แก้ไขปัญหา Modal บังหน้าจอ: เอา display: flex !important ออก เพื่อไม่ให้หักล้างคลาส hidden ของ Tailwind */
       #formModal { 
         padding: 1rem !important; 
-        display: flex !important; 
-        justify-content: center !important; 
-        align-items: center !important; 
         z-index: 100 !important;
       }
       #modalContent { 
@@ -189,9 +188,9 @@
       }
       /* ✅ แก้ไข: กล่องข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2) - ฟอนต์เล็ก 3 เท่า, เปิดแถบเลื่อนแนวตั้งเพื่อตรวจทาน */
       #reportCopyText { 
-        font-size: 0.8rem !important; /* ตัวเล็กลง 3 เท่า */
-        height: 350px !important; /* ล็อกความสูงพอดี */
-        min-height: 350px !important;
+        font-size: 0.85rem !important; /* ตัวเล็กลงมาก */
+        height: 300px !important; /* ล็อกความสูงพอดี */
+        min-height: 300px !important;
         overflow-y: auto !important; /* เปิดแถบเลื่อนด้านข้างสำหรับตรวจข้อมูล */
         padding: 1rem !important; 
         line-height: 1.5 !important; 
@@ -204,31 +203,27 @@
       /* 6. การ์ดแผนก IPD/OPD (ปรับระยะกระชับ สบายตา และขยายฟอนต์ตึก 2 เท่า) */
       #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
         grid-template-columns: 1fr !important; /* 1 คอลัมน์ ไม่บีบกัน */
-        gap: 0.75rem !important; /* ระยะห่างระหว่างการ์ดเพิ่มขึ้นอีกนิด ให้สวยงาม */
+        gap: 0.5rem !important; /* ระยะห่างระหว่างการ์ดที่เหมาะสม */
       }
       #daily-record-content .card-zoom { 
         min-height: auto !important; /* ปลดล็อกความสูงขั้นต่ำ */
-        padding-top: 0.65rem !important; /* ลดระยะห่างกรอบบนของการ์ดกับข้อความลงอีก */
-        padding-bottom: 1rem !important;
-        padding-left: 1.25rem !important;
-        padding-right: 1.25rem !important;
+        padding: 1rem 1.25rem !important; /* ลดระยะห่างกรอบบน-ล่างให้กระชับขึ้น */
       }
       /* ขนาดตัวหนังสือตึกใหญ่ขึ้น 2 เท่า แต่ระยะกระชับ */
       #daily-record-content .card-zoom h4 { 
-        font-size: 2.1rem !important; 
-        line-height: 1.15 !important; /* ปรับระยะห่างระหว่างบรรทัดลงให้กระชับขึ้น */
+        font-size: 2rem !important; 
+        line-height: 1.2 !important; /* ปรับระยะห่างระหว่างบรรทัดลงให้กระชับขึ้น */
         margin-bottom: 0.2rem !important; 
       }
       /* ✅ แก้ไข: ป้ายยอดอัตรากำลังและคนไข้ RN NA PT ขนาดเล็กลง สมดุลสวยงาม */
       #daily-record-content .card-zoom .text-\[10px\] { 
         font-size: 1rem !important; /* ลดขนาดอักษร ตรง RN NA PT ลงตามที่ส่ง */
-        padding: 0.35rem !important; 
-        margin-top: 0.35rem !important; 
+        padding: 0.4rem !important; 
+        margin-top: 0.4rem !important; 
         border-radius: 0.5rem !important; 
-        line-height: 1.1 !important;
       }
-      #daily-record-content .card-zoom .text-xs { font-size: 1.2rem !important; padding: 0.3rem 0.6rem !important; margin-top: 0.35rem !important; }
-      #daily-record-content .card-zoom i.fa-circle-check, #daily-record-content .card-zoom i.fa-circle-exclamation { font-size: 1.6rem !important; }
+      #daily-record-content .card-zoom .text-xs { font-size: 1.2rem !important; padding: 0.4rem 0.8rem !important; margin-top: 0.4rem !important; }
+      #daily-record-content .card-zoom i.fa-circle-check, #daily-record-content .card-zoom i.fa-circle-exclamation { font-size: 1.8rem !important; }
 
       /* การ์ดสถิติทั่วไป บังคับ 1 คอลัมน์ */
       .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4,
@@ -248,11 +243,11 @@
         box-sizing: border-box !important;
       }
       /* ป้องกันอักษรหางยาว (ุ ู ญ ฐ ิ ี) โดนขอบล่างบังตา */
-      .disease-card p.text-xs { font-size: 1.5rem !important; line-height: 1.2 !important; padding-bottom: 0.6rem !important; white-space: normal !important; text-align: center !important;}
-      .disease-card p.text-xl { font-size: 3.5rem !important; line-height: 1 !important; margin-top: 0.25rem !important; padding-bottom: 0.6rem !important;}
+      .disease-card p.text-xs { font-size: 1.6rem !important; line-height: 1.2 !important; padding-bottom: 0.2rem !important; white-space: normal !important; text-align: center !important;}
+      .disease-card p.text-xl { font-size: 3.5rem !important; line-height: 1 !important; margin-top: 0.5rem !important; padding-bottom: 0.5rem !important;}
       
-      .o2-card p.text-sm { font-size: 1.5rem !important; line-height: 1.2 !important; padding-bottom: 0.6rem !important;}
-      .o2-card p.text-3xl { font-size: 3.5rem !important; line-height: 1 !important; margin-top: 0.25rem !important; padding-bottom: 0.6rem !important;}
+      .o2-card p.text-sm { font-size: 1.6rem !important; line-height: 1.2 !important; padding-bottom: 0.2rem !important;}
+      .o2-card p.text-3xl { font-size: 3.5rem !important; line-height: 1 !important; margin-top: 0.5rem !important; padding-bottom: 0.5rem !important;}
 
       /* 7. ตารางข้อมูล (ขยายตารางให้เลื่อนซ้ายขวาได้ตรงคอลัมน์เป๊ะๆ) */
       .overflow-x-auto { 
@@ -468,6 +463,7 @@
     </div>
   </main>
 
+  <!-- ✅ แก้ไข: เอาคำสั่งแสดงผลขัดแย้งของ CSS โมเดลออก เพื่อให้เปิด/ปิดได้ลื่นไหลปกติ ไม่บังหน้าจอ -->
   <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] flex justify-center items-center p-2 md:p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300" id="modalContent">
       <div class="p-4 md:p-5 border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-t-2xl">
