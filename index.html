@@ -140,22 +140,40 @@
         flex-direction: column !important;
         overflow: hidden !important;
       }
-      /* ✅ แก้ไข: พื้นที่ส่วนหัวการ์ด Modal จัด Layout ใหม่อยู่แถวเดียว เครื่องหมายกากบาทอยู่ขวาบนเสมอ */
-      #modalContent > div:first-child { 
-        padding: 1rem 1.25rem !important; 
-        align-items: flex-start !important; /* ให้ปุ่ม x ชิดบนเสมอเผื่อชื่อเรื่องยาว */
+      /* ✅ แก้ไข: แถบหัวการ์ด Modal ให้บางลง อยู่แถวเดียวเสมอ ไม่ดันปุ่ม X ตกบรรทัด 2 */
+      #modalContent > div:first-child {
+        padding: 0.7rem 0.85rem !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;          /* บังคับแถวเดียว ห้ามตกบรรทัด */
+        align-items: center !important;        /* จัดกึ่งกลางแนวตั้งทั้งชื่อเรื่องและปุ่ม X */
+        justify-content: space-between !important;
+        gap: 0.5rem !important;
+        min-height: 0 !important;
       }
-      #modal-title { 
-        font-size: 1.25rem !important; 
-        padding: 0 !important; 
-        line-height: 1.3 !important; 
-        padding-right: 1rem !important; /* เว้นระยะไม่ให้ชนปุ่ม X */
+      #modal-title {
+        font-size: 1rem !important;             /* ลดขนาดฟอนต์หัวเรื่องเพื่อไม่ให้ดันปุ่ม X */
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 1.25 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;     /* ชื่อยาวเกินให้ตัด ... แทนการตกบรรทัด */
       }
       #modalContent > div:first-child button {
-        margin-top: -0.2rem !important; /* ยกปุ่ม X ขึ้นนิดนึงให้สวยงาม */
+        flex: 0 0 auto !important;              /* ปุ่ม X ไม่ถูกบีบ ไม่ถูกดันตกบรรทัด */
+        margin: 0 !important;
+        width: 2rem !important;
+        height: 2rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        align-self: center !important;          /* อยู่กึ่งกลางแนวตั้งของแถบหัว (มุมขวาบนของการ์ด) */
       }
-      #modalContent > div:first-child .fa-xmark { 
-        font-size: 1.75rem !important; 
+      #modalContent > div:first-child .fa-xmark {
+        font-size: 1.25rem !important;          /* ย่อไอคอนกากบาทลงให้สมส่วนกับแถบหัวที่บางลง */
       }
       
       #dataForm { 
@@ -422,7 +440,7 @@
         <div class="bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl shadow-md p-4 mb-5 flex flex-col md:flex-row justify-between items-center text-white gap-3">
           <div class="flex items-center">
             <i class="fas fa-calendar-day text-3xl mr-3"></i>
-            <h1 class="text-xl md:text-2xl font-bold">แดชบอร์ดประจำวัน</h1>
+            <h1 class="text-xl md:text-2xl font-bold">แดชบอร์ดรายวัน</h1>
           </div>
           <div class="flex flex-wrap items-center gap-2 text-gray-800">
             <select id="d-date-select" onchange="onDailyDateChange()" class="p-2 border-none rounded-lg text-sm font-semibold min-w-[160px]">
@@ -606,15 +624,15 @@
     let monthlyDefaultsSet = false;
 
     const menuItems = [
-      { label: 'บันทึกข้อมูลรายวัน', sheet: 'DailyRecord', icon: 'fa-clipboard-list', color: 'text-rose-500' },
-      { label: 'แดชบอร์ดประจำวัน', sheet: 'DailyDashboard', icon: 'fa-calendar-day', color: 'text-cyan-500' },
-      { label: 'แดชบอร์ดรายเดือน', sheet: 'MonthlyDashboard', icon: 'fa-chart-line', color: 'text-indigo-500' },
+      { label: 'ประจำเวร', sheet: 'DailyRecord', icon: 'fa-clipboard-list', color: 'text-rose-500' },
       { label: 'ข้อมูลรายเวร', sheet: 'Data', icon: 'fa-calendar-check', color: 'text-rose-600' },
+      { label: 'รายชื่อบุคลากร', sheet: 'HR', icon: 'fa-users', color: 'text-blue-500' },
+      { label: 'รายชื่อพยาบาลตรวจการ', sheet: 'Sup', icon: 'fa-user-nurse', color: 'text-pink-500' },
+      { label: 'รายชื่อแพทย์', sheet: 'Doc', icon: 'fa-user-doctor', color: 'text-emerald-500' },
       { label: 'ข้อมูล IPD', sheet: 'IPD', icon: 'fa-bed-pulse', color: 'text-rose-600' },
       { label: 'ข้อมูล OPD', sheet: 'OPD', icon: 'fa-stethoscope', color: 'text-cyan-600' },
-      { label: 'รายชื่อบุคลากร', sheet: 'HR', icon: 'fa-users', color: 'text-blue-500' },
-      { label: 'พยาบาลตรวจการ', sheet: 'Sup', icon: 'fa-user-nurse', color: 'text-pink-500' },
-      { label: 'รายชื่อแพทย์', sheet: 'Doc', icon: 'fa-user-doctor', color: 'text-emerald-500' },
+      { label: 'แดชบอร์ดรายวัน', sheet: 'DailyDashboard', icon: 'fa-calendar-day', color: 'text-cyan-500' },
+      { label: 'แดชบอร์ดรายเดือน', sheet: 'MonthlyDashboard', icon: 'fa-chart-line', color: 'text-indigo-500' },
       { label: 'แผนก', sheet: 'แผนก', icon: 'fa-layer-group', color: 'text-orange-500' }
     ];
 
