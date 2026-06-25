@@ -78,6 +78,12 @@
       font-size: 0.95rem !important; padding: 0.55rem 0.75rem !important; min-height: 40px;
     }
 
+    /* ===== 🖥️ PC SPECIFIC TWEAKS ===== */
+    @media (min-width: 769px) {
+      /* ขยายกล่องข้อความรายงานที่ 2 ให้สูงพอดี ไม่ต้องเลื่อนใน PC */
+      #reportCopyText { min-height: 800px !important; height: auto !important; }
+    }
+
     /* =========================================================================
        📱 SMARTPHONE OVERRIDE ONLY (max-width: 768px)
        แก้ไขเสร็จสมบูรณ์: เมนูแถวเดียว, กล่องรายงานฟอนต์เล็กพร้อมสโครลบาร์, การ์ดแผนกกระชับ,
@@ -121,14 +127,13 @@
       .bg-gradient-to-r select, .bg-gradient-to-r button { width: 100% !important; font-size: 1.3rem !important; padding: 1.2rem !important; min-height: 55px !important; border-radius: 1rem !important; }
 
       /* 4. การ์ดโมเดลฟอร์มบันทึกข้อมูล (Responsive Card Modal สวยงาม) */
-      /* ✅ แก้ไขปัญหา Modal บังหน้าจอ: เอา display: flex !important ออก เพื่อไม่ให้หักล้างคลาส hidden ของ Tailwind */
       #formModal { 
         padding: 1rem !important; 
         z-index: 100 !important;
       }
       #modalContent { 
         height: auto !important; 
-        max-height: 85vh !important; /* บังคับไม่ให้ยืดยาวเต็ม 100vh จนบังคีย์บอร์ด */
+        max-height: 90vh !important; 
         width: 100% !important;
         max-width: 500px !important; 
         border-radius: 1.5rem !important; 
@@ -137,119 +142,121 @@
         flex-direction: column !important;
         overflow: hidden !important;
       }
-      #modal-title { font-size: 1.6rem !important; padding: 1.5rem !important; }
+      #formModal .border-b { padding: 0.75rem 1rem !important; } /* ย่อหัวโมเดลให้แคบลงเพื่อประหยัดพื้นที่ */
+      #modal-title { font-size: 1.25rem !important; padding: 0 !important; line-height: 1.2 !important; }
+      #formModal .fa-xmark { font-size: 1.5rem !important; }
+      
       #dataForm { 
         display: flex !important; 
         flex-direction: column !important; 
-        gap: 1.5rem !important; 
-        padding: 1.5rem !important; 
+        gap: 1.25rem !important; 
+        padding: 1.25rem !important; 
         overflow-y: auto !important;
-        max-height: calc(85vh - 140px) !important;
       }
       #dataForm > div { width: 100% !important; max-width: 100% !important; margin-bottom: 0 !important; }
-      #dataForm label { font-size: 1.3rem !important; margin-bottom: 0.5rem !important; display: block !important; line-height: 1.3 !important; }
+      #dataForm label { font-size: 1.1rem !important; margin-bottom: 0.4rem !important; display: block !important; line-height: 1.3 !important; }
       #dataForm input, #dataForm select, #dataForm textarea { 
         width: 100% !important; 
-        font-size: 1.3rem !important; 
-        padding: 1.1rem !important; 
-        min-height: 55px !important; 
-        border-width: 2px !important; 
-        border-radius: 0.75rem !important; 
+        font-size: 1.15rem !important; 
+        padding: 0.85rem !important; 
+        min-height: 48px !important; 
+        border-width: 1px !important; 
+        border-radius: 0.5rem !important; 
         height: auto !important; 
       }
       
       /* ปรับปุ่มล่างสุดของฟอร์มบันทึกข้อมูลย่อย ให้จัดแบบ Row คู่ ไม่บังจอ */
       #formModal .p-4.border-t { 
         display: flex !important;
-        flex-direction: row !important; /* จัดเคียงคู่กันสวยงามสไตล์แอปมือถือ */
-        padding: 1rem 1.5rem !important; 
-        gap: 0.75rem !important; 
+        flex-direction: row !important;
+        padding: 0.75rem 1rem !important; 
+        gap: 0.5rem !important; 
         border-top: 1px solid #e5e7eb !important;
         background-color: #ffffff !important;
       }
       #formModal .p-4.border-t button { 
         flex: 1 !important; 
         width: auto !important; 
-        font-size: 1.2rem !important; 
-        padding: 1rem !important; 
-        border-radius: 0.75rem !important; 
+        font-size: 1.1rem !important; 
+        padding: 0.75rem !important; 
+        border-radius: 0.5rem !important; 
         margin: 0 !important; 
-        min-height: 50px !important;
+        min-height: 44px !important;
       }
 
       /* 5. กล่องข้อความ Copy */
       #lineCopyText { 
-        font-size: 1.2rem !important; 
-        min-height: 280px !important; 
+        font-size: 1.1rem !important; 
+        min-height: 250px !important; 
         overflow-y: hidden !important; 
-        padding: 1.5rem !important; 
-        line-height: 1.8 !important; 
-        border-radius: 1rem !important; 
+        padding: 1rem !important; 
+        line-height: 1.6 !important; 
+        border-radius: 0.75rem !important; 
       }
-      /* ✅ แก้ไข: กล่องข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2) - ฟอนต์เล็ก 3 เท่า, เปิดแถบเลื่อนแนวตั้งเพื่อตรวจทาน */
+      /* ✅ แก้ไข: กล่องข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2) */
       #reportCopyText { 
-        font-size: 0.85rem !important; /* ตัวเล็กลงมาก */
-        height: 300px !important; /* ล็อกความสูงพอดี */
+        font-size: 0.85rem !important; 
+        height: 300px !important; 
         min-height: 300px !important;
-        overflow-y: auto !important; /* เปิดแถบเลื่อนด้านข้างสำหรับตรวจข้อมูล */
+        overflow-y: auto !important; 
         padding: 1rem !important; 
         line-height: 1.5 !important; 
-        border-radius: 1rem !important; 
+        border-radius: 0.75rem !important; 
         white-space: pre-wrap !important;
         word-wrap: break-word !important;
       }
-      .bg-pink-50 button, .bg-green-50 button { font-size: 1.4rem !important; padding: 1.2rem !important; border-radius: 1rem !important; margin-top: 1rem !important; }
+      .bg-pink-50 button, .bg-green-50 button { font-size: 1.2rem !important; padding: 1rem !important; border-radius: 0.75rem !important; margin-top: 0.75rem !important; }
 
-      /* 6. การ์ดแผนก IPD/OPD (ปรับระยะกระชับ สบายตา และขยายฟอนต์ตึก 2 เท่า) */
-      #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6 {
-        grid-template-columns: 1fr !important; /* 1 คอลัมน์ ไม่บีบกัน */
-        gap: 0.5rem !important; /* ระยะห่างระหว่างการ์ดที่เหมาะสม */
-      }
-      #daily-record-content .card-zoom { 
-        min-height: auto !important; /* ปลดล็อกความสูงขั้นต่ำ */
-        padding: 1rem 1.25rem !important; /* ลดระยะห่างกรอบบน-ล่างให้กระชับขึ้น */
-      }
-      /* ขนาดตัวหนังสือตึกใหญ่ขึ้น 2 เท่า แต่ระยะกระชับ */
-      #daily-record-content .card-zoom h4 { 
-        font-size: 2rem !important; 
-        line-height: 1.2 !important; /* ปรับระยะห่างระหว่างบรรทัดลงให้กระชับขึ้น */
-        margin-bottom: 0.2rem !important; 
-      }
-      /* ✅ แก้ไข: ป้ายยอดอัตรากำลังและคนไข้ RN NA PT ขนาดเล็กลง สมดุลสวยงาม */
-      #daily-record-content .card-zoom .text-\[10px\] { 
-        font-size: 1rem !important; /* ลดขนาดอักษร ตรง RN NA PT ลงตามที่ส่ง */
-        padding: 0.4rem !important; 
-        margin-top: 0.4rem !important; 
-        border-radius: 0.5rem !important; 
-      }
-      #daily-record-content .card-zoom .text-xs { font-size: 1.2rem !important; padding: 0.4rem 0.8rem !important; margin-top: 0.4rem !important; }
-      #daily-record-content .card-zoom i.fa-circle-check, #daily-record-content .card-zoom i.fa-circle-exclamation { font-size: 1.8rem !important; }
-
-      /* การ์ดสถิติทั่วไป บังคับ 1 คอลัมน์ */
+      /* 6. จัดการ์ดแผนกและสถิติให้ขนาดเท่ากัน สวยงาม เป็นมืออาชีพ */
+      #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6,
       .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4,
       .grid.grid-cols-2.sm\:grid-cols-5,
       .grid.grid-cols-2.md\:grid-cols-4 {
-        grid-template-columns: 1fr !important;
-        gap: 0.8rem !important;
+        grid-template-columns: 1fr !important; /* 1 คอลัมน์ ไม่บีบกัน */
+        gap: 0.75rem !important;
       }
       
-      /* ✅ แก้ไข: การ์ดสถิติโรค ไม่ตัดขาตัวหนังสือสวยงามอลังการ */
-      .disease-card, .o2-card { 
-        padding: 1.5rem !important; 
+      /* ปรับขนาดและระยะของการ์ดให้เท่ากันทั้งหมดและกระทัดรัดขึ้น */
+      .card-zoom, .disease-card, .o2-card { 
         min-height: auto !important; 
+        padding: 1.25rem !important; 
         border-radius: 1rem !important; 
-        display: flex; flex-direction: column; justify-content: center;
-        overflow: visible !important; /* ป้องกันการตัดตัวหนังสือด้านล่าง */
-        box-sizing: border-box !important;
+        display: flex !important; flex-direction: column !important; justify-content: center !important;
+        overflow: visible !important; box-sizing: border-box !important;
       }
-      /* ป้องกันอักษรหางยาว (ุ ู ญ ฐ ิ ี) โดนขอบล่างบังตา */
-      .disease-card p.text-xs { font-size: 1.6rem !important; line-height: 1.2 !important; padding-bottom: 0.2rem !important; white-space: normal !important; text-align: center !important;}
-      .disease-card p.text-xl { font-size: 3.5rem !important; line-height: 1 !important; margin-top: 0.5rem !important; padding-bottom: 0.5rem !important;}
       
-      .o2-card p.text-sm { font-size: 1.6rem !important; line-height: 1.2 !important; padding-bottom: 0.2rem !important;}
-      .o2-card p.text-3xl { font-size: 3.5rem !important; line-height: 1 !important; margin-top: 0.5rem !important; padding-bottom: 0.5rem !important;}
+      /* ฟอนต์หัวข้อการ์ด (ให้เท่ากัน) */
+      .card-zoom h4, .disease-card p.text-xs, .o2-card p.text-sm, .card-zoom p.text-xs { 
+        font-size: 1.25rem !important; 
+        line-height: 1.3 !important; 
+        margin-bottom: 0.25rem !important; padding-bottom: 0 !important;
+        white-space: normal !important; text-align: center !important; font-weight: 700 !important;
+      }
+      
+      /* ฟอนต์ตัวเลข/สถิติหลัก (ให้เท่ากัน) */
+      .card-zoom p.text-xl, .card-zoom p.text-3xl, .disease-card p.text-xl, .o2-card p.text-3xl { 
+        font-size: 2.2rem !important; 
+        line-height: 1 !important; 
+        margin-top: 0.25rem !important; padding-bottom: 0.2rem !important; /* กันตัดขาตัวหนังสือ */
+        font-weight: 900 !important; text-align: center !important;
+      }
 
-      /* 7. ตารางข้อมูล (ขยายตารางให้เลื่อนซ้ายขวาได้ตรงคอลัมน์เป๊ะๆ) */
+      /* ป้ายย่อย (เช่น IPD: 0 | OPD: 0, หรือ RN NA PT) */
+      .card-zoom .text-\[10px\] { 
+        font-size: 0.95rem !important; 
+        padding: 0.4rem !important; 
+        margin-top: 0.4rem !important; 
+        border-radius: 0.5rem !important; 
+        line-height: 1.1 !important;
+      }
+      .card-zoom .text-xs { font-size: 1.1rem !important; padding: 0.3rem 0.6rem !important; margin-top: 0.35rem !important; }
+      
+      /* ไอคอนภายใน */
+      .disease-card i, .o2-card i, .card-zoom i.text-xl, .card-zoom i.fa-circle-check, .card-zoom i.fa-circle-exclamation { 
+        font-size: 1.8rem !important; 
+      }
+
+      /* 7. ตารางข้อมูลยอดสถิติแยกตามแผนก ปรับให้แคบลง พอดีหน้าจอ */
       .overflow-x-auto { 
         overflow-x: auto !important; 
         -webkit-overflow-scrolling: touch !important; 
@@ -258,7 +265,7 @@
         border-radius: 0.75rem !important;
       }
       table { 
-        min-width: 1000px !important; /* บังคับขนาดตารางให้ขยายเต็มที่ ไม่เกิดการซ้อนทับ */
+        min-width: 100% !important; /* ยกเลิก 1000px เพื่อให้แคบลงและพอดีจอ */
         table-layout: auto !important; 
         width: 100% !important;
         border-collapse: collapse !important;
@@ -266,18 +273,18 @@
       table thead th { 
         position: sticky !important; 
         top: 0 !important; 
-        background-color: #f0fdfa !important; /* ล็อกสีหัวคอลัมน์เวลาเลื่อน */
+        background-color: #f0fdfa !important; 
         z-index: 10 !important; 
-        font-size: 1.2rem !important; 
-        padding: 1.2rem 1rem !important; 
+        font-size: 0.9rem !important; 
+        padding: 0.75rem 0.5rem !important; 
         white-space: nowrap !important; 
         border-bottom: 2px solid #b2f5ea !important;
         font-weight: 700 !important;
         color: #0f766e !important;
       }
       table tbody td { 
-        font-size: 1.2rem !important; 
-        padding: 1.2rem 1rem !important; 
+        font-size: 0.9rem !important; 
+        padding: 0.75rem 0.5rem !important; 
         white-space: nowrap !important; 
         background-color: #ffffff !important;
         text-align: center !important;
@@ -285,7 +292,6 @@
       }
       table tbody tr:hover td { background-color: #f0fdfa !important; }
       
-      /* ล็อกคอลัมน์แรก (ชื่อตึก) ให้อยู่กับที่เวลาเลื่อนปัดตารางเพื่อความโปร่งใสแบบเว็บมืออาชีพ */
       table thead th:first-child, table tbody td:first-child {
         text-align: left !important;
         position: sticky !important;
@@ -297,7 +303,7 @@
       table tbody td:first-child { background-color: #ffffff !important; }
       table tbody tr:hover td:first-child { background-color: #f0fdfa !important; }
 
-      #table-body td button { font-size: 1.5rem !important; padding: 1rem 1.5rem !important; margin: 0.2rem !important; border-radius: 1rem !important; }
+      #table-body td button { font-size: 1.2rem !important; padding: 0.75rem 1rem !important; margin: 0.2rem !important; border-radius: 0.5rem !important; }
       #table-head th:nth-child(n+3):not(:last-child), #table-body td:nth-child(n+3):not(:last-child),
       table.dept-stats-table th:not(.col-keep), table.dept-stats-table td:not(.col-keep) {
         display: table-cell !important;
