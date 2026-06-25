@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* ========== 🔍 BASE STYLES & PC (ไม่เปลี่ยนแปลง) ========== */
+    /* ========== 🔍 BASE STYLES & PC ========== */
     :root { font-size: 16px; }
 
     body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #e0f8f5 0%, #f3f4f6 100%); color: #1f2937; font-size: 1rem; line-height: 1.55; }
@@ -61,6 +61,7 @@
     h2.text-2xl { font-size: 1.75rem !important; font-weight: 800; }
     h1.text-xl { font-size: 1.55rem !important; }
     h1.text-2xl { font-size: 1.9rem !important; }
+
     @media (min-width: 1024px) {
       h1.text-2xl { font-size: 2.1rem !important; }
       h2.text-2xl { font-size: 1.95rem !important; }
@@ -93,7 +94,7 @@
       main { height: auto !important; min-height: 100vh !important; width: 100% !important; }
       #table-view, #daily-record-view, #daily-dashboard-view, #monthly-dashboard-view { flex: none !important; height: auto !important; min-height: 60vh !important; overflow: visible !important; }
 
-      /* 1. เมนูด้านข้าง: บังคับแถวเดียว (nowrap) */
+      /* 1. เมนูด้านข้าง: บังคับแถวเดียว (nowrap) ตัวหนังสือพอดี ไม่ตกแถว */
       aside#sidebar { width: 85vw !important; max-width: 350px !important; border-radius: 0 !important; }
       aside#sidebar h2 { font-size: 1.5rem !important; padding: 1.5rem 0 !important; }
       aside#sidebar nav button { 
@@ -140,41 +141,9 @@
         flex-direction: column !important;
         overflow: hidden !important;
       }
-      /* ✅ แก้ไข: แถบหัวการ์ด Modal ให้บางลง อยู่แถวเดียวเสมอ ไม่ดันปุ่ม X ตกบรรทัด 2 */
-      #modalContent > div:first-child {
-        padding: 0.7rem 0.85rem !important;
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;          /* บังคับแถวเดียว ห้ามตกบรรทัด */
-        align-items: center !important;        /* จัดกึ่งกลางแนวตั้งทั้งชื่อเรื่องและปุ่ม X */
-        justify-content: space-between !important;
-        gap: 0.5rem !important;
-        min-height: 0 !important;
-      }
-      #modal-title {
-        font-size: 1rem !important;             /* ลดขนาดฟอนต์หัวเรื่องเพื่อไม่ให้ดันปุ่ม X */
-        padding: 0 !important;
-        margin: 0 !important;
-        line-height: 1.25 !important;
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;     /* ชื่อยาวเกินให้ตัด ... แทนการตกบรรทัด */
-      }
-      #modalContent > div:first-child button {
-        flex: 0 0 auto !important;              /* ปุ่ม X ไม่ถูกบีบ ไม่ถูกดันตกบรรทัด */
-        margin: 0 !important;
-        width: 2rem !important;
-        height: 2rem !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        align-self: center !important;          /* อยู่กึ่งกลางแนวตั้งของแถบหัว (มุมขวาบนของการ์ด) */
-      }
-      #modalContent > div:first-child .fa-xmark {
-        font-size: 1.25rem !important;          /* ย่อไอคอนกากบาทลงให้สมส่วนกับแถบหัวที่บางลง */
-      }
+      #formModal .border-b { padding: 0.75rem 1rem !important; align-items: flex-start !important; } /* ย่อหัวโมเดลให้แคบลงและชิดบน */
+      #modal-title { font-size: 1.25rem !important; padding: 0 !important; line-height: 1.2 !important; padding-right: 1rem !important; }
+      #formModal .fa-xmark { font-size: 1.5rem !important; margin-top: -0.2rem !important; }
       
       #dataForm { 
         display: flex !important; 
@@ -223,7 +192,7 @@
         line-height: 1.6 !important; 
         border-radius: 0.75rem !important; 
       }
-      /* ✅ แก้ไข: กล่องข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2) */
+      /* กล่องข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2) */
       #reportCopyText { 
         font-size: 0.85rem !important; 
         height: 300px !important; 
@@ -237,35 +206,35 @@
       }
       .bg-pink-50 button, .bg-green-50 button { font-size: 1.2rem !important; padding: 1rem !important; border-radius: 0.75rem !important; margin-top: 0.75rem !important; }
 
-      /* 6. จัดการ์ดแผนกและสถิติให้จัดเรียง 2 คอลัมน์ สวยงาม เป็นมืออาชีพ */
-      /* ยกเลิกการบังคับ 1 คอลัมน์ ปล่อยให้ Grid ของ Tailwind จัด 2 คอลัมน์ตามที่กำหนดใน JS */
-      #daily-record-content .grid,
-      #daily-dashboard-content .grid,
-      #monthly-dashboard-content .grid {
-          /* จะพึ่งพาคลาสเช่น grid-cols-2 ที่สร้างจาก JS ให้แสดง 2 คอลัมน์ในมือถือ */
-          gap: 0.65rem !important;
+      /* 6. จัดการ์ดแผนกและสถิติให้ขนาดเท่ากัน สวยงาม เป็นมืออาชีพ */
+      #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6,
+      .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4,
+      .grid.grid-cols-2.sm\:grid-cols-5,
+      .grid.grid-cols-2.md\:grid-cols-4 {
+        grid-template-columns: 1fr 1fr !important; /* จัด 2 คอลัมน์ ไม่บีบกัน */
+        gap: 0.75rem !important;
       }
       
-      /* ปรับขนาดและระยะของการ์ดให้เท่ากันทั้งหมดและกระทัดรัดขึ้นสำหรับ 2 คอลัมน์ */
+      /* ปรับขนาดและระยะของการ์ดให้เท่ากันทั้งหมดและกระทัดรัดขึ้น */
       .card-zoom, .disease-card, .o2-card { 
         min-height: auto !important; 
-        padding: 1rem !important; /* ลด Padding เพื่อลง 2 คอลัมน์ได้สวยงาม */
+        padding: 1.25rem !important; 
         border-radius: 1rem !important; 
         display: flex !important; flex-direction: column !important; justify-content: center !important;
         overflow: visible !important; box-sizing: border-box !important;
       }
       
-      /* ฟอนต์หัวข้อการ์ด (ปรับลงเพื่อลง 2 คอลัมน์) */
+      /* ฟอนต์หัวข้อการ์ด (ให้เท่ากัน) */
       .card-zoom h4, .disease-card p.text-xs, .o2-card p.text-sm, .card-zoom p.text-xs { 
-        font-size: 1.1rem !important; 
-        line-height: 1.2 !important; 
+        font-size: 1.15rem !important; 
+        line-height: 1.3 !important; 
         margin-bottom: 0.25rem !important; padding-bottom: 0 !important;
         white-space: normal !important; text-align: center !important; font-weight: 700 !important;
       }
       
-      /* ฟอนต์ตัวเลข/สถิติหลัก (ปรับลงเพื่อลง 2 คอลัมน์) */
+      /* ฟอนต์ตัวเลข/สถิติหลัก (ให้เท่ากัน) */
       .card-zoom p.text-xl, .card-zoom p.text-3xl, .disease-card p.text-xl, .o2-card p.text-3xl { 
-        font-size: 1.8rem !important; 
+        font-size: 2.2rem !important; 
         line-height: 1 !important; 
         margin-top: 0.25rem !important; padding-bottom: 0.2rem !important; /* กันตัดขาตัวหนังสือ */
         font-weight: 900 !important; text-align: center !important;
@@ -274,16 +243,16 @@
       /* ป้ายย่อย (เช่น IPD: 0 | OPD: 0, หรือ RN NA PT) */
       .card-zoom .text-\[10px\] { 
         font-size: 0.85rem !important; 
-        padding: 0.35rem !important; 
+        padding: 0.4rem !important; 
         margin-top: 0.4rem !important; 
         border-radius: 0.5rem !important; 
         line-height: 1.1 !important;
       }
-      .card-zoom .text-xs { font-size: 1rem !important; padding: 0.3rem 0.6rem !important; margin-top: 0.35rem !important; }
+      .card-zoom .text-xs { font-size: 0.95rem !important; padding: 0.3rem 0.6rem !important; margin-top: 0.35rem !important; }
       
       /* ไอคอนภายใน */
       .disease-card i, .o2-card i, .card-zoom i.text-xl, .card-zoom i.fa-circle-check, .card-zoom i.fa-circle-exclamation { 
-        font-size: 1.5rem !important; 
+        font-size: 1.8rem !important; 
       }
 
       /* 7. ตารางข้อมูลยอดสถิติแยกตามแผนก ปรับให้แคบลง พอดีหน้าจอ */
@@ -393,9 +362,9 @@
         </h1>
       </div>
 
-      <!-- Row 2: filter -->
-      <div id="headerFilterRow" class="flex flex-wrap items-center gap-2 w-full">
-        <div id="filterSection" class="flex items-center gap-2">
+      <!-- Row 2: filter อย่างเดียว (ลบปุ่มเพิ่มข้อมูลออกตามคำขอ นำไปโชว์ในหน้ารายวันแทน) -->
+      <div class="flex flex-wrap items-center gap-2 w-full">
+        <div id="filterSection" class="flex items-center gap-2 w-full md:w-auto md:ml-auto">
           <select id="filterMonth" class="bg-white border border-teal-200 rounded-xl px-2 py-2 text-sm focus:ring-2 focus:ring-teal-400">
             <option value="all">เดือนทั้งหมด</option>
             <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
@@ -436,7 +405,7 @@
         <div class="bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl shadow-md p-4 mb-5 flex flex-col md:flex-row justify-between items-center text-white gap-3">
           <div class="flex items-center">
             <i class="fas fa-calendar-day text-3xl mr-3"></i>
-            <h1 class="text-xl md:text-2xl font-bold">แดชบอร์ดรายวัน</h1>
+            <h1 class="text-xl md:text-2xl font-bold">แดชบอร์ดประจำวัน</h1>
           </div>
           <div class="flex flex-wrap items-center gap-2 text-gray-800">
             <select id="d-date-select" onchange="onDailyDateChange()" class="p-2 border-none rounded-lg text-sm font-semibold min-w-[160px]">
@@ -495,19 +464,19 @@
     </div>
   </main>
 
-  <!-- ✅ แก้ไขปัญหาโมเดลบังหน้าจอในสมาทโฟน: ปรับโครงสร้าง Container ให้แสดง/ซ่อนได้สมบูรณ์ -->
-  <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] justify-center items-center opacity-0 transition-opacity duration-300 hidden">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300" id="modalContent">
-      <div class="p-4 md:p-5 border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-t-2xl">
-        <h2 id="modal-title" class="text-lg md:text-xl font-bold tracking-wide">จัดการข้อมูล</h2>
-        <button onclick="closeModal()" class="text-white hover:text-red-200 text-2xl transition"><i class="fa-solid fa-xmark"></i></button>
+  <!-- ✅ แก้ไข: พื้นที่ส่วนหัวแคบลง จัดตำแหน่งกากบาทให้อยู่ขวาบนสวยงาม -->
+  <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white w-full shadow-2xl flex flex-col transform scale-95 transition-transform duration-300 relative mx-auto my-auto" id="modalContent">
+      <div class="border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-t-2xl">
+        <h2 id="modal-title" class="font-bold tracking-wide">จัดการข้อมูล</h2>
+        <button onclick="closeModal()" class="text-white hover:text-red-200 transition"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-4 md:p-6 overflow-y-auto flex-1 custom-scroll bg-gray-50/50">
-        <form id="dataForm" onsubmit="saveData(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></form>
+      <div class="overflow-y-auto flex-1 custom-scroll bg-gray-50/50 relative">
+        <form id="dataForm" onsubmit="saveData(event)"></form>
       </div>
       <div class="p-4 border-t flex justify-end gap-3 bg-white rounded-b-2xl shadow-inner">
-        <button type="button" onclick="closeModal()" class="px-5 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 transition font-semibold">ยกเลิก</button>
-        <button type="submit" form="dataForm" class="px-5 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:shadow-lg transition font-bold"><i class="fa-solid fa-save"></i> บันทึกข้อมูล</button>
+        <button type="button" onclick="closeModal()" class="text-gray-600 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition font-semibold">ยกเลิก</button>
+        <button type="submit" form="dataForm" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:shadow-lg transition font-bold"><i class="fa-solid fa-save"></i> บันทึกข้อมูล</button>
       </div>
     </div>
   </div>
@@ -620,15 +589,15 @@
     let monthlyDefaultsSet = false;
 
     const menuItems = [
-      { label: 'บันทึกข้อมูลประจำเวร', sheet: 'DailyRecord', icon: 'fa-clipboard-list', color: 'text-rose-500' },
+      { label: 'บันทึกข้อมูลรายวัน', sheet: 'DailyRecord', icon: 'fa-clipboard-list', color: 'text-rose-500' },
+      { label: 'แดชบอร์ดประจำวัน', sheet: 'DailyDashboard', icon: 'fa-calendar-day', color: 'text-cyan-500' },
+      { label: 'แดชบอร์ดรายเดือน', sheet: 'MonthlyDashboard', icon: 'fa-chart-line', color: 'text-indigo-500' },
       { label: 'ข้อมูลรายเวร', sheet: 'Data', icon: 'fa-calendar-check', color: 'text-rose-600' },
-      { label: 'รายชื่อบุคลากร', sheet: 'HR', icon: 'fa-users', color: 'text-blue-500' },
-      { label: 'รายชื่อพยาบาลตรวจการ', sheet: 'Sup', icon: 'fa-user-nurse', color: 'text-pink-500' },
-      { label: 'รายชื่อแพทย์', sheet: 'Doc', icon: 'fa-user-doctor', color: 'text-emerald-500' },
       { label: 'ข้อมูล IPD', sheet: 'IPD', icon: 'fa-bed-pulse', color: 'text-rose-600' },
       { label: 'ข้อมูล OPD', sheet: 'OPD', icon: 'fa-stethoscope', color: 'text-cyan-600' },
-      { label: 'แดชบอร์ดรายวัน', sheet: 'DailyDashboard', icon: 'fa-calendar-day', color: 'text-cyan-500' },
-      { label: 'แดชบอร์ดรายเดือน', sheet: 'MonthlyDashboard', icon: 'fa-chart-line', color: 'text-indigo-500' },
+      { label: 'รายชื่อบุคลากร', sheet: 'HR', icon: 'fa-users', color: 'text-blue-500' },
+      { label: 'พยาบาลตรวจการ', sheet: 'Sup', icon: 'fa-user-nurse', color: 'text-pink-500' },
+      { label: 'รายชื่อแพทย์', sheet: 'Doc', icon: 'fa-user-doctor', color: 'text-emerald-500' },
       { label: 'แผนก', sheet: 'แผนก', icon: 'fa-layer-group', color: 'text-orange-500' }
     ];
 
@@ -818,16 +787,16 @@
       `).join('');
     }
 
-    // ซ่อนตัวกรองเดือน/ปี/ค้นหาบน header เฉพาะตอนอยู่หน้า "บันทึกข้อมูลประจำเวร"
-    function setHeaderFilterVisible(visible) {
-      const row = document.getElementById('headerFilterRow');
-      if (row) row.classList.toggle('hidden', !visible);
-    }
-
     function switchTab(sheetName) {
       currentSheet = sheetName;
       ['table-view','daily-record-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      setHeaderFilterVisible(sheetName !== 'DailyRecord');
+
+      // สลับการแสดงผลของปุ่มเพิ่มข้อมูล และ ตัวกรอง ตามหน้าที่เปิด
+      if (sheetName === 'DailyRecord') {
+        document.getElementById('filterSection').classList.add('hidden');
+      } else {
+        document.getElementById('filterSection').classList.remove('hidden');
+      }
 
       if (sheetName === 'DailyRecord') {
         document.getElementById('daily-record-view').classList.remove('hidden');
@@ -936,12 +905,10 @@
     // ==========================================
     let currentDailyRecordId = null;
 
-    // dropdown "เลือกเวร" ที่รวมตัวเลือก "สร้างเวรใหม่" ไว้บนสุด
     function showDailyRecord(dataId = null) {
       currentSheet = 'DailyRecord';
       ['table-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.getElementById('daily-record-view').classList.remove('hidden');
-      setHeaderFilterVisible(false);
       renderMenus();
 
       let dataRows = globalData.tables['Data'] || [];
@@ -953,9 +920,8 @@
         container.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-500">
           <i class="fa-solid fa-box-open text-6xl mb-4 text-gray-300"></i>
           <h2 class="text-xl font-bold">ยังไม่มีข้อมูลเวรประจำวัน</h2>
-          <p class="mb-4">กรุณาเริ่มสร้างเวรใหม่เพื่อบันทึกข้อมูลประจำเวร</p>
-          <button onclick="renderInlineDataForm(null, null)" class="btn-blink px-5 py-2.5 text-sm md:text-base font-bold text-white bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl hover:from-teal-600 hover:to-cyan-600 focus:ring-2 focus:ring-teal-400 transition flex items-center gap-2 shadow-md border border-teal-400">
-            <i class="fa-solid fa-plus-circle text-lg md:text-xl"></i> สร้างเวรใหม่
+          <button onclick="openModal(null, 'Data')" class="mt-4 bg-teal-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-teal-600 transition font-bold shadow-sm flex justify-center items-center gap-2">
+            <i class="fa-solid fa-plus"></i> เพิ่มข้อมูลเวรใหม่
           </button>
         </div>`;
         return;
@@ -983,19 +949,19 @@
       let html = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div class="lg:col-span-2 bg-white border-l-4 border-cyan-500 p-5 md:p-6 rounded-xl shadow-sm h-full">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-gray-100 pb-3 mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-3 mb-4">
               <h2 class="text-2xl font-bold text-teal-800"><i class="fa-solid fa-calendar-check text-cyan-500 mr-2"></i> ข้อมูลบันทึกเวรประจำวัน</h2>
-              <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                <button onclick="renderInlineDataForm(null, null)" class="btn-blink bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-xl text-sm hover:from-teal-600 hover:to-cyan-600 transition font-bold shadow-sm border border-teal-400 flex-1 md:flex-initial">
-                  <i class="fa-solid fa-plus-circle mr-1"></i> สร้างเวรใหม่
+              <div class="flex flex-row gap-2 w-full md:w-auto mt-2 md:mt-0">
+                <button onclick="openModal(null, 'Data')" class="flex-1 md:flex-none bg-teal-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-teal-600 transition font-bold shadow-sm border border-teal-600 flex justify-center items-center gap-1">
+                  <i class="fa-solid fa-plus"></i> เพิ่มข้อมูลเวรใหม่
                 </button>
-                <button onclick="editDataByRowId('Data', '${esc(targetData['ID'])}')" class="bg-amber-100 text-amber-700 px-4 py-2 rounded-xl text-sm hover:bg-amber-200 transition font-bold shadow-sm border border-amber-200 flex-1 md:flex-initial">
-                  <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลเวร
+                <button onclick="editDataByRowId('Data', '${esc(targetData['ID'])}')" class="flex-1 md:flex-none bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-sm hover:bg-amber-200 transition font-bold shadow-sm border border-amber-200 flex justify-center items-center gap-1">
+                  <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลเวร
                 </button>
               </div>
             </div>
             <div class="mb-4 flex flex-wrap gap-2 items-center">
-              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวรเก่าเพื่อดู/แก้ไข:</label>
+              <label class="text-sm font-bold text-teal-700"><i class="fa-solid fa-list"></i> เลือกเวรที่จะบันทึก:</label>
               <select onchange="showDailyRecord(this.value)" class="border border-teal-200 bg-teal-50 rounded-lg px-3 py-2 text-sm font-semibold text-teal-800">${shiftOptions}</select>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm md:text-base text-gray-700 info-grid">
@@ -1107,21 +1073,21 @@
       let statLine = `RN: ${rnCount} | NA: ${naCount} | PT: ${patCount}`;
 
       if (isReallyFilled) {
-        return `<div onclick="renderInlineForm(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-300 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36">
+        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-300 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-check text-emerald-500 text-lg shadow-sm bg-white rounded-full"></i></div>
           <h4 class="font-bold text-emerald-800 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-emerald-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">${statLine}</div>
           <div class="text-xs text-emerald-600 mt-2 bg-emerald-200/50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
         </div>`;
       } else if (record) {
-        return `<div onclick="renderInlineForm(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
+        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-exclamation text-rose-400 text-lg bg-white rounded-full"></i></div>
           <h4 class="font-bold text-rose-700 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-rose-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">${statLine}</div>
           <div class="text-xs text-rose-500 mt-2 bg-rose-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
         </div>`;
       } else {
-        return `<div onclick="openPreFilledInlineForm('${esc(type)}', '${esc(date)}', '${esc(shift)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
+        return `<div onclick="openPreFilledModal('${esc(type)}', '${esc(date)}', '${esc(shift)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-exclamation text-rose-400 text-lg bg-white rounded-full"></i></div>
           <h4 class="font-bold text-rose-700 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-rose-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">ยังไม่ลงข้อมูล</div>
@@ -1933,31 +1899,22 @@
       openModal(idx !== -1 ? idx : null, targetSheet, data['หน่วยงาน'] || data['แผนก']);
     }
 
-    // ฟอร์มเต็มหน้า (inline): เก็บค่าที่กรอกไว้แล้ว re-render ฟิลด์ใหม่ตามเวร/หน่วยงานที่เปลี่ยน
-    function onInlineFieldChange() {
-      const form = document.getElementById('inlineDataForm');
-      if (!form) return;
-      const fd = new FormData(form);
-      const data = Object.fromEntries(fd.entries());
-      const targetSheet = data['_targetSheet'];
-      delete data['_targetSheet'];
-      const pk = data['Code'] || data['ID'];
-      let idx = null;
-      if (pk) {
-        const arr = globalData.tables[targetSheet] || [];
-        idx = arr.findIndex(r => String(r['Code']||r['ID']) === String(pk));
-      }
-      window._inlineSavedData = data;
-      renderInlineForm(idx !== -1 ? idx : null, targetSheet, data['หน่วยงาน'] || data['แผนก']);
-    }
-
-    // ==========================================================================
-    // 🧩 ฟังก์ชันกลางสร้างฟิลด์ฟอร์ม (ใช้ร่วมกันทั้งโมเดล และฟอร์มเต็มหน้า)
-    // ==========================================================================
-    // คืนค่า primaryHeaders เพื่อให้ผู้เรียกไปวาด badge ต่อได้
-    function buildFormFields(targetSheet, form, rowData, contextDept) {
+    function openModal(idx = null, forceSheet = null, contextDept = null) {
+      const targetSheet = forceSheet || currentSheet;
+      const form = document.getElementById('dataForm');
       form.innerHTML = '';
+      let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
+      if (targetSheet === 'Data') sheetLabel = 'ข้อมูลเวรหลักพยาบาลตรวจการ';
+      document.getElementById('modal-title').innerHTML = idx !== null
+        ? `<i class="fa-solid fa-pen-to-square text-amber-300"></i> บันทึกข้อมูล (${esc(sheetLabel)})`
+        : `<i class="fa-solid fa-plus-circle text-cyan-300"></i> เพิ่มข้อมูลเวรใหม่`;
+
       const headers = globalData.headers[targetSheet] || [];
+      let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
+      if (window._modalSavedData) {
+        Object.assign(rowData, window._modalSavedData);
+        delete window._modalSavedData;
+      }
       let currentDept = rowData['หน่วยงาน'] || rowData['แผนก'] || contextDept || '';
       let currentShift = String(rowData['เวร']||'').trim();
 
@@ -2045,7 +2002,7 @@
 
         if (isShiftCount) {
           if (value === '' || value === undefined) value = 0;
-          inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" placeholder="จำนวนคน" class="w-full bg-amber-50 focus:ring-2 focus:ring-amber-400 font-bold text-amber-700 border-amber-300 rounded-xl px-4 py-2">`;
+          inputHtml = `<input type="number" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" min="0" placeholder="จำนวนคน" class="w-full bg-amber-50 focus:ring-2 focus:ring-amber-400 font-bold text-amber-700 border-amber-300 rounded-xl px-4 py-2 border">`;
         }
         else if (primaryHeaders[header]) {
           let pg = primaryHeaders[header];
@@ -2067,7 +2024,7 @@
           else if (isPN) colorClass = 'text-green-700 bg-green-50 border-green-300 focus:ring-green-400';
           else if (isNA) colorClass = 'text-amber-600 bg-amber-50 border-amber-300 focus:ring-amber-400';
           else colorClass = 'text-gray-700 bg-gray-100 border-gray-400 focus:ring-gray-400';
-
+          
           let hintText = '';
           if (opdUnit === 'porter' && header === 'พนักงานเวรเปล เวรดึก 1') {
             hintText = '<p class="text-[1.2rem] text-rose-500 mt-2">* ลงข้อมูลเฉพาะ "เวรบ่าย" (เพื่อจัดเวรดึก) — เวรเช้าไม่ต้องลง</p>';
@@ -2083,7 +2040,7 @@
         else if (isSup) {
           let supNameKey = getNameKey('Sup');
           let supList = globalData.tables['Sup'] || [];
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}'); autoFillPhone(this.value);" class="w-full bg-pink-50 text-pink-700 font-semibold focus:ring-2 focus:ring-pink-400 border-pink-300 rounded-xl px-4 py-3">
+          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Sup', '', '', '${esc(header)}'); autoFillPhone(this.value);" class="w-full bg-pink-50 text-pink-700 font-semibold focus:ring-2 focus:ring-pink-400 border-pink-300 rounded-xl px-4 py-3 border">
             <option value="">-- เลือกพยาบาลตรวจการ --</option>
             ${supList.map(s => `<option value="${esc(s[supNameKey])}" ${value === s[supNameKey] ? 'selected' : ''}>${esc(s[supNameKey])}</option>`).join('')}
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
@@ -2096,7 +2053,7 @@
           else if (isInternDoc) docList = docList.filter(d => matchDocType(d['ประเภท'], 'INTERN'));
           else if (isERDoc) docList = docList.filter(d => matchDocType(d['ประเภท'], 'ER'));
           let docType = isMedDoc ? 'MED' : (isInternDoc ? 'INTERN' : 'ER');
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Doc', '${docType}', '', '${esc(header)}')" class="w-full bg-emerald-50 text-emerald-700 font-semibold focus:ring-2 focus:ring-emerald-400 border-emerald-300 rounded-xl px-4 py-3">
+          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" ${isRequired} onchange="checkAddNew(this, 'Doc', '${docType}', '', '${esc(header)}')" class="w-full bg-emerald-50 text-emerald-700 font-semibold focus:ring-2 focus:ring-emerald-400 border-emerald-300 rounded-xl px-4 py-3 border">
             <option value="">-- เลือกแพทย์ --</option>
             ${docList.map(d => `<option value="${esc(d[docNameKey])}" ${value === d[docNameKey] ? 'selected' : ''}>${esc(d[docNameKey])}</option>`).join('')}
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
@@ -2106,14 +2063,14 @@
           let docNameKey = getNameKey('Doc');
           let expectedType = getDocTypeForDept(currentDept);
           let docList = (globalData.tables['Doc'] || []).filter(d => matchDocType(d['ประเภท'], expectedType));
-          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" onchange="checkAddNew(this, 'Doc', '${esc(expectedType)}', '', '${esc(header)}')" class="w-full bg-emerald-50 text-emerald-700 font-semibold focus:ring-2 focus:ring-emerald-400 border-emerald-300 rounded-xl px-4 py-3">
+          inputHtml = `<select name="${esc(header)}" id="sel_${esc(header)}" onchange="checkAddNew(this, 'Doc', '${esc(expectedType)}', '', '${esc(header)}')" class="w-full bg-emerald-50 text-emerald-700 font-semibold focus:ring-2 focus:ring-emerald-400 border-emerald-300 rounded-xl px-4 py-3 border">
             <option value="">-- เลือกแพทย์ (${esc(expectedType||'-')}) --</option>
             ${docList.map(d => `<option value="${esc(d[docNameKey])}" ${value === d[docNameKey] ? 'selected' : ''}>${esc(d[docNameKey])}</option>`).join('')}
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อแพทย์ใหม่</option>
           </select>`;
         }
         else if (isEKG) {
-          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" placeholder="พิมพ์รายชื่อ" class="w-full bg-rose-50 focus:ring-2 focus:ring-rose-400 text-rose-700 font-semibold border-rose-200 rounded-xl px-4 py-3">`;
+          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" placeholder="พิมพ์รายชื่อ" class="w-full bg-rose-50 focus:ring-2 focus:ring-rose-400 text-rose-700 font-semibold border-rose-200 rounded-xl px-4 py-3 border">`;
         }
         else if (isImageField) {
           let previewHtml = '';
@@ -2129,15 +2086,13 @@
           inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" placeholder="เช่น 14/4/2568" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700 rounded-xl px-4 py-3 border">`;
         }
         else if (header.includes('เวร') && targetSheet !== 'HR' && !header.includes('เวรเปล') && !header.includes('เวรดึก') && !header.includes('เวรเช้า') && !header.includes('EKG')) {
-          let onChangeFn = (targetSheet === 'Data' || targetSheet === 'IPD' || targetSheet === 'OPD') && form.id === 'inlineDataForm' ? 'onInlineFieldChange()' : 'onModalFieldChange()';
-          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="${onChangeFn}" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700 rounded-xl px-4 py-3 border">
+          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 font-bold text-teal-700 rounded-xl px-4 py-3 border">
             <option value="">-- เลือกระบุเวร --</option>
             ${['เวรเช้า', 'เวรบ่าย', 'เวรดึก'].map(s => `<option value="${s}" ${value === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>`;
         }
         else if (header === 'หน่วยงาน' || header === 'แผนก') {
-          let onChangeFn = form.id === 'inlineDataForm' ? 'onInlineFieldChange()' : 'onModalFieldChange()';
-          inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="${onChangeFn}" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
+          inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
             <option value="">-- เลือก --</option>
             ${(globalData.dropdowns.departments||[]).map(d => `<option value="${esc(d)}" ${value === d ? 'selected' : ''}>${esc(d)}</option>`).join('')}
           </select>`;
@@ -2166,117 +2121,17 @@
           </div>`;
       });
       form.innerHTML += `<input type="hidden" name="_targetSheet" value="${esc(targetSheet)}">`;
-      return primaryHeaders;
-    }
-
-    function openModal(idx = null, forceSheet = null, contextDept = null) {
-      const targetSheet = forceSheet || currentSheet;
-      const form = document.getElementById('dataForm');
-      let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
-      if (targetSheet === 'Data') sheetLabel = 'ข้อมูลเวรหลักพยาบาลตรวจการ';
-      document.getElementById('modal-title').innerHTML = idx !== null
-        ? `<i class="fa-solid fa-pen-to-square text-amber-300"></i> บันทึกข้อมูล (${esc(sheetLabel)})`
-        : `<i class="fa-solid fa-plus-circle text-cyan-300"></i> เพิ่มข้อมูล (${esc(sheetLabel)})`;
-
-      let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
-      if (window._modalSavedData) {
-        Object.assign(rowData, window._modalSavedData);
-        delete window._modalSavedData;
-      }
-
-      let primaryHeaders = buildFormFields(targetSheet, form, rowData, contextDept);
 
       const modal = document.getElementById('formModal');
       const modalContent = document.getElementById('modalContent');
       modal.classList.remove('hidden');
+      
+      // ✅ แก้ไข: ยกเลิกการใช้ display: flex บนโมเดลเพื่อป้องกันการบังหน้าจอแบบโปร่งใส 
+      // ใช้ style.display แบบตรงไปตรงมา
+      modal.style.display = 'flex';
+      
       setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); }, 10);
       setTimeout(() => { Object.keys(primaryHeaders).forEach(h => renderBadges(h)); }, 50);
-    }
-
-    // ==========================================================================
-    // 📝 ฟอร์มเต็มหน้า (Inline Form) — ใช้แทนโมเดลสำหรับ Data / IPD / OPD
-    // ==========================================================================
-    // alias ที่เรียกจากปุ่ม "สร้างเวรใหม่" เมื่อยังไม่มีข้อมูลเวรเลย
-    function renderInlineDataForm(idx, contextDept) {
-      renderInlineForm(idx, 'Data', contextDept);
-    }
-
-    function renderInlineForm(idx, targetSheet, contextDept = null) {
-      currentSheet = 'DailyRecord';
-      ['table-view','daily-dashboard-view','monthly-dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      document.getElementById('daily-record-view').classList.remove('hidden');
-      setHeaderFilterVisible(false);
-      renderMenus();
-
-      let sheetLabel = (menuItems.find(m => m.sheet === targetSheet) || {}).label || targetSheet;
-      if (targetSheet === 'Data') sheetLabel = 'ข้อมูลเวรหลักพยาบาลตรวจการ';
-
-      let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
-      if (window._inlineSavedData) {
-        Object.assign(rowData, window._inlineSavedData);
-        delete window._inlineSavedData;
-      }
-
-      const container = document.getElementById('daily-record-content');
-      container.innerHTML = `
-        <div class="bg-white border-l-4 border-cyan-500 rounded-xl shadow-sm mb-6 overflow-hidden">
-          <div class="p-4 md:p-5 border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
-            <h2 class="text-lg md:text-xl font-bold tracking-wide truncate">
-              <i class="fa-solid ${idx !== null ? 'fa-pen-to-square' : 'fa-plus-circle'} mr-2"></i>
-              ${idx !== null ? 'บันทึกข้อมูล' : 'เพิ่มข้อมูล'} (${esc(sheetLabel)})
-            </h2>
-            <button type="button" onclick="cancelInlineForm()" class="text-white hover:text-red-200 text-2xl transition flex-shrink-0 ml-3"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-          <div class="p-4 md:p-6 bg-gray-50/50">
-            <form id="inlineDataForm" onsubmit="saveInlineForm(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></form>
-          </div>
-          <div class="p-4 border-t flex justify-end gap-3 bg-white shadow-inner">
-            <button type="button" onclick="cancelInlineForm()" class="px-5 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 transition font-semibold">ยกเลิก</button>
-            <button type="submit" form="inlineDataForm" class="px-5 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:shadow-lg transition font-bold"><i class="fa-solid fa-save"></i> บันทึกข้อมูล</button>
-          </div>
-        </div>`;
-
-      const form = document.getElementById('inlineDataForm');
-      let primaryHeaders = buildFormFields(targetSheet, form, rowData, contextDept);
-      Object.keys(primaryHeaders).forEach(h => renderBadges(h));
-    }
-
-    // ยกเลิกฟอร์มเต็มหน้า กลับไปหน้าแสดงข้อมูลประจำเวรตามปกติ
-    function cancelInlineForm() {
-      delete window._inlineSavedData;
-      showDailyRecord(currentDailyRecordId);
-    }
-
-    function saveInlineForm(event) {
-      event.preventDefault();
-      const formData = new FormData(event.target);
-      const dataObj = Object.fromEntries(formData.entries());
-      const targetSheet = dataObj['_targetSheet'];
-      delete dataObj['_targetSheet'];
-      const m = 'all'; const y = 'all';
-      if (targetSheet === 'Data' && !dataObj['ID']) {
-        Swal.fire({ title: 'กำลังสร้างฟอร์มตึกอัตโนมัติ...', text: `กรุณารอสักครู่...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-      } else {
-        Swal.fire({ title: 'กำลังบันทึกข้อมูล...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-      }
-      google.script.run
-        .withSuccessHandler(res => {
-          try {
-            if (!res || !res.tables) throw new Error("บันทึกข้อมูลไม่สมบูรณ์");
-            globalData = res;
-            Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', timer: 1500, showConfirmButton: false });
-            if (targetSheet === 'Data') {
-              let savedId = (dataObj['วันที่'] || '') + (dataObj['เวร'] || '');
-              if (!savedId && globalData.tables['Data'] && globalData.tables['Data'][0]) savedId = globalData.tables['Data'][0]['ID'];
-              showDailyRecord(savedId);
-            } else {
-              // IPD / OPD: กลับไปแสดงหน้าประจำเวรเดิม การ์ดแผนกจะอัปเดตสถานะอัตโนมัติ
-              showDailyRecord(currentDailyRecordId);
-            }
-          } catch(e) { Swal.fire('ข้อผิดพลาด', e.message, 'error'); }
-        })
-        .withFailureHandler(err => Swal.fire('ข้อผิดพลาด', err.message, 'error'))
-        .saveRecord(targetSheet, dataObj, m, y);
     }
 
     function autoFillPhone(supName) {
@@ -2347,27 +2202,19 @@
       }, 100);
     }
 
-    // เวอร์ชันฟอร์มเต็มหน้า: เปิดฟอร์มลงข้อมูลแผนกที่ยังไม่มีข้อมูล พร้อมกรอกวันที่/เวร/หน่วยงานไว้ล่วงหน้า
-    function openPreFilledInlineForm(targetSheet, date, shift, deptName) {
-      renderInlineForm(null, targetSheet, deptName);
-      setTimeout(() => {
-        if (document.getElementById('input_วันที่')) document.getElementById('input_วันที่').value = date;
-        if (document.getElementById('input_เวร')) document.getElementById('input_เวร').value = shift;
-        if (document.getElementById('input_หน่วยงาน')) document.getElementById('input_หน่วยงาน').value = deptName;
-        updateHRDropdowns();
-      }, 100);
-    }
-
     function editDataByRowId(targetSheet, rowId) {
       const idx = globalData.tables[targetSheet].findIndex(r => r['ID'] === rowId);
-      if (idx !== -1) renderInlineForm(idx, targetSheet);
+      if (idx !== -1) openModal(idx, targetSheet);
     }
 
     function closeModal() {
       const modal = document.getElementById('formModal');
       const modalContent = document.getElementById('modalContent');
       modal.classList.add('opacity-0'); modalContent.classList.add('scale-95');
-      setTimeout(() => modal.classList.add('hidden'), 300);
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.style.display = 'none'; // เพิ่มบรรทัดนี้ปิดกระจกใสบังจอ
+      }, 300);
     }
 
     function saveData(event) {
@@ -2376,6 +2223,29 @@
       const dataObj = Object.fromEntries(formData.entries());
       const targetSheet = dataObj['_targetSheet'];
       delete dataObj['_targetSheet'];
+
+      // 🔥 ระบบป้องกันการบันทึกข้อมูลซ้ำซ้อน
+      if (targetSheet === 'Data' && !dataObj['ID']) {
+        let inputDate = String(dataObj['วันที่'] || '').trim();
+        let inputShift = String(dataObj['เวร'] || '').trim();
+        let dataRows = globalData.tables['Data'] || [];
+        
+        let isDuplicate = dataRows.some(r => String(r['วันที่'] || '').trim() === inputDate && String(r['เวร'] || '').trim() === inputShift);
+        
+        if (isDuplicate) {
+          let lastRow = dataRows[dataRows.length - 1];
+          let nurseName = lastRow ? (lastRow['พยาบาลตรวจการ'] || '') : '';
+          
+          Swal.fire({
+            icon: 'warning',
+            title: 'ข้อมูลซ้ำซ้อน!',
+            text: `มีการบันทึกข้อมูลในวันนี้และเวรนี้แล้ว กรุณาตรวจสอบข้อมูลค่ะคุณ${nurseName}`,
+            confirmButtonColor: '#0ea5e9'
+          });
+          return; // หยุดการทำงาน ไม่ให้บันทึก
+        }
+      }
+
       const m = 'all'; const y = 'all';
       if (targetSheet === 'Data' && !dataObj['ID']) {
         Swal.fire({ title: 'กำลังสร้างฟอร์มตึกอัตโนมัติ...', text: `กรุณารอสักครู่...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
