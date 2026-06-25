@@ -6,6 +6,7 @@
   <title>ระบบบันทึกข้อมูลเวรพยาบาลตรวจการ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -529,6 +530,17 @@
     // ==========================================
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwvcP4hBVE6bUi0zM9_8pJ1bNSwZtqfSIvEO2rHq2vycReCSITPD7ZASYEppV4RWEEk/exec';
 
+    // ==========================================
+    // 📲 LINE LIFF (สำหรับปุ่ม Share รายงาน/ข้อความไปกลุ่มไลน์)
+    // ==========================================
+    const LIFF_ID = '2007625222-ziw8Ty7N'; // ⚠️ รอใส่ LIFF ID จริงจาก LINE Developers Console
+    let liffReady = false;
+    if (typeof liff !== 'undefined' && LIFF_ID && LIFF_ID !== 'YOUR_LIFF_ID_HERE') {
+      liff.init({ liffId: LIFF_ID })
+        .then(() => { liffReady = true; console.log('[LIFF] init สำเร็จ'); })
+        .catch(err => { console.error('[LIFF] init ไม่สำเร็จ:', err); });
+    }
+
     const API_ACTIONS = {
       getAppData:         { method: 'GET',  args: ['filterMonth', 'filterYear'] },
       saveRecord:         { method: 'POST', args: ['sheetName', 'data', 'filterMonth', 'filterYear'] },
@@ -723,6 +735,162 @@
       });
     }
 
+    // ==========================================================================
+    // 📲 Share รายงาน/ข้อความสรุป ไปกลุ่มไลน์ ผ่าน LIFF shareTargetPicker (Flex Message)
+    // ==========================================================================
+
+    // แปลงข้อความดิบในกล่อง (หลายบรรทัด) เป็น Flex "contents" แบบรายการ key-value สวยงาม
+    // บรรทัดที่มี ":" จะถูกแยกเป็น label/value วางคนละฝั่ง ส่วนบรรทัดอื่นแสดงเป็นข้อความเต็มบรรทัด
+    function buildFlexBodyContents(rawText, accentColor) {
+      let lines = String(rawText || '').split('\n');
+      let contents = [];
+      let blankStreak = 0;
+
+      function pushLabelValueRow(label, value) {
+        contents.push({
+          type: 'box', layout: 'baseline', spacing: 'sm', margin: 'sm',
+          contents: [
+            { type: 'text', text: label, color: '#6B7280', size: 'xs', flex: 4, wrap: true },
+            { type: 'text', text: value || '-', color: '#111827', size: 'xs', weight: 'bold', flex: 6, wrap: true }
+          ]
+        });
+      }
+
+      lines.forEach(line => {
+        let trimmed = line.trim();
+        if (!trimmed) {
+          blankStreak++;
+          if (blankStreak === 1 && contents.length) {
+            contents.push({ type: 'separator', margin: 'md', color: '#E5E7EB' });
+          }
+          return;
+        }
+        blankStreak = 0;
+
+        // กรณีพิเศษ: บรรทัดมี 2 คู่ label:value คั่นด้วย " / " (เช่น พยาบาลตรวจการ Staff/Train ในบรรทัดเดียว)
+        // จับคู่แบบ "ข้อความก่อน : ข้อความ / ข้อความก่อน : ข้อความ" แยกเป็น 2 แถว
+        let doublePairMatch = trimmed.match(/^(.{1,40}?)\s*:\s*(.+?)\s*\/\s*(.{1,40}?)\s*:\s*(.+)$/);
+        if (doublePairMatch) {
+          pushLabelValueRow(doublePairMatch[1].trim(), doublePairMatch[2].trim());
+          pushLabelValueRow(doublePairMatch[3].trim(), doublePairMatch[4].trim());
+          return;
+        }
+
+        let colonIdx = trimmed.indexOf(':');
+        // เฉพาะบรรทัดที่มี ":" และความยาว label ไม่มากเกินไป ถือเป็นคู่ label/value จัดคนละฝั่ง
+        if (colonIdx > -1 && colonIdx < 40 && !trimmed.startsWith('(')) {
+          let label = trimmed.substring(0, colonIdx).trim();
+          let value = trimmed.substring(colonIdx + 1).trim();
+          pushLabelValueRow(label, value);
+        } else if (trimmed.startsWith('(***')) {
+          // บรรทัดรายละเอียดย่อย (เช่น หลังคลอด/NB/เด็กป่วย) — แสดงเล็ก สีอ่อน เยื้องเข้า
+          contents.push({ type: 'text', text: trimmed, color: '#9CA3AF', size: 'xxs', margin: 'xs', wrap: true });
+        } else {
+          contents.push({ type: 'text', text: trimmed, color: '#111827', size: 'xs', weight: 'bold', margin: 'sm', wrap: true });
+        }
+      });
+
+      return contents;
+    }
+
+    function buildFlexMessage(altText, title, subtitle, rawText, accentColor, headerIcon) {
+      let bodyContents = buildFlexBodyContents(rawText, accentColor);
+      const MAX_ROWS = 60; // กันบับเบิลยาวเกินไปกรณีรายงานมีรายละเอียดมาก
+      let truncated = bodyContents.length > MAX_ROWS;
+      if (truncated) {
+        bodyContents = bodyContents.slice(0, MAX_ROWS);
+        bodyContents.push({ type: 'separator', margin: 'md', color: '#E5E7EB' });
+        bodyContents.push({ type: 'text', text: '…ดูรายละเอียดฉบับเต็มจากข้อความที่คัดลอกไว้', color: '#9CA3AF', size: 'xxs', margin: 'md', wrap: true, style: 'italic' });
+      }
+      return {
+        type: 'flex',
+        altText: altText,
+        contents: {
+          type: 'bubble',
+          size: 'giga',
+          header: {
+            type: 'box', layout: 'vertical', backgroundColor: accentColor, paddingAll: '16px',
+            contents: [
+              { type: 'box', layout: 'baseline', spacing: 'sm', contents: [
+                { type: 'text', text: headerIcon, size: 'xl', color: '#FFFFFF', flex: 0 },
+                { type: 'text', text: title, color: '#FFFFFF', weight: 'bold', size: 'md', margin: 'sm', wrap: true }
+              ]},
+              { type: 'text', text: subtitle, color: '#FFFFFF', size: 'xs', margin: 'sm', wrap: true }
+            ]
+          },
+          body: {
+            type: 'box', layout: 'vertical', paddingAll: '16px', spacing: 'none',
+            contents: bodyContents
+          },
+          footer: {
+            type: 'box', layout: 'vertical', paddingAll: '12px', backgroundColor: '#F9FAFB',
+            contents: [
+              { type: 'text', text: '📋 ส่งจากระบบบันทึกข้อมูลเวรพยาบาลตรวจการ', size: 'xxs', color: '#9CA3AF', align: 'center', wrap: true }
+            ]
+          }
+        }
+      };
+    }
+
+    // ฟังก์ชันกลาง: เรียก shareTargetPicker พร้อม Flex Message ที่สร้างจากข้อความในกล่องที่ระบุ
+    function shareTextViaLine(elementId, options) {
+      const text = document.getElementById(elementId).value;
+      if (!text || !text.trim()) {
+        Swal.fire('ไม่มีข้อความให้แชร์', 'กรุณาตรวจสอบว่ามีข้อมูลในกล่องก่อนแชร์', 'warning');
+        return;
+      }
+      if (LIFF_ID === 'YOUR_LIFF_ID_HERE' || !LIFF_ID) {
+        Swal.fire({ icon: 'info', title: 'ยังไม่ได้ตั้งค่า LIFF ID', text: 'กรุณาตั้งค่า LIFF_ID ในโค้ดก่อนใช้งานฟีเจอร์ Share ไปไลน์', confirmButtonColor: '#06C755' });
+        return;
+      }
+      if (typeof liff === 'undefined' || !liffReady) {
+        Swal.fire({ icon: 'warning', title: 'LIFF ยังไม่พร้อมใช้งาน', text: 'กรุณาเปิดหน้านี้ผ่านแอป LINE หรือลิงก์ LIFF อีกครั้ง', confirmButtonColor: '#06C755' });
+        return;
+      }
+      if (!liff.isApiAvailable('shareTargetPicker')) {
+        Swal.fire({ icon: 'error', title: 'อุปกรณ์นี้ไม่รองรับ', text: 'ฟีเจอร์ Share ไปกลุ่มไลน์ใช้ได้เฉพาะบางเวอร์ชันของแอป LINE', confirmButtonColor: '#06C755' });
+        return;
+      }
+
+      const flexMsg = buildFlexMessage(options.altText, options.title, options.subtitle, text, options.accentColor, options.headerIcon);
+
+      Swal.fire({ title: 'กำลังเปิดหน้าเลือกผู้รับ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      liff.shareTargetPicker([flexMsg], { isMultiple: true })
+        .then(res => {
+          Swal.close();
+          if (res) {
+            Swal.fire({ icon: 'success', title: 'ส่งสำเร็จ!', text: 'แชร์ข้อความไปยังไลน์แล้ว', timer: 1500, showConfirmButton: false });
+          }
+          // res เป็น undefined เมื่อผู้ใช้กดยกเลิกหน้าเลือกผู้รับ — ไม่ต้องแจ้ง error
+        })
+        .catch(err => {
+          console.error('[shareTargetPicker] error:', err);
+          Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเปิดหน้าแชร์ไปไลน์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
+        });
+    }
+
+    // Share "ข้อความสรุปส่งกลุ่มไลน์" (กล่องที่ 1: ข้อมูลเวร/พยาบาลตรวจการ/แพทย์)
+    function shareLineSummaryToLine() {
+      shareTextViaLine('lineCopyText', {
+        altText: 'สรุปข้อมูลเวรประจำวัน',
+        title: 'สรุปข้อมูลเวรประจำวัน',
+        subtitle: 'ข้อมูลพยาบาลตรวจการและแพทย์เวร',
+        accentColor: '#EC4899',
+        headerIcon: '🏥'
+      });
+    }
+
+    // Share "ข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2)"
+    function shareDailyReportToLine() {
+      shareTextViaLine('reportCopyText', {
+        altText: 'สรุปรายงานประจำวัน (ส่งครั้งที่ 2)',
+        title: 'สรุปรายงานประจำวัน',
+        subtitle: 'ยอดผู้ป่วย / โรคเฝ้าระวัง / สถิติแยกตามตึก',
+        accentColor: '#10B981',
+        headerIcon: '📊'
+      });
+    }
+
     const SHIFT_TIME_LABEL = { 'เวรเช้า': '08.30 - 16.30 น.', 'เวรบ่าย': '16.30 - 00.30 น.', 'เวรดึก': '00.30 - 08.30 น.' };
 
     const REPORT_O2_COLS = [ '3/2 On Respirator', '3/2 On HFNC', '7/4 On Respirator', '7/4 On HFNC', '7/2 On HFNC', '7/6 On HFNC', '5/3 On HFNC', '5/4 On HFNC', '5/5 On HFNC', 'ICU On Respirator', 'ICU On HFNC', 'NICU On Respirator', 'NICU On HFNC' ];
@@ -731,11 +899,26 @@
       { label: 'DHF', keys: ['DHF'] }, { label: 'DF',  keys: ['DF'] }, { label: 'Influenza A,B', keys: ['Influenza A,B', 'Influenza A B', 'FLU'] }, { label: 'Acute Diarrhea', keys: ['Acute Diarrhea', 'AD'] }, { label: 'TB',  keys: ['TB', 'TB&MDR TB'] }, { label: 'HIV', keys: ['HIV'] }, { label: 'RSV', keys: ['RSV'] }, { label: 'PUI Covid-19', keys: ['PUI Covid-19', 'PUI'] }, { label: 'Confirm Covid-19', keys: ['Confirm Covid-19'] }, { label: 'Monkeypox', keys: ['Monkeypox', 'Mpox'] }
     ];
 
+    // สร้างรายละเอียดย่อย "หลังคลอด / NB / เด็กป่วย" ที่สโคปเฉพาะตึกนั้นๆ (กันจับคอลัมน์ข้ามตึกผิด)
+    function postpartumSubsFor(wardKeyword) {
+      return [
+        { partials: [wardKeyword, 'หลังคลอด'], label: 'หลังคลอด' },
+        { partials: [wardKeyword, 'nb'], label: 'NB', excludePartials: ['หลังคลอด','เด็กป่วย'] },
+        { partials: [wardKeyword, 'เด็กป่วย'], label: 'เด็กป่วย' }
+      ];
+    }
+
+    // โครงสร้างรายงานใหม่: จัดกลุ่มเว้นบรรทัดระหว่างกลุ่มตึก และใส่รายละเอียดย่อยใต้ 7/3, 7/5, LR/PP/NB เท่านั้น
     const REPORT_WARDS = [
-      { ward: 'ตึก 3/2' }, { ward: 'ตึก 3/3' }, { ward: 'ตึก 3/4' },
-      { ward: 'ตึก 3/5', subs: [ { partials: ['OBS'], label: 'OBS' }, { partials: ['NB'], label: 'NB', excludePartials: ['lr/pp/nb','หลังคลอด','เด็กป่วย'] }, { partials: ['เด็กป่วย'], label: 'เด็กป่วย', excludePartials: ['lr/pp/nb','หลังคลอด'] } ]},
-      { ward: 'ตึก 5/3' }, { ward: 'ตึก 5/4' }, { ward: 'ตึก 5/5' }, { ward: 'ตึก 7/2' }, { ward: 'ตึก 7/3' }, { ward: 'ตึก 7/4' }, { ward: 'ตึก 7/5' }, { ward: 'ตึก 7/6' }, { ward: 'ตึก ICU' }, { ward: 'ตึก NICU' },
-      { ward: 'ตึก LR/PP/NB', subs: [ { partials: ['lr/pp/nb','หลังคลอด'], label: 'หลังคลอด' }, { partials: ['lr/pp/nb','nb'], label: 'NB', excludePartials: ['หลังคลอด','เด็กป่วย'] }, { partials: ['lr/pp/nb','เด็กป่วย'], label: 'เด็กป่วย' } ]}
+      [ { ward: 'ตึก 3/2' }, { ward: 'ตึก 3/3' }, { ward: 'ตึก 3/4' }, { ward: 'ตึก 3/5' } ],
+      [ { ward: 'ตึก 5/3' }, { ward: 'ตึก 5/4' }, { ward: 'ตึก 5/5' } ],
+      [ { ward: 'ตึก 7/2' } ],
+      [ { ward: 'ตึก 7/3', subs: postpartumSubsFor('7/3') } ],
+      [ { ward: 'ตึก 7/4' } ],
+      [ { ward: 'ตึก 7/5', subs: postpartumSubsFor('7/5') } ],
+      [ { ward: 'ตึก 7/6' } ],
+      [ { ward: 'ตึก ICU' }, { ward: 'ตึก NICU' } ],
+      [ { ward: 'ตึก LR/PP/NB', subs: postpartumSubsFor('lr/pp/nb') } ]
     ];
 
     function findColByPartials(rec, partials, excludePartials) {
@@ -796,16 +979,18 @@
 
       lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${num(sumRec['รวมยอดผู้ป่วยในทั้งหมด']||0)} ราย`);
 
-      REPORT_WARDS.forEach(g => {
-        let v = num(sumRec[g.ward] || 0);
-        lines.push(`${g.ward} ${v} ราย`);
-        if (g.subs && g.subs.length) {
-          let parts = g.subs.map(s => {
-            let val = valByPartials(sumRec, s.partials, s.excludePartials);
-            return `${s.label} = ${val}`;
-          }).join(', ');
-          lines.push(`(***${parts} )`);
-        }
+      REPORT_WARDS.forEach(group => {
+        group.forEach(g => {
+          let v = num(sumRec[g.ward] || 0);
+          lines.push(`${g.ward} ${v} ราย`);
+          if (g.subs && g.subs.length) {
+            let parts = g.subs.map(s => {
+              let val = valByPartials(sumRec, s.partials, s.excludePartials);
+              return `${s.label} = ${val}`;
+            }).join(', ');
+            lines.push(`(***${parts} )`); // รายละเอียดย่อยอยู่คนละบรรทัดกับชื่อตึกเสมอ
+          }
+        });
       });
 
       return lines.join('\n');
@@ -1066,6 +1251,9 @@
             <button onclick="copyLineText()" class="mt-3 w-full bg-pink-500 text-white font-bold py-2.5 rounded-xl hover:bg-pink-600 focus:ring-2 focus:ring-pink-300 transition shadow-sm">
               <i class="fa-solid fa-copy mr-1"></i> คัดลอกข้อความ
             </button>
+            <button onclick="shareLineSummaryToLine()" class="mt-2 w-full bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
+              <i class="fa-brands fa-line text-lg"></i> Share สรุปไป Line
+            </button>
           </div>
         </div>
         <div class="mb-8">
@@ -1097,6 +1285,9 @@
             </button>
           </div>
           <textarea id="reportCopyText" class="w-full text-sm bg-white border border-green-100 rounded-lg p-3 text-gray-700 outline-none font-medium leading-relaxed" readonly>${esc(reportText)}</textarea>
+          <button onclick="shareDailyReportToLine()" class="mt-3 w-full bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
+            <i class="fa-brands fa-line text-lg"></i> Share สรุปรายงานไป Line กลุ่ม
+          </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
         </div>`;
       container.innerHTML = html;
@@ -2205,7 +2396,6 @@
 
         form.innerHTML += isSup
           ? `<div class="md:col-span-2 lg:col-span-2 bg-pink-50/40 border border-pink-100 rounded-2xl p-3">
-              <label class="font-bold ${labelColor} mb-2 block" title="${esc(header)}"><i class="fa-solid fa-user-shield mr-1"></i> พยาบาลตรวจการประจำเวร ${labelStar}</label>
               ${inputHtml}
             </div>`
           : `<div>
