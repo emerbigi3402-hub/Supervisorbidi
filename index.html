@@ -113,6 +113,8 @@
       #headerAddBtn { width: 100% !important; font-size: 1.2rem !important; padding: 1rem !important; justify-content: center !important; border-radius: 0.8rem !important; }
       #filterSection { display: flex !important; flex-direction: column !important; width: 100% !important; border: none !important; padding: 1rem 0 0 0 !important; margin: 0 !important; border-top: 2px solid #e5e7eb !important; }
       #filterSection select, #filterSection button { width: 100% !important; font-size: 1.2rem !important; padding: 1rem !important; min-height: 48px !important; margin-bottom: 0.5rem !important; border-radius: 0.8rem !important; }
+      #filterSection.hidden { display: none !important; } /* ✅ แก้ไข: ต้องมาทีหลังกฎ flex ด้านบน เพื่อให้ JS ซ่อนตัวกรองในหน้า "บันทึกข้อมูลรายวัน" ได้บนมือถือด้วย */
+      #headerAddBtnContainer.hidden, #headerAddBtn.hidden { display: none !important; }
 
       /* 3. แดชบอร์ด Header & ตัวกรอง */
       .bg-gradient-to-r { flex-direction: column !important; align-items: stretch !important; padding: 1.5rem !important; gap: 1.5rem !important; }
@@ -220,6 +222,15 @@
         word-wrap: break-word !important;
       }
       .bg-pink-50 button, .bg-green-50 button { font-size: 1.2rem !important; padding: 1rem !important; border-radius: 0.75rem !important; margin-top: 0.75rem !important; }
+      /* ✅ แก้ไข: ปุ่มคู่ของกล่องรายงานครั้งที่ 2 ต้องเล็กกว่าปุ่มทั่วไป เพื่อให้อยู่แถวเดียวกันพอดีบนมือถือ (id selector specificity สูงกว่า class ด้านบน) */
+      #copyDailyReportBtn, #shareDailyReportBtn {
+        font-size: 0.72rem !important;
+        padding: 0.65rem 0.4rem !important;
+        margin-top: 0 !important;
+        line-height: 1.2 !important;
+        gap: 0.35rem !important;
+      }
+      #copyDailyReportBtn i, #shareDailyReportBtn i { font-size: 0.85rem !important; }
 
       /* 6. จัดการ์ดแผนกและสถิติให้ขนาดเท่ากัน สวยงาม เป็นมืออาชีพ */
       #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6,
@@ -533,7 +544,7 @@
     // ==========================================
     // 📲 LINE LIFF (สำหรับปุ่ม Share รายงาน/ข้อความไปกลุ่มไลน์)
     // ==========================================
-    const LIFF_ID = '2007625222-ziw8Ty7N'; // ⚠️ รอใส่ LIFF ID จริงจาก LINE Developers Console
+    const LIFF_ID = 'YOUR_LIFF_ID_HERE'; // ⚠️ รอใส่ LIFF ID จริงจาก LINE Developers Console
     let liffReady = false;
     if (typeof liff !== 'undefined' && LIFF_ID && LIFF_ID !== 'YOUR_LIFF_ID_HERE') {
       liff.init({ liffId: LIFF_ID })
@@ -848,7 +859,18 @@
         return;
       }
       if (!liff.isApiAvailable('shareTargetPicker')) {
-        Swal.fire({ icon: 'error', title: 'อุปกรณ์นี้ไม่รองรับ', text: 'ฟีเจอร์ Share ไปกลุ่มไลน์ใช้ได้เฉพาะบางเวอร์ชันของแอป LINE', confirmButtonColor: '#06C755' });
+        let diag = `isInClient: ${liff.isInClient()}\nOS: ${liff.getOS ? liff.getOS() : '-'}\nLINE version: ${liff.getLineVersion ? liff.getLineVersion() : '-'}\nLIFF SDK version: ${liff.getVersion ? liff.getVersion() : '-'}`;
+        console.warn('[shareTargetPicker ใช้ไม่ได้] รายละเอียด:\n' + diag);
+        Swal.fire({
+          icon: 'error',
+          title: 'อุปกรณ์/เวอร์ชันนี้ยังไม่รองรับ',
+          html: `<div class="text-left text-sm">
+                   <p class="mb-2">ฟีเจอร์ Share ไปกลุ่มไลน์ต้องใช้แอป LINE เวอร์ชันที่รองรับ Share Target Picker</p>
+                   <p class="text-xs text-gray-500 mt-3 font-mono whitespace-pre-line">${diag.replace(/</g,'&lt;')}</p>
+                   <p class="text-xs text-gray-500 mt-2">กรุณาอัปเดตแอป LINE เป็นเวอร์ชันล่าสุดแล้วลองใหม่</p>
+                 </div>`,
+          confirmButtonColor: '#06C755'
+        });
         return;
       }
 
@@ -1276,18 +1298,18 @@
         </div>
 
         <div class="bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm mt-6 mb-4">
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3 border-b border-green-200 pb-2">
-            <h3 class="text-base md:text-lg font-bold text-green-700">
-              <i class="fa-brands fa-line text-green-500 text-xl mr-1"></i> ข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2)
-            </h3>
-            <button onclick="copyLineText('reportCopyText')" class="bg-green-500 text-white font-bold px-4 py-2 rounded-xl hover:bg-green-600 focus:ring-2 focus:ring-green-300 transition shadow-sm text-sm">
-              <i class="fa-solid fa-copy mr-1"></i> คัดลอกข้อความรายงาน
+          <h3 class="text-base md:text-lg font-bold text-green-700 mb-3 border-b border-green-200 pb-2">
+            <i class="fa-brands fa-line text-green-500 text-xl mr-1"></i> ข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2)
+          </h3>
+          <textarea id="reportCopyText" class="w-full text-sm bg-white border border-green-100 rounded-lg p-3 text-gray-700 outline-none font-medium leading-relaxed" readonly>${esc(reportText)}</textarea>
+          <div class="flex flex-row gap-2 mt-3">
+            <button id="copyDailyReportBtn" onclick="copyLineText('reportCopyText')" class="flex-1 bg-green-500 text-white font-bold py-2.5 rounded-xl hover:bg-green-600 focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2 text-sm md:text-base whitespace-nowrap">
+              <i class="fa-solid fa-copy"></i> คัดลอกข้อความรายงาน
+            </button>
+            <button id="shareDailyReportBtn" onclick="shareDailyReportToLine()" class="flex-1 bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2 text-[0.7rem] sm:text-sm md:text-base whitespace-nowrap">
+              <i class="fa-brands fa-line"></i> Share สรุปรายงานไป Line กลุ่ม
             </button>
           </div>
-          <textarea id="reportCopyText" class="w-full text-sm bg-white border border-green-100 rounded-lg p-3 text-gray-700 outline-none font-medium leading-relaxed" readonly>${esc(reportText)}</textarea>
-          <button onclick="shareDailyReportToLine()" class="mt-3 w-full bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
-            <i class="fa-brands fa-line text-lg"></i> Share สรุปรายงานไป Line กลุ่ม
-          </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
         </div>`;
       container.innerHTML = html;
