@@ -561,6 +561,10 @@
     // หมายเหตุ: liff.init() ต้องรอให้ LIFF SDK (<script src="...sdk.js">) โหลดเสร็จก่อนแน่นอน
     // จึงเรียกจาก initLiff() ภายใน window.onload เท่านั้น ไม่เรียกตอน parse script ตรงๆ
     // เพื่อป้องกัน race condition ที่ทำให้ liff เป็น undefined อยู่ตลอด แม้ SDK โหลดเสร็จแล้วก็ตาม
+    //
+    // 🔑 สำคัญ: ระบบนี้เป็นเว็บแอปหลายหน้า (ฟอร์มลงข้อมูล/แดชบอร์ด/ตาราง) ไม่ใช่หน้าเดี่ยวสำหรับแชร์อย่างเดียว
+    // จึง "ไม่" เรียก liff.login() ทันทีตอนโหลดหน้า (จะบังคับ login ทุกครั้งที่เข้าระบบ ทั้งที่ไม่ได้จะใช้ Share เลย)
+    // แต่จะเรียก login() แบบ lazy เฉพาะตอนกดปุ่ม Share เท่านั้น (ดูฟังก์ชัน ensureLiffLoggedIn ด้านล่าง)
     function initLiff() {
       if (typeof liff === 'undefined') {
         liffInitError = 'LIFF SDK โหลดไม่สำเร็จ (สคริปต์จาก static.line-scdn.net อาจถูกบล็อกหรือเน็ตช้า)';
@@ -576,12 +580,23 @@
         .then(() => {
           liffReady = true;
           liffInitError = null;
-          console.log('[LIFF] init สำเร็จ — isInClient:', liff.isInClient(), '| isLoggedIn:', liff.isLoggedIn());
+          console.log('[LIFF] init สำเร็จ — isInClient:', liff.isInClient(), '| isLoggedIn:', liff.isLoggedIn(), '| OS:', liff.getOS ? liff.getOS() : '-');
         })
         .catch(err => {
           liffInitError = (err && err.message) || String(err);
           console.error('[LIFF] init ไม่สำเร็จ:', err);
         });
+    }
+
+    // เรียกตอนกดปุ่ม Share เท่านั้น: ถ้ายังไม่ login จะพาไป login ก่อน (จะ redirect ออกจากหน้าแล้วเด้งกลับมาเอง)
+    // คืนค่า true = login แล้ว พร้อมใช้งานต่อ, false = กำลัง redirect ไป login (โค้ดหลังจากนี้ไม่ต้องรันต่อ)
+    function ensureLiffLoggedIn() {
+      if (!liff.isLoggedIn()) {
+        console.log('[LIFF] ยังไม่ login — กำลังพาไปหน้า login...');
+        liff.login({ redirectUri: location.href });
+        return false;
+      }
+      return true;
     }
 
     const API_ACTIONS = {
@@ -889,7 +904,6 @@
       if (typeof liff === 'undefined' || !liffReady) {
         // ลองเรียก initLiff() ใหม่อีกครั้งเผื่อกรณี SDK โหลดเสร็จช้ากว่า window.onload (เช่นเน็ตช้า)
         if (typeof liff !== 'undefined' && !liffReady) initLiff();
-        let detail = liffInitError ? `\n\nรายละเอียด: ${liffInitError}` : '';
         Swal.fire({
           icon: 'warning',
           title: 'LIFF ยังไม่พร้อมใช้งาน',
@@ -901,6 +915,28 @@
         });
         return;
       }
+
+      // ⚠️ shareTargetPicker ใช้ได้เฉพาะตอนเปิดผ่าน "แอป LINE" จริงๆ (in-app browser) เท่านั้น
+      // ถ้าเปิดผ่าน browser ทั่วไป (Chrome/Safari/PC) แม้จะ login LINE ไว้แล้วก็ใช้ไม่ได้ — เป็นข้อจำกัดของ LINE เอง ไม่ใช่บั๊ก
+      if (!liff.isInClient()) {
+        Swal.fire({
+          icon: 'info',
+          title: 'ต้องเปิดผ่านแอป LINE เท่านั้น',
+          html: `<div class="text-left text-sm">
+                   <p class="mb-2">ฟีเจอร์ Share ไปกลุ่มไลน์ใช้ได้เฉพาะตอนเปิดหน้านี้ผ่าน <b>แอป LINE</b> (กดลิงก์จากในแชทไลน์) เท่านั้น</p>
+                   <p class="mb-2">ขณะนี้เปิดผ่านเบราว์เซอร์ทั่วไป (Chrome/Safari/PC) ซึ่งไม่รองรับฟีเจอร์นี้ตามข้อจำกัดของ LINE</p>
+                   <p class="text-xs text-gray-500 mt-3">วิธีแก้: ส่งลิงก์ <code class="bg-gray-100 px-1 rounded break-all">https://liff.line.me/${esc(LIFF_ID)}</code> เข้าแชทไลน์ของตัวเอง แล้วกดเปิดจากในแชทนั้น</p>
+                 </div>`,
+          confirmButtonColor: '#06C755'
+        });
+        return;
+      }
+
+      // เปิดผ่านแอป LINE แล้ว (isInClient = true) แต่ยังไม่ login เข้า LIFF — พาไป login ก่อน แล้วค่อยกดปุ่ม Share ใหม่อีกครั้ง
+      if (!ensureLiffLoggedIn()) {
+        return; // กำลัง redirect ไปหน้า login อยู่ — โค้ดส่วนที่เหลือไม่ต้องรันต่อในรอบนี้
+      }
+
       if (!liff.isApiAvailable('shareTargetPicker')) {
         let diag = `isInClient: ${liff.isInClient()}\nOS: ${liff.getOS ? liff.getOS() : '-'}\nLINE version: ${liff.getLineVersion ? liff.getLineVersion() : '-'}\nLIFF SDK version: ${liff.getVersion ? liff.getVersion() : '-'}`;
         console.warn('[shareTargetPicker ใช้ไม่ได้] รายละเอียด:\n' + diag);
