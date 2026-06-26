@@ -232,15 +232,6 @@
         word-wrap: break-word !important;
       }
       .bg-pink-50 button, .bg-green-50 button { font-size: 1.2rem !important; padding: 1rem !important; border-radius: 0.75rem !important; margin-top: 0.75rem !important; }
-      /* ✅ แก้ไข: ปุ่มคู่ของกล่องรายงานครั้งที่ 2 ต้องเล็กกว่าปุ่มทั่วไป เพื่อให้อยู่แถวเดียวกันพอดีบนมือถือ (id selector specificity สูงกว่า class ด้านบน) */
-      #copyDailyReportBtn, #shareDailyReportBtn {
-        font-size: 0.72rem !important;
-        padding: 0.65rem 0.4rem !important;
-        margin-top: 0 !important;
-        line-height: 1.2 !important;
-        gap: 0.35rem !important;
-      }
-      #copyDailyReportBtn i, #shareDailyReportBtn i { font-size: 0.85rem !important; }
 
       /* 6. จัดการ์ดแผนกและสถิติให้ขนาดเท่ากัน สวยงาม เป็นมืออาชีพ */
       #daily-record-content .grid.grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4.xl\:grid-cols-6,
@@ -814,31 +805,38 @@
         });
       }
 
-      lines.forEach(line => {
-        let trimmed = line.trim();
+      let i = 0;
+      while (i < lines.length) {
+        let trimmed = lines[i].trim();
         if (!trimmed) {
           blankStreak++;
           if (blankStreak === 1 && contents.length) {
             contents.push({ type: 'separator', margin: 'md', color: '#E5E7EB' });
           }
-          return;
+          i++;
+          continue;
         }
         blankStreak = 0;
 
         // กรณีพิเศษ: บรรทัดมี 2 คู่ label:value คั่นด้วย " / " (เช่น พยาบาลตรวจการ Staff/Train ในบรรทัดเดียว)
-        // จับคู่แบบ "ข้อความก่อน : ข้อความ / ข้อความก่อน : ข้อความ" แยกเป็น 2 แถว
         let doublePairMatch = trimmed.match(/^(.{1,40}?)\s*:\s*(.+?)\s*\/\s*(.{1,40}?)\s*:\s*(.+)$/);
         if (doublePairMatch) {
           pushLabelValueRow(doublePairMatch[1].trim(), doublePairMatch[2].trim());
           pushLabelValueRow(doublePairMatch[3].trim(), doublePairMatch[4].trim());
-          return;
+          i++;
+          continue;
         }
 
         let colonIdx = trimmed.indexOf(':');
-        // เฉพาะบรรทัดที่มี ":" และความยาว label ไม่มากเกินไป ถือเป็นคู่ label/value จัดคนละฝั่ง
         if (colonIdx > -1 && colonIdx < 40 && !trimmed.startsWith('(')) {
           let label = trimmed.substring(0, colonIdx).trim();
           let value = trimmed.substring(colonIdx + 1).trim();
+          // ✅ แก้ไข: ถ้าบรรทัดนี้มีแต่ label จบด้วย ":" ไม่มีค่าตามหลัง (เช่น "พยาบาลตรวจการ (Staff) : ")
+          // ค่าจริงจะอยู่บรรทัดถัดไปแทน (รูปแบบ "label :\nvalue") — ดึงบรรทัดถัดไปมาเป็นค่าคู่กัน
+          if (!value && i + 1 < lines.length && lines[i + 1].trim()) {
+            value = lines[i + 1].trim();
+            i++; // ข้ามบรรทัดค่าที่ดึงมาใช้แล้ว ไม่ให้ถูกประมวลผลซ้ำเป็นบรรทัดแยก
+          }
           pushLabelValueRow(label, value);
         } else if (trimmed.startsWith('(***')) {
           // บรรทัดรายละเอียดย่อย (เช่น หลังคลอด/NB/เด็กป่วย) — แสดงเล็ก สีอ่อน เยื้องเข้า
@@ -846,7 +844,8 @@
         } else {
           contents.push({ type: 'text', text: trimmed, color: '#111827', size: 'xs', weight: 'bold', margin: 'sm', wrap: true });
         }
-      });
+        i++;
+      }
 
       return contents;
     }
@@ -1382,14 +1381,12 @@
             <i class="fa-brands fa-line text-green-500 text-xl mr-1"></i> ข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2)
           </h3>
           <textarea id="reportCopyText" class="w-full text-sm bg-white border border-green-100 rounded-lg p-3 text-gray-700 outline-none font-medium leading-relaxed" readonly>${esc(reportText)}</textarea>
-          <div class="flex flex-row gap-2 mt-3">
-            <button id="copyDailyReportBtn" onclick="copyLineText('reportCopyText')" class="flex-1 bg-green-500 text-white font-bold py-2.5 rounded-xl hover:bg-green-600 focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2 text-sm md:text-base whitespace-nowrap">
-              <i class="fa-solid fa-copy"></i> คัดลอกข้อความรายงาน
-            </button>
-            <button id="shareDailyReportBtn" onclick="shareDailyReportToLine()" class="flex-1 bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2 text-[0.7rem] sm:text-sm md:text-base whitespace-nowrap">
-              <i class="fa-brands fa-line"></i> Share สรุปรายงานไป Line กลุ่ม
-            </button>
-          </div>
+          <button id="copyDailyReportBtn" onclick="copyLineText('reportCopyText')" class="mt-3 w-full bg-green-500 text-white font-bold py-2.5 rounded-xl hover:bg-green-600 focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-copy"></i> คัดลอกข้อความรายงาน
+          </button>
+          <button id="shareDailyReportBtn" onclick="shareDailyReportToLine()" class="mt-2 w-full bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
+            <i class="fa-brands fa-line text-lg"></i> Share สรุปรายงานไป Line กลุ่ม
+          </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
         </div>`;
       container.innerHTML = html;
