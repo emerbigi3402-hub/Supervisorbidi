@@ -584,7 +584,7 @@
     function ensureLiffLoggedIn() {
       if (!liff.isLoggedIn()) {
         console.log('[LIFF] ยังไม่ login — กำลังพาไปหน้า login...');
-        liff.login({ redirectUri: location.href });
+        liff.login();
         return false;
       }
       return true;
@@ -915,29 +915,15 @@
         return;
       }
 
-      // ⚠️ shareTargetPicker ใช้ได้เฉพาะตอนเปิดผ่าน "แอป LINE" จริงๆ (in-app browser) เท่านั้น
-      // ถ้าเปิดผ่าน browser ทั่วไป (Chrome/Safari/PC) แม้จะ login LINE ไว้แล้วก็ใช้ไม่ได้ — เป็นข้อจำกัดของ LINE เอง ไม่ใช่บั๊ก
-      if (!liff.isInClient()) {
-        Swal.fire({
-          icon: 'info',
-          title: 'ต้องเปิดผ่านแอป LINE เท่านั้น',
-          html: `<div class="text-left text-sm">
-                   <p class="mb-2">ฟีเจอร์ Share ไปกลุ่มไลน์ใช้ได้เฉพาะตอนเปิดหน้านี้ผ่าน <b>แอป LINE</b> (กดลิงก์จากในแชทไลน์) เท่านั้น</p>
-                   <p class="mb-2">ขณะนี้เปิดผ่านเบราว์เซอร์ทั่วไป (Chrome/Safari/PC) ซึ่งไม่รองรับฟีเจอร์นี้ตามข้อจำกัดของ LINE</p>
-                   <p class="text-xs text-gray-500 mt-3">วิธีแก้: ส่งลิงก์ <code class="bg-gray-100 px-1 rounded break-all">https://liff.line.me/${esc(LIFF_ID)}</code> เข้าแชทไลน์ของตัวเอง แล้วกดเปิดจากในแชทนั้น</p>
-                 </div>`,
-          confirmButtonColor: '#06C755'
-        });
-        return;
-      }
-
-      // เปิดผ่านแอป LINE แล้ว (isInClient = true) แต่ยังไม่ login เข้า LIFF — พาไป login ก่อน แล้วค่อยกดปุ่ม Share ใหม่อีกครั้ง
+      // เปิดผ่าน LIFF แล้ว แต่ยังไม่ login เข้า LIFF — พาไป login ก่อน แล้วค่อยกดปุ่ม Share ใหม่อีกครั้ง
+      // (อ้างอิงโฟลว์จากโค้ดตัวอย่างที่ใช้งานได้จริง: login() ก่อน แล้วปล่อยให้ isApiAvailable เป็นตัวตัดสินสุดท้ายจุดเดียว
+      //  ไม่เช็ค isInClient() ซ้ำเพราะอาจรายงานผลไม่ตรงกับความเป็นจริงในบางบริบท ทำให้ปิดกั้นเคสที่ใช้ได้จริงไปด้วย)
       if (!ensureLiffLoggedIn()) {
         return; // กำลัง redirect ไปหน้า login อยู่ — โค้ดส่วนที่เหลือไม่ต้องรันต่อในรอบนี้
       }
 
       if (!liff.isApiAvailable('shareTargetPicker')) {
-        let diag = `isInClient: ${liff.isInClient()}\nOS: ${liff.getOS ? liff.getOS() : '-'}\nLINE version: ${liff.getLineVersion ? liff.getLineVersion() : '-'}\nLIFF SDK version: ${liff.getVersion ? liff.getVersion() : '-'}`;
+        let diag = `isInClient: ${liff.isInClient()}\nisLoggedIn: ${liff.isLoggedIn()}\nOS: ${liff.getOS ? liff.getOS() : '-'}\nLINE version: ${liff.getLineVersion ? liff.getLineVersion() : '-'}\nLIFF SDK version: ${liff.getVersion ? liff.getVersion() : '-'}\nURL: ${location.href}`;
         console.warn('[shareTargetPicker ใช้ไม่ได้] รายละเอียด:\n' + diag);
         Swal.fire({
           icon: 'error',
@@ -945,7 +931,7 @@
           html: `<div class="text-left text-sm">
                    <p class="mb-2">ฟีเจอร์ Share ไปกลุ่มไลน์ต้องใช้แอป LINE เวอร์ชันที่รองรับ Share Target Picker</p>
                    <p class="text-xs text-gray-500 mt-3 font-mono whitespace-pre-line">${diag.replace(/</g,'&lt;')}</p>
-                   <p class="text-xs text-gray-500 mt-2">กรุณาอัปเดตแอป LINE เป็นเวอร์ชันล่าสุดแล้วลองใหม่</p>
+                   <p class="text-xs text-gray-500 mt-2">กรุณาอัปเดตแอป LINE เป็นเวอร์ชันล่าสุดแล้วลองใหม่ หรือเปิดผ่านลิงก์ liff.line.me จากในแชทไลน์</p>
                  </div>`,
           confirmButtonColor: '#06C755'
         });
