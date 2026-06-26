@@ -881,7 +881,7 @@
         altText: altText,
         contents: {
           type: 'bubble',
-          size: 'kilo', // ✅ แก้ไข: ลดจาก giga เป็น kilo ไม่ให้การ์ดกว้างล้นจอแชทบนมือถือ
+          size: 'mega', // ✅ แก้ไข: ขยายจาก kilo เป็น mega ให้การ์ดใหญ่ขึ้น อ่านง่ายขึ้น แต่ยังไม่เต็มจอแบบ giga
           header: {
             type: 'box', layout: 'vertical', backgroundColor: accentColor, paddingAll: '16px',
             contents: [
@@ -937,13 +937,23 @@
       }
 
       // เปิดผ่าน LIFF แล้ว แต่ยังไม่ login เข้า LIFF — พาไป login ก่อน แล้วค่อยกดปุ่ม Share ใหม่อีกครั้ง
-      // (อ้างอิงโฟลว์จากโค้ดตัวอย่างที่ใช้งานได้จริง: login() ก่อน แล้วปล่อยให้ isApiAvailable เป็นตัวตัดสินสุดท้ายจุดเดียว
-      //  ไม่เช็ค isInClient() ซ้ำเพราะอาจรายงานผลไม่ตรงกับความเป็นจริงในบางบริบท ทำให้ปิดกั้นเคสที่ใช้ได้จริงไปด้วย)
       if (!ensureLiffLoggedIn()) {
         return; // กำลัง redirect ไปหน้า login อยู่ — โค้ดส่วนที่เหลือไม่ต้องรันต่อในรอบนี้
       }
 
       if (!liff.isApiAvailable('shareTargetPicker')) {
+        // ⚠️ เคสนี้พบว่า: บนมือถือที่ล็อกอินแอป LINE ค้างไว้อยู่แล้ว liff.isLoggedIn() จะเป็น true ทันที
+        // โดยไม่ได้ผ่านขั้นตอน LIFF login flow ที่สมบูรณ์ (ต่างจาก PC ที่ไม่มี session ค้าง จึงต้อง login ใหม่ผ่าน flow ที่ถูกต้องเสมอ)
+        // ทำให้ isApiAvailable ยังเป็น false ทั้งที่ login อยู่แล้ว — ลองบังคับ logout แล้ว login ใหม่ให้ผ่าน flow ที่สมบูรณ์ก่อนสรุปว่าใช้ไม่ได้จริง
+        if (!sessionStorage.getItem('liffReloginAttempted')) {
+          sessionStorage.setItem('liffReloginAttempted', '1');
+          console.log('[LIFF] isApiAvailable เป็น false ทั้งที่ login อยู่แล้ว — ลอง logout แล้ว login ใหม่ผ่าน LIFF flow ที่สมบูรณ์');
+          liff.logout();
+          liff.login();
+          return;
+        }
+        sessionStorage.removeItem('liffReloginAttempted');
+
         let diag = `isInClient: ${liff.isInClient()}\nisLoggedIn: ${liff.isLoggedIn()}\nOS: ${liff.getOS ? liff.getOS() : '-'}\nLINE version: ${liff.getLineVersion ? liff.getLineVersion() : '-'}\nLIFF SDK version: ${liff.getVersion ? liff.getVersion() : '-'}\nURL: ${location.href}`;
         console.warn('[shareTargetPicker ใช้ไม่ได้] รายละเอียด:\n' + diag);
         Swal.fire({
@@ -958,6 +968,7 @@
         });
         return;
       }
+      sessionStorage.removeItem('liffReloginAttempted'); // ใช้งานได้ปกติแล้ว เคลียร์สถานะการลองใหม่ทิ้ง
 
       const flexMsg = buildFlexMessage(options.altText, options.title, options.subtitle, text, options.accentColor, options.headerIcon);
 
