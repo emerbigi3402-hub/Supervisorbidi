@@ -795,11 +795,28 @@
       let contents = [];
       let blankStreak = 0;
 
+      // เลือกไอคอนให้เหมาะกับ label แต่ละแถว เพื่อความสวยงามและอ่านง่ายขึ้น
+      function iconForLabel(label) {
+        let l = label.toLowerCase();
+        if (label.includes('วันที่')) return '📅';
+        if (label.includes('เวร') && !label.includes('แพทย์')) return '🕐';
+        if (label.includes('Staff')) return '👩‍⚕️';
+        if (label.includes('Train')) return '🎓';
+        if (label.includes('แพทย์')) return '👨‍⚕️';
+        if (label.includes('Respirator')) return '🫁';
+        if (label.includes('HFNC')) return '💨';
+        if (label.includes('ตึก')) return '🏥';
+        if (label.includes('รวมยอด')) return '📊';
+        if (['DHF','DF','Influenza','Acute Diarrhea','TB','HIV','RSV','Covid','Monkeypox'].some(k => label.includes(k))) return '🦠';
+        return '▫️';
+      }
+
       function pushLabelValueRow(label, value) {
         contents.push({
           type: 'box', layout: 'baseline', spacing: 'sm', margin: 'sm',
           contents: [
-            { type: 'text', text: label, color: '#6B7280', size: 'xs', flex: 4, wrap: true },
+            { type: 'text', text: iconForLabel(label), size: 'xs', flex: 0 },
+            { type: 'text', text: label, color: '#6B7280', size: 'xs', flex: 4, wrap: true, margin: 'xs' },
             { type: 'text', text: value || '-', color: '#111827', size: 'xs', weight: 'bold', flex: 6, wrap: true }
           ]
         });
@@ -839,8 +856,8 @@
           }
           pushLabelValueRow(label, value);
         } else if (trimmed.startsWith('(***')) {
-          // บรรทัดรายละเอียดย่อย (เช่น หลังคลอด/NB/เด็กป่วย) — แสดงเล็ก สีอ่อน เยื้องเข้า
-          contents.push({ type: 'text', text: trimmed, color: '#9CA3AF', size: 'xxs', margin: 'xs', wrap: true });
+          // บรรทัดรายละเอียดย่อย (เช่น หลังคลอด/NB/เด็กป่วย) — สีดำชัดเจนปกติตามที่ต้องการ (ไม่ใช่สีเทาอีกต่อไป)
+          contents.push({ type: 'text', text: trimmed, color: '#111827', size: 'xxs', margin: 'xs', wrap: true });
         } else {
           contents.push({ type: 'text', text: trimmed, color: '#111827', size: 'xs', weight: 'bold', margin: 'sm', wrap: true });
         }
@@ -864,7 +881,7 @@
         altText: altText,
         contents: {
           type: 'bubble',
-          size: 'giga',
+          size: 'kilo', // ✅ แก้ไข: ลดจาก giga เป็น kilo ไม่ให้การ์ดกว้างล้นจอแชทบนมือถือ
           header: {
             type: 'box', layout: 'vertical', backgroundColor: accentColor, paddingAll: '16px',
             contents: [
@@ -880,9 +897,13 @@
             contents: bodyContents
           },
           footer: {
-            type: 'box', layout: 'vertical', paddingAll: '12px', backgroundColor: '#F9FAFB',
+            type: 'box', layout: 'vertical', paddingAll: '12px', spacing: 'sm', backgroundColor: '#F9FAFB',
             contents: [
-              { type: 'text', text: '📋 ส่งจากระบบบันทึกข้อมูลเวรพยาบาลตรวจการ', size: 'xxs', color: '#9CA3AF', align: 'center', wrap: true }
+              {
+                type: 'button', style: 'primary', height: 'sm', color: '#06C755',
+                action: { type: 'uri', label: '🔗 แชร์ต่อไปกลุ่มอื่น', uri: `https://liff.line.me/${LIFF_ID}` }
+              },
+              { type: 'text', text: '📋 ส่งจากระบบบันทึกข้อมูลเวรพยาบาลตรวจการ', size: 'xxs', color: '#9CA3AF', align: 'center', wrap: true, margin: 'sm' }
             ]
           }
         }
