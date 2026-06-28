@@ -1259,7 +1259,6 @@
             const currentSelectedYear = yearSelect.value;
             let yearsList = (globalData.dropdowns && globalData.dropdowns.years) ? globalData.dropdowns.years : [];
             yearSelect.innerHTML = `<option value="all">ปีทั้งหมด</option>` + yearsList.map(year => `<option value="${year}">${year}</option>`).join('');
-            const wasFirstLoad = isFirstLoad; // ✅ เก็บค่าไว้ก่อนถูกตั้งเป็น false ด้านล่าง ใช้เช็คว่าควร trigger auto-share หรือไม่
             if (isFirstLoad) {
               const currentYear = new Date().getFullYear() + 543;
               yearSelect.value = yearsList.includes(currentYear) ? currentYear : (yearsList[0] || currentYear);
@@ -1273,10 +1272,6 @@
               else renderTable();
             }
             Swal.close();
-            if (wasFirstLoad) {
-              autoShareDataReady = true; // ✅ ข้อมูลพร้อมแล้ว (เฉพาะตอนโหลดครั้งแรกของหน้า ไม่ใช่ตอน refetch อื่นๆ)
-              tryAutoShare(); // เช็คว่าพร้อม auto-share หรือยัง (รออีกฝั่งคือ LIFF init เสร็จด้วย)
-            }
           } catch (error) { console.error(error); Swal.fire('เกิดข้อผิดพลาดในการโหลดข้อมูล', error.message, 'error'); }
         })
         .withFailureHandler(err => {
