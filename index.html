@@ -546,6 +546,8 @@
     // 📲 LINE LIFF (สำหรับปุ่ม Share รายงาน/ข้อความไปกลุ่มไลน์)
     // ==========================================
     const LIFF_ID = '2007625222-ziw8Ty7N';
+    // ⚠️ LIFF App ตัวใหม่ที่สร้างแยกสำหรับหน้า share.html (auto-share) — ใส่ LIFF ID ที่ได้จาก LINE Developers Console
+    const SHARE_LIFF_ID = '2007625222-lfvooeW5';
     let liffReady = false;
     let liffInitError = null;
 
@@ -572,8 +574,6 @@
           liffReady = true;
           liffInitError = null;
           console.log('[LIFF] init สำเร็จ — isInClient:', liff.isInClient(), '| isLoggedIn:', liff.isLoggedIn(), '| OS:', liff.getOS ? liff.getOS() : '-');
-          autoShareLiffReady = true;
-          tryAutoShare(); // ✅ เช็คว่าพร้อม auto-share หรือยัง (รออีกฝั่งคือข้อมูลโหลดเสร็จด้วย)
         })
         .catch(err => {
           liffInitError = (err && err.message) || String(err);
@@ -593,57 +593,11 @@
     }
 
     // ==========================================================================
-    // 🔗 Auto-Share ผ่าน URL parameter (?autoshare=line หรือ ?autoshare=report)
-    // เปิดลิงก์นี้แล้วระบบจะแชร์ Flex ทันทีอัตโนมัติ ไม่ต้องกดปุ่มเองในหน้าเว็บ
-    // ตัวอย่าง: https://liff.line.me/2007625222-ziw8Ty7N?autoshare=line
+    // 🔗 ปุ่ม footer ใน Flex Message ("Share to Line") ลิงก์ไปหน้า auto-share แยกต่างหาก
+    // (หน้าใหม่ share.html ทำงานเร็วกว่า เพราะดึง Flex สำเร็จรูปจาก Apps Script ตรงๆ ไม่ต้องโหลดทั้งระบบ)
     // ==========================================================================
-    let autoShareDataReady = false;   // true เมื่อ fetchData() โหลดข้อมูลเสร็จแล้ว
-    let autoShareLiffReady = false;   // true เมื่อ initLiff() เสร็จแล้ว (ไม่ว่าจะ login หรือยัง)
-    let autoShareTriggered = false;   // กันยิงแชร์ซ้ำสองรอบ
-
-    function getAutoShareParam() {
-      return new URLSearchParams(location.search).get('autoshare'); // คืนค่า 'line' / 'report' / null
-    }
-
-    // เรียกทุกครั้งที่สถานะใดสถานะหนึ่ง (ข้อมูลพร้อม / LIFF พร้อม) เปลี่ยนแปลง เพื่อเช็คว่าพร้อมยิง auto-share หรือยัง
-    function tryAutoShare() {
-      const mode = getAutoShareParam();
-      if (!mode || autoShareTriggered) return;
-      if (!autoShareDataReady || !autoShareLiffReady) return; // รอให้พร้อมทั้งสองอย่างก่อน
-
-      autoShareTriggered = true;
-      console.log('[AutoShare] ข้อมูลและ LIFF พร้อมแล้ว — เริ่มแชร์อัตโนมัติ mode =', mode);
-
-      if (mode === 'line') {
-        shareLineSummaryToLine();
-      } else if (mode === 'report') {
-        shareDailyReportToLine();
-      } else {
-        console.warn('[AutoShare] ไม่รู้จัก mode:', mode);
-      }
-    }
-
-    // สร้างลิงก์ auto-share แบบเต็ม สำหรับคัดลอกไปใช้ (ปักหมุดในแชท/ปุ่มลัด ฯลฯ)
     function buildAutoShareLink(mode) {
-      return `https://liff.line.me/${LIFF_ID}?autoshare=${mode}`;
-    }
-
-    // คัดลอกลิงก์ auto-share ไปยัง clipboard พร้อมแจ้งผู้ใช้
-    function copyAutoShareLink(mode) {
-      const link = buildAutoShareLink(mode);
-      navigator.clipboard.writeText(link).then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'คัดลอกลิงก์แล้ว',
-          html: `<div class="text-left text-sm">
-                   <p class="mb-2">เปิดลิงก์นี้จากในแชทไลน์ จะแชร์ ${mode === 'line' ? 'ข้อความสรุปส่งกลุ่มไลน์' : 'ข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2)'} แบบอัตโนมัติทันที ไม่ต้องกดปุ่มอะไรเพิ่ม</p>
-                   <p class="text-xs text-gray-500 font-mono break-all bg-gray-100 p-2 rounded">${esc(link)}</p>
-                 </div>`,
-          confirmButtonColor: '#06C755'
-        });
-      }).catch(() => {
-        Swal.fire('คัดลอกไม่สำเร็จ', 'กรุณาคัดลอกลิงก์นี้ด้วยตัวเอง: ' + link, 'warning');
-      });
+      return `https://liff.line.me/${SHARE_LIFF_ID}?mode=${mode}`;
     }
 
     const API_ACTIONS = {
@@ -1439,9 +1393,6 @@
             <button onclick="shareLineSummaryToLine()" class="mt-2 w-full bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
               <i class="fa-brands fa-line text-lg"></i> Share สรุปไป Line
             </button>
-            <button onclick="copyAutoShareLink('line')" class="mt-2 w-full bg-white border border-pink-300 text-pink-600 font-semibold py-2 rounded-xl hover:bg-pink-50 transition shadow-sm flex items-center justify-center gap-2 text-sm">
-              <i class="fa-solid fa-link"></i> คัดลอกลิงก์ Auto-Share
-            </button>
           </div>
         </div>
         <div class="mb-8">
@@ -1473,9 +1424,6 @@
           </button>
           <button id="shareDailyReportBtn" onclick="shareDailyReportToLine()" class="mt-2 w-full bg-[#06C755] text-white font-bold py-2.5 rounded-xl hover:bg-[#05a847] focus:ring-2 focus:ring-green-300 transition shadow-sm flex items-center justify-center gap-2">
             <i class="fa-brands fa-line text-lg"></i> Share สรุปรายงานไป Line กลุ่ม
-          </button>
-          <button onclick="copyAutoShareLink('report')" class="mt-2 w-full bg-white border border-green-300 text-green-600 font-semibold py-2 rounded-xl hover:bg-green-50 transition shadow-sm flex items-center justify-center gap-2 text-sm">
-            <i class="fa-solid fa-link"></i> คัดลอกลิงก์ Auto-Share
           </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
         </div>`;
