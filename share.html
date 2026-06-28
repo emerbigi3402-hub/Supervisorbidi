@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>แชร์ข้อมูลเวรพยาบาลตรวจการ</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Sarabun", "Noto Sans Thai", sans-serif;
+    background: #F8FAFC; color: #0F172A;
+  }
+  .card {
+    max-width: 360px; width: calc(100% - 32px); padding: 28px 24px;
+    background: #FFFFFF; border-radius: 20px; box-shadow: 0 4px 20px rgba(15,23,42,0.08);
+    text-align: center;
+  }
+  h1 { font-size: 18px; margin: 0 0 6px; }
+  .sub { font-size: 13px; color: #64748B; margin-bottom: 20px; }
+  .spinner {
+    width: 36px; height: 36px; margin: 8px auto 16px;
+    border: 3px solid #E2E8F0; border-top-color: #0EA5E9; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  button {
+    width: 100%; padding: 14px; border: 0; border-radius: 12px;
+    font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+    background: #0EA5E9; color: #fff;
+  }
+  button.ghost { background: #E2E8F0; color: #0F172A; }
+  .msg-ok  { color: #16A34A; font-size: 14px; margin-top: 10px; }
+  .msg-err { color: #DC2626; font-size: 14px; margin-top: 10px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 id="title">เตรียมหน้าต่างแชร์...</h1>
+  <div class="sub" id="period"></div>
+  <div class="spinner" id="spinner"></div>
+
+  <div id="actions" class="hidden">
+    <button id="btnRetry">ลองอีกครั้ง</button>
+    <button id="btnClose" class="ghost">ปิด</button>
+  </div>
+
+  <div id="okMsg"  class="msg-ok  hidden">ส่งสำเร็จ ✓</div>
+  <div id="errMsg" class="msg-err hidden"></div>
+</div>
+
+<script>
+  // ⚠️ ใส่ LIFF ID ของ LIFF App ใหม่ที่สร้างแยกสำหรับหน้านี้ (Endpoint URL ต้องตั้งเป็น URL ของหน้านี้ตรงๆ)
+  const LIFF_ID      = '2007625222-lfvooeW5';
+  // ⚠️ ใช้ Web App URL เดียวกับระบบหลัก (GAS_WEB_APP_URL ใน index.html)
+  const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwvcP4hBVE6bUi0zM9_8pJ1bNSwZtqfSIvEO2rHq2vycReCSITPD7ZASYEppV4RWEEk/exec';
+
+  const $ = (id) => document.getElementById(id);
+
+  function show(id) { $(id).classList.remove('hidden'); }
+  function hide(id) { $(id).classList.add('hidden'); }
+
+  // mode = 'line' (ข้อความสรุปส่งกลุ่มไลน์ สั้น) หรือ 'report' (รายงานประจำวัน ยาว)
+  function getMode() {
+    return new URLSearchParams(location.search).get('mode') || 'line';
+  }
+  function modeLabel(mode) {
+    return mode === 'report' ? 'รายงานประจำวัน (ส่งครั้งที่ 2)' : 'สรุปข้อมูลเวรประจำวัน';
+  }
+
+  async function fetchFlex(mode) {
+    const url = GAS_ENDPOINT + '?action=flexData&mode=' + encodeURIComponent(mode);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('โหลดข้อมูลล้มเหลว (' + res.status + ')');
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'โหลดข้อมูลล้มเหลว');
+    return json.data; // Flex Message JSON สำเร็จรูปจาก Apps Script
+  }
+
+  async function autoShare() {
+    const mode = getMode();
+    $('period').textContent = modeLabel(mode);
+
+    try {
+      const flex = await fetchFlex(mode);
+      $('title').textContent = 'เลือกผู้รับ...';
+
+      if (!liff.isApiAvailable('shareTargetPicker')) {
+        throw new Error('อุปกรณ์ไม่รองรับ — โปรดเปิดใน LINE app');
+      }
+
+      const result = await liff.shareTargetPicker([flex], { isMultiple: true });
+
+      hide('spinner');
+      $('title').textContent = 'ส่งสำเร็จ ✓';
+      show('okMsg');
+
+      setTimeout(() => { if (liff.closeWindow) liff.closeWindow(); }, 1500);
+
+    } catch (e) {
+      hide('spinner');
+      const msg = (e && e.message) ? e.message : String(e);
+
+      if (/cancel/i.test(msg) || msg === 'undefined') {
+        if (liff.closeWindow) liff.closeWindow();
+        return;
+      }
+
+      $('title').textContent = 'แชร์ไม่สำเร็จ';
+      $('errMsg').textContent = msg;
+      show('errMsg');
+      show('actions');
+    }
+  }
+
+  $('btnRetry').addEventListener('click', () => {
+    hide('actions'); hide('errMsg'); show('spinner');
+    $('title').textContent = 'เตรียมหน้าต่างแชร์...';
+    autoShare();
+  });
+  $('btnClose').addEventListener('click', () => liff.closeWindow && liff.closeWindow());
+
+  (async () => {
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) { liff.login(); return; }
+      await autoShare();
+    } catch (e) {
+      hide('spinner');
+      $('title').textContent = 'เริ่ม LIFF ไม่สำเร็จ';
+      $('errMsg').textContent = (e && e.message) || String(e);
+      show('errMsg');
+      show('actions');
+    }
+  })();
+</script>
+</body>
+</html>
