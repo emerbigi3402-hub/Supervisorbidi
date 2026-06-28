@@ -554,10 +554,6 @@
     // หมายเหตุ: liff.init() ต้องรอให้ LIFF SDK (<script src="...sdk.js">) โหลดเสร็จก่อนแน่นอน
     // จึงเรียกจาก initLiff() ภายใน window.onload เท่านั้น ไม่เรียกตอน parse script ตรงๆ
     // เพื่อป้องกัน race condition ที่ทำให้ liff เป็น undefined อยู่ตลอด แม้ SDK โหลดเสร็จแล้วก็ตาม
-    //
-    // 🔑 สำคัญ: ระบบนี้เป็นเว็บแอปหลายหน้า (ฟอร์มลงข้อมูล/แดชบอร์ด/ตาราง) ไม่ใช่หน้าเดี่ยวสำหรับแชร์อย่างเดียว
-    // จึง "ไม่" เรียก liff.login() ทันทีตอนโหลดหน้า (จะบังคับ login ทุกครั้งที่เข้าระบบ ทั้งที่ไม่ได้จะใช้ Share เลย)
-    // แต่จะเรียก login() แบบ lazy เฉพาะตอนกดปุ่ม Share เท่านั้น (ดูฟังก์ชัน ensureLiffLoggedIn ด้านล่าง)
     function initLiff() {
       if (typeof liff === 'undefined') {
         liffInitError = 'LIFF SDK โหลดไม่สำเร็จ (สคริปต์จาก static.line-scdn.net อาจถูกบล็อกหรือเน็ตช้า)';
@@ -579,17 +575,6 @@
           liffInitError = (err && err.message) || String(err);
           console.error('[LIFF] init ไม่สำเร็จ:', err);
         });
-    }
-
-    // เรียกตอนกดปุ่ม Share เท่านั้น: ถ้ายังไม่ login จะพาไป login ก่อน (จะ redirect ออกจากหน้าแล้วเด้งกลับมาเอง)
-    // คืนค่า true = login แล้ว พร้อมใช้งานต่อ, false = กำลัง redirect ไป login (โค้ดหลังจากนี้ไม่ต้องรันต่อ)
-    function ensureLiffLoggedIn() {
-      if (!liff.isLoggedIn()) {
-        console.log('[LIFF] ยังไม่ login — กำลังพาไปหน้า login...');
-        liff.login();
-        return false;
-      }
-      return true;
     }
 
     // ==========================================================================
@@ -949,39 +934,10 @@
         return;
       }
 
-      // เปิดผ่าน LIFF แล้ว แต่ยังไม่ login เข้า LIFF — พาไป login ก่อน แล้วค่อยกดปุ่ม Share ใหม่อีกครั้ง
-      if (!ensureLiffLoggedIn()) {
-        return; // กำลัง redirect ไปหน้า login อยู่ — โค้ดส่วนที่เหลือไม่ต้องรันต่อในรอบนี้
-      }
-
       if (!liff.isApiAvailable('shareTargetPicker')) {
-        // ⚠️ เคสนี้พบว่า: บนมือถือที่ล็อกอินแอป LINE ค้างไว้อยู่แล้ว liff.isLoggedIn() จะเป็น true ทันที
-        // โดยไม่ได้ผ่านขั้นตอน LIFF login flow ที่สมบูรณ์ (ต่างจาก PC ที่ไม่มี session ค้าง จึงต้อง login ใหม่ผ่าน flow ที่ถูกต้องเสมอ)
-        // ทำให้ isApiAvailable ยังเป็น false ทั้งที่ login อยู่แล้ว — ลองบังคับ logout แล้ว login ใหม่ให้ผ่าน flow ที่สมบูรณ์ก่อนสรุปว่าใช้ไม่ได้จริง
-        if (!sessionStorage.getItem('liffReloginAttempted')) {
-          sessionStorage.setItem('liffReloginAttempted', '1');
-          console.log('[LIFF] isApiAvailable เป็น false ทั้งที่ login อยู่แล้ว — ลอง logout แล้ว login ใหม่ผ่าน LIFF flow ที่สมบูรณ์');
-          liff.logout();
-          liff.login();
-          return;
-        }
-        sessionStorage.removeItem('liffReloginAttempted');
-
-        let diag = `isInClient: ${liff.isInClient()}\nisLoggedIn: ${liff.isLoggedIn()}\nOS: ${liff.getOS ? liff.getOS() : '-'}\nLINE version: ${liff.getLineVersion ? liff.getLineVersion() : '-'}\nLIFF SDK version: ${liff.getVersion ? liff.getVersion() : '-'}\nURL: ${location.href}`;
-        console.warn('[shareTargetPicker ใช้ไม่ได้] รายละเอียด:\n' + diag);
-        Swal.fire({
-          icon: 'error',
-          title: 'อุปกรณ์/เวอร์ชันนี้ยังไม่รองรับ',
-          html: `<div class="text-left text-sm">
-                   <p class="mb-2">ฟีเจอร์ Share ไปกลุ่มไลน์ต้องใช้แอป LINE เวอร์ชันที่รองรับ Share Target Picker</p>
-                   <p class="text-xs text-gray-500 mt-3 font-mono whitespace-pre-line">${diag.replace(/</g,'&lt;')}</p>
-                   <p class="text-xs text-gray-500 mt-2">กรุณาอัปเดตแอป LINE เป็นเวอร์ชันล่าสุดแล้วลองใหม่ หรือเปิดผ่านลิงก์ liff.line.me จากในแชทไลน์</p>
-                 </div>`,
-          confirmButtonColor: '#06C755'
-        });
+        Swal.fire({ icon: 'error', title: 'อุปกรณ์นี้ไม่รองรับ', text: 'ฟีเจอร์ Share ไปกลุ่มไลน์ใช้ได้เฉพาะบางเวอร์ชันของแอป LINE', confirmButtonColor: '#06C755' });
         return;
       }
-      sessionStorage.removeItem('liffReloginAttempted'); // ใช้งานได้ปกติแล้ว เคลียร์สถานะการลองใหม่ทิ้ง
 
       const flexMsg = buildFlexMessage(options.altText, options.title, options.subtitle, text, options.accentColor, options.headerIcon, options.autoShareMode);
 
