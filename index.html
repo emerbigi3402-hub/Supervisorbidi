@@ -2029,17 +2029,26 @@
         let visibleHeaders = headers.filter(h => h !== 'ID' && h !== 'Code').slice(0, 5);
         let hHtml = visibleHeaders.map(h => `<th class="px-4 py-3 text-left font-medium text-gray-500">${esc(h)}</th>`).join('');
         thead.innerHTML = `<tr>${hHtml}<th class="px-4 py-3 text-center font-medium text-gray-500">จัดการ</th></tr>`;
+        let isDataSheet = currentSheet === 'Data'; // ✅ ใหม่: ตาราง "ข้อมูลรายเวร(ย้อนหลัง)" กดแถวเพื่อเปิดหน้าบันทึกเวรประจำวันแบบเต็มได้เลย
         tbody.innerHTML = rows.map((row, idx) => {
           let tdHtml = visibleHeaders.map(h => `<td class="px-4 py-3 text-gray-600 truncate max-w-[150px]">${esc(row[h] ?? '-')}</td>`).join('');
           let pk = row['Code'] || row['ID'];
-          return `<tr class="hover:bg-white transition duration-150">${tdHtml}
+          let rowClickAttr = isDataSheet ? ` onclick='openDailyRecordFromTable("${esc(row['ID'])}")' style="cursor:pointer;"` : '';
+          return `<tr class="hover:bg-white transition duration-150"${rowClickAttr}>${tdHtml}
             <td class="px-4 py-3 text-center whitespace-nowrap">
-              <button onclick='viewDetails(${idx})' class="text-cyan-500 hover:text-cyan-600 mx-1"><i class="fa-solid fa-eye"></i></button>
-              <button onclick='openModal(${idx})' class="text-amber-500 hover:text-amber-600 mx-1"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button onclick="deleteData('${esc(pk)}')" class="text-rose-500 hover:text-rose-600 mx-1"><i class="fa-solid fa-trash"></i></button>
+              <button onclick='event.stopPropagation(); viewDetails(${idx})' class="text-cyan-500 hover:text-cyan-600 mx-1"><i class="fa-solid fa-eye"></i></button>
+              <button onclick='event.stopPropagation(); ${isDataSheet ? `openDailyRecordFromTable("${esc(row['ID'])}")` : `openModal(${idx})`}' class="text-amber-500 hover:text-amber-600 mx-1"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="event.stopPropagation(); deleteData('${esc(pk)}')" class="text-rose-500 hover:text-rose-600 mx-1"><i class="fa-solid fa-trash"></i></button>
             </td></tr>`;
         }).join('');
       }
+    }
+
+    // ✅ ใหม่: เปิดหน้า "ข้อมูลบันทึกเวรประจำวัน" แบบเต็ม (เหมือนหน้าเมนู "บันทึกข้อมูลรายวัน")
+    // พร้อมข้อมูลของแถวที่กดเลือกไว้ครบทุกอย่าง (ข้อความสรุปไลน์/รายงาน/การ์ดแผนก IPD-OPD) ดูและแก้ไขได้ทันที
+    function openDailyRecordFromTable(rowId) {
+      switchTab('DailyRecord');
+      showDailyRecord(rowId);
     }
 
     function showWardDeptDetail(deptName, s) {
@@ -2247,6 +2256,28 @@
       reader.readAsDataURL(file);
     }
 
+    // อัปโหลดรูปประจำตัวพยาบาลตรวจการ (ชีต Sup คอลัมน์ pIC) — เหมือน handleImageUpload แต่แสดงตัวอย่างเป็นรูปจริง (วงกลม/สี่เหลี่ยมมุมมน) แทนลิงก์ข้อความ
+    function handleSupPicUpload(input, header) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      Swal.fire({ title: 'กำลังอัปโหลดรูป...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = String(e.target.result).split(',')[1];
+        google.script.run
+          .withSuccessHandler(url => {
+            let hid = document.getElementById('hidden_img_' + header);
+            let prev = document.getElementById('preview_img_' + header);
+            if (hid) hid.value = url;
+            if (prev) prev.innerHTML = `<img src="${esc(url)}" class="w-24 h-24 object-cover rounded-xl border-2 border-pink-200 shadow-sm" alt="รูปประจำตัว">`;
+            Swal.fire({icon:'success', title:'อัปโหลดสำเร็จ', timer:1200, showConfirmButton:false});
+          })
+          .withFailureHandler(err => Swal.fire('ข้อผิดพลาด', err.message, 'error'))
+          .uploadImageToDrive(base64, file.name, file.type);
+      };
+      reader.readAsDataURL(file);
+    }
+
     function onModalFieldChange() {
       const form = document.getElementById('dataForm');
       if (!form) return;
@@ -2342,6 +2373,9 @@
         let isRequired = '';
         if (targetSheet === 'Data' && (header === 'วันที่' || header === 'เวร')) isRequired = 'required';
         if (targetSheet === 'IPD' && header.includes('จำนวนผู้ป่วยที่ต้องการความช่วยเหลือ')) isRequired = 'required';
+        if (targetSheet === 'HR' && header === 'ตำแหน่ง') isRequired = 'required';
+        if (targetSheet === 'Doc' && header === 'ประเภท') isRequired = 'required';
+        if (targetSheet === 'แผนก' && (header === 'แผนก' || header === 'ประเภท')) isRequired = 'required';
         let labelStar = isRequired ? '<span class="text-red-500">*</span>' : '';
 
         let isRN = header.includes('RN'), isPN = header.includes('PN'), isNA = header.includes('NA');
@@ -2354,6 +2388,12 @@
         let isEKG = header === 'เวร EKG';
         let isTotalField = header === 'ยอดผู้ป่วยทั้งหมด';
         let isPatientType = header.match(/ผู้ป่วยประเภท\s*[1-5]/);
+        // ✅ ใหม่: ฟิลด์เฉพาะของหน้า "เพิ่ม/แก้ไข" รายชื่อบุคลากร/แพทย์/แผนก (เปิดจากหน้าตารางโดยตรง ไม่ใช่ฟอร์มเวร)
+        let isHRPosition = targetSheet === 'HR' && header === 'ตำแหน่ง';
+        let isDocType = targetSheet === 'Doc' && header === 'ประเภท';
+        let isDeptTypeField = targetSheet === 'แผนก' && header === 'ประเภท';
+        let isDeptNameField = targetSheet === 'แผนก' && header === 'แผนก';
+        let isSupPic = targetSheet === 'Sup' && header === 'pIC';
 
         let iconHtml = ''; let labelColor = 'text-gray-600';
         if (isRN) { iconHtml = '<i class="fa-solid fa-user-nurse text-blue-600 mr-1"></i>'; labelColor = 'text-blue-700'; }
@@ -2453,6 +2493,41 @@
             <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อแพทย์ใหม่</option>
           </select>`;
         }
+        else if (isHRPosition) {
+          // ✅ ใหม่: ตำแหน่งของบุคลากร (ชีต HR) เป็นดรอปดาวน์คงที่ ไม่ใช่ช่องพิมพ์อิสระอีกต่อไป
+          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
+            <option value="">-- เลือกตำแหน่ง --</option>
+            ${['พนักงาน', 'RN', 'PN', 'NA'].map(p => `<option value="${p}" ${value === p ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>`;
+        }
+        else if (isDocType) {
+          // ✅ ใหม่: ประเภทแพทย์ (ชีต Doc) เป็นดรอปดาวน์คงที่ ตามแผนกที่รองรับในระบบ
+          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
+            <option value="">-- เลือกประเภท --</option>
+            ${['MED', 'PED', 'ENT', 'SUR', 'Ortho', 'EYE', 'Intern', 'Uro'].map(t => `<option value="${t}" ${value === t ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>`;
+        }
+        else if (isDeptTypeField) {
+          // ✅ ใหม่: ประเภทของแผนก (ชีต แผนก) เลือกได้แค่ IPD หรือ OPD เท่านั้น
+          inputHtml = `<select name="${esc(header)}" id="input_${esc(header)}" ${isRequired} class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
+            <option value="">-- เลือกประเภท --</option>
+            ${['IPD', 'OPD'].map(t => `<option value="${t}" ${value === t ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>`;
+        }
+        else if (isSupPic) {
+          // ✅ ใหม่: รูปภาพประจำตัวพยาบาลตรวจการ (ชีต Sup คอลัมน์ pIC) อัปโหลดได้จริง พร้อมแสดงตัวอย่างรูปสวยงาม
+          let picPreviewHtml = (value && String(value).trim() !== '')
+            ? `<img src="${esc(value)}" class="w-24 h-24 object-cover rounded-xl border-2 border-pink-200 shadow-sm" alt="รูปประจำตัว">`
+            : `<div class="w-24 h-24 flex items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400"><i class="fa-solid fa-user text-3xl"></i></div>`;
+          inputHtml = `<input type="hidden" name="${esc(header)}" id="hidden_img_${esc(header)}" value="${esc(value)}"/>
+            <div class="flex items-center gap-3">
+              <div id="preview_img_${esc(header)}">${picPreviewHtml}</div>
+              <label class="flex-1 cursor-pointer bg-pink-50 border border-pink-200 text-pink-700 font-semibold rounded-xl px-4 py-3 text-center hover:bg-pink-100 transition text-sm">
+                <i class="fa-solid fa-camera mr-1"></i> เลือกรูปภาพ
+                <input type="file" accept="image/*" onchange="handleSupPicUpload(this, '${esc(header)}')" class="hidden">
+              </label>
+            </div>`;
+        }
         else if (isEKG) {
           inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" value="${esc(value)}" placeholder="พิมพ์รายชื่อ" class="w-full bg-rose-50 focus:ring-2 focus:ring-rose-400 text-rose-700 font-semibold border-rose-200 rounded-xl px-4 py-3 border">`;
         }
@@ -2474,6 +2549,11 @@
             <option value="">-- เลือกระบุเวร --</option>
             ${['เวรเช้า', 'เวรบ่าย', 'เวรดึก'].map(s => `<option value="${s}" ${value === s ? 'selected' : ''}>${s}</option>`).join('')}
           </select>`;
+        }
+        else if (isDeptNameField) {
+          // ✅ ใหม่: ชื่อแผนก (ชีต แผนก) ต้องเป็นชื่อใหม่ที่ไม่ซ้ำกับที่มีอยู่แล้ว จึงเป็นช่องพิมพ์อิสระ ไม่ใช่ dropdown
+          // มีการตรวจสอบชื่อซ้ำซ้อนอีกครั้งฝั่ง JS ตอนกดบันทึก (ดูฟังก์ชัน saveData)
+          inputHtml = `<input type="text" name="${esc(header)}" id="input_${esc(header)}" ${isRequired} value="${esc(value)}" placeholder="พิมพ์ชื่อแผนกใหม่ (ห้ามซ้ำกับที่มีอยู่แล้ว)" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">`;
         }
         else if (header === 'หน่วยงาน' || header === 'แผนก') {
           inputHtml = `<select name="${esc(header)}" id="input_หน่วยงาน" ${isRequired} onchange="onModalFieldChange()" class="w-full border-gray-300 bg-white focus:ring-2 focus:ring-teal-400 rounded-xl px-4 py-3 border">
@@ -2641,6 +2721,23 @@
       const dataObj = Object.fromEntries(formData.entries());
       const targetSheet = dataObj['_targetSheet'];
       delete dataObj['_targetSheet'];
+
+      // 🔥 ตรวจสอบว่าชื่อแผนกใหม่ไม่ซ้ำกับชื่อที่มีอยู่แล้วในระบบ (เฉพาะตอนเพิ่มแผนกใหม่ ไม่ใช่ตอนแก้ไขแผนกเดิม)
+      if (targetSheet === 'แผนก' && !dataObj['ID']) {
+        let newDeptName = String(dataObj['แผนก'] || '').trim();
+        let existingDepts = globalData.tables['แผนก'] || [];
+        let isDuplicateDept = existingDepts.some(d => String(d['แผนก'] || '').trim().toLowerCase() === newDeptName.toLowerCase());
+
+        if (isDuplicateDept) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'ชื่อแผนกซ้ำกัน!',
+            text: `มีแผนกชื่อ "${newDeptName}" อยู่ในระบบแล้ว กรุณาตั้งชื่อแผนกใหม่ที่ไม่ซ้ำกัน`,
+            confirmButtonColor: '#0ea5e9'
+          });
+          return; // หยุดการทำงาน ไม่ให้บันทึก
+        }
+      }
 
       // 🔥 ระบบป้องกันการบันทึกข้อมูลซ้ำซ้อน
       if (targetSheet === 'Data' && !dataObj['ID']) {
