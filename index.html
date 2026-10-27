@@ -1395,6 +1395,14 @@
       let depts = globalData.tables['แผนก'] || [];
       let ipdDepts = depts.filter(d => d['ประเภท'] === 'IPD');
       let opdDepts = depts.filter(d => d['ประเภท'] === 'OPD');
+      // เรียงการ์ด OPD Med, Med 2, Med 3 ... Med 6 จากน้อยไปมาก (แผนกอื่นคงตำแหน่งเดิม)
+      (function sortOpdMedCards() {
+        const medNo = d => { let m = String(d['แผนก'] || '').trim().match(/^OPD\s*Med\s*(\d*)$/i); return m ? (m[1] ? parseInt(m[1]) : 1) : null; };
+        let slots = [], meds = [];
+        opdDepts.forEach((d, i) => { if (medNo(d) !== null) { slots.push(i); meds.push(d); } });
+        meds.sort((a, b) => medNo(a) - medNo(b));
+        slots.forEach((slot, k) => { opdDepts[slot] = meds[k]; });
+      })();
 
       let lineText = `วันที่ ${date}\nเวร ${shift}\n\n${formatSupervisorLabel(targetData['พยาบาลตรวจการ'], true)}\n\nแพทย์เวร MED : \n${targetData['แพทย์เวร MED']||'-'}\n\nแพทย์เวร ER : \n${targetData['แพทย์เวร ER']||'-'}\n\nแพทย์ Intern/Extern : \n${targetData['แพทย์ Intern/Extern']||'-'}`;
 
@@ -2238,6 +2246,7 @@
         let hidden = document.getElementById('hidden_' + headerId);
         let current = hidden.value ? hidden.value.split(',').map(s=>s.trim()).filter(Boolean) : [];
         if (!current.includes(val)) { current.push(val); hidden.value = current.join(', '); renderBadges(headerId); }
+        syncChecklist(headerId);
     }
 
     function removeBadge(headerId, val) {
@@ -2246,7 +2255,75 @@
         current = current.filter(x => x !== val);
         hidden.value = current.join(', ');
         renderBadges(headerId);
+        syncChecklist(headerId);
     }
+
+    // ===== ดรอปดาวน์แบบติ๊กเลือกรายชื่อได้หลายคนในครั้งเดียว =====
+    // ใช้ตัวเลือกจาก <select> เดิม (ซ่อนไว้) เป็นแหล่งรายชื่อ จึงยังกรองตามแผนก/ตำแหน่ง และเพิ่มรายชื่อใหม่ได้เหมือนเดิม
+    function getSelectedNames(headerId) {
+        let hidden = document.getElementById('hidden_' + headerId);
+        return hidden && hidden.value ? hidden.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+
+    function toggleChecklist(headerId, posType) {
+        let panel = document.getElementById('checklist_' + headerId);
+        if (!panel) return;
+        let willOpen = panel.classList.contains('hidden');
+        document.querySelectorAll('[id^="checklist_"]').forEach(p => p.classList.add('hidden'));
+        if (!willOpen) return;
+        buildChecklist(headerId, posType);
+        panel.classList.remove('hidden');
+        let search = panel.querySelector('input[type="search"]');
+        if (search) search.focus();
+    }
+
+    function buildChecklist(headerId, posType) {
+        let panel = document.getElementById('checklist_' + headerId);
+        let sel = document.getElementById('sel_' + headerId);
+        if (!panel || !sel) return;
+        let selected = getSelectedNames(headerId);
+        let names = Array.from(sel.options).map(o => o.value).filter(v => v && v !== '__ADD_NEW__');
+        selected.forEach(n => { if (!names.includes(n)) names.unshift(n); }); // ชื่อที่เลือกไว้แต่ไม่อยู่ในรายการแผนกนี้ ก็ยังติ๊กออกได้
+        panel.innerHTML = `
+          <input type="search" placeholder="พิมพ์ค้นหาชื่อ..." class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-2 text-sm">
+          <div class="max-h-64 overflow-y-auto">
+            ${names.length ? names.map(n => `
+              <label class="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer" data-name="${esc(n)}">
+                <input type="checkbox" class="w-5 h-5 accent-teal-600" value="${esc(n)}" ${selected.includes(n) ? 'checked' : ''}>
+                <span>${esc(n)}</span>
+              </label>`).join('') : '<p class="text-gray-400 text-sm px-2 py-2">ยังไม่มีรายชื่อในแผนกนี้</p>'}
+          </div>
+          <div class="flex gap-2 mt-2 pt-2 border-t border-gray-100">
+            <button type="button" data-act="add" class="flex-1 font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 rounded-lg px-3 py-2 text-sm">+ เพิ่มรายชื่อใหม่</button>
+            <button type="button" data-act="done" class="flex-1 font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg px-3 py-2 text-sm">เสร็จ</button>
+          </div>`;
+        panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener('change', () => { cb.checked ? addBadge(headerId, cb.value) : removeBadge(headerId, cb.value); });
+        });
+        panel.querySelector('input[type="search"]').addEventListener('input', e => {
+          let q = e.target.value.trim().toLowerCase();
+          panel.querySelectorAll('label[data-name]').forEach(l => { l.style.display = l.getAttribute('data-name').toLowerCase().includes(q) ? '' : 'none'; });
+        });
+        panel.querySelector('[data-act="done"]').addEventListener('click', () => panel.classList.add('hidden'));
+        panel.querySelector('[data-act="add"]').addEventListener('click', () => {
+          panel.classList.add('hidden');
+          sel.value = '__ADD_NEW__';
+          handleMultiSelectChange(sel, headerId, posType);
+        });
+    }
+
+    // อัปเดตเครื่องหมายติ๊กให้ตรงกับรายชื่อที่เลือก (เช่น ตอนกดกากบาทลบชื่อ)
+    function syncChecklist(headerId) {
+        let panel = document.getElementById('checklist_' + headerId);
+        if (!panel || panel.classList.contains('hidden')) return;
+        let selected = getSelectedNames(headerId);
+        panel.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = selected.includes(cb.value); });
+    }
+
+    // คลิกนอกกล่องรายชื่อ = ปิดกล่อง
+    document.addEventListener('click', e => {
+        if (!e.target.closest('[data-checklist]')) document.querySelectorAll('[id^="checklist_"]').forEach(p => p.classList.add('hidden'));
+    });
 
     function renderBadges(headerId) {
         let hidden = document.getElementById('hidden_' + headerId);
@@ -2535,7 +2612,13 @@
           }
           inputHtml = `<input type="hidden" name="${esc(header)}" id="hidden_${esc(header)}" value="${esc(value)}"/>
             <div id="badges_${esc(header)}" class="flex flex-wrap gap-2 mb-2 border border-dashed border-gray-200 p-2 rounded-xl bg-gray-50 min-h-[50px]"></div>
-            <select id="sel_${esc(header)}" data-hr-type="${esc(posType)}" onchange="handleMultiSelectChange(this, '${esc(header)}', '${esc(posType)}')" class="w-full font-semibold transition ${colorClass} rounded-xl px-4 py-3 border">
+            <div class="relative" data-checklist="${esc(header)}">
+              <button type="button" onclick="toggleChecklist('${esc(header)}', '${esc(posType)}')" class="w-full text-left font-semibold transition ${colorClass} rounded-xl px-4 py-3 border flex justify-between items-center">
+                <span>-- ติ๊กเลือก ${esc(posType)} (เลือกได้หลายคน) --</span><i class="fa-solid fa-chevron-down text-sm"></i>
+              </button>
+              <div id="checklist_${esc(header)}" class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-300 rounded-xl shadow-lg p-2"></div>
+            </div>
+            <select id="sel_${esc(header)}" data-hr-type="${esc(posType)}" onchange="handleMultiSelectChange(this, '${esc(header)}', '${esc(posType)}')" class="hidden">
               <option value="">-- เลือกเพิ่ม ${esc(posType)} --</option>
               ${uniqueHrList.map(h => `<option value="${esc(h[hrNameKey])}">${esc(h[hrNameKey])}</option>`).join('')}
               <option value="__ADD_NEW__" class="font-bold text-teal-600 bg-white">+ เพิ่มรายชื่อใหม่</option>
