@@ -1024,7 +1024,7 @@
     }
     function firstKeyVal(rec, keys) {
       for (let k of keys) {
-        if (rec[k] !== undefined && rec[k] !== null && String(rec[k]).trim() !== '') return num(rec[k]);
+        let v = getNorm(rec, k); if (v !== undefined && v !== null && String(v).trim() !== '') return num(v);
       }
       return 0;
     }
@@ -1046,7 +1046,81 @@
       }
     }
 
+    // อ่านค่าคอลัมน์โดยไม่สนช่องว่าง/ขึ้นบรรทัดในชื่อหัวคอลัมน์ (เช่น "ตึก ICU " กับ "ตึก ICU")
+    function normKey(k) { return String(k).replace(/\s+/g, ' ').trim().toLowerCase(); }
+    function getNorm(rec, key) {
+      if (!rec) return undefined;
+      if (rec[key] !== undefined) return rec[key];
+      let nk = normKey(key);
+      let col = Object.keys(rec).find(k => normKey(k) === nk);
+      return col !== undefined ? rec[col] : undefined;
+    }
+
+    // ชื่อตึกในรายงาน -> ชื่อหน่วยงานในชีต IPD
+    const REPORT_WARD_TO_DEPT = {
+      'ตึก 3/2': '3/2', 'ตึก 3/3': '3/3', 'ตึก 3/4': '3/4', 'ตึก 3/5': '3/5',
+      'ตึก 5/3': '5/3', 'ตึก 5/4': '5/4', 'ตึก 5/5': '5/5',
+      'ตึก 7/2': '7/2', 'ตึก 7/3': '7/3', 'ตึก 7/4': '7/4', 'ตึก 7/5': '7/5', 'ตึก 7/6': '7/6',
+      'ตึก ICU': 'ICU', 'ตึก NICU': 'NICU', 'ตึก LR/PP/NB': 'ห้องคลอด'
+    };
+    // โรคในรายงาน -> คอลัมน์ในชีต IPD
+    const REPORT_DISEASE_IPD = {
+      'DHF': 'DHF', 'DF': 'DF', 'Influenza A,B': 'FLU', 'Acute Diarrhea': 'AD',
+      'TB': 'TB/MDR TB', 'HIV': 'HIV', 'RSV': 'RSV', 'PUI Covid-19': 'PUI',
+      'Confirm Covid-19': 'Covid-19', 'Monkeypox': 'Monkeypox'
+    };
+    // รายละเอียดย่อยในรายงาน -> คอลัมน์ในชีต IPD
+    const REPORT_SUB_IPD = { 'หลังคลอด': 'หลังคลอด', 'NB': 'NB', 'เด็กป่วย': 'เด็กป่วย', 'OBS': 'OBS' };
+
+    // คำนวณยอดสรุปสดจากชีต IPD ทุกครั้งที่เปิดหน้า (ไม่ต้องรอชีต "สรุป")
+    function buildLiveSummary(shiftId) {
+      let rows = (globalData.tables['IPD'] || []).filter(r => String(r['ID'] || '').trim() === String(shiftId || '').trim());
+      if (!rows.length) return null;
+      const deptRow = dept => rows.find(r => String(r['หน่วยงาน'] || '').trim() === dept) || null;
+      const sumCol = col => rows.reduce((a, r) => a + num(getNorm(r, col) || 0), 0);
+      let out = { o2: {}, disease: {}, ward: {}, subs: {}, total: 0 };
+      REPORT_O2_COLS.forEach(c => {
+        let parts = c.split(' ');
+        let rec = deptRow(parts[0]);
+        out.o2[c] = rec ? num(getNorm(rec, parts.slice(1).join(' ')) || 0) : 0;
+      });
+      REPORT_DISEASE_COLS.forEach(d => { out.disease[d.label] = sumCol(REPORT_DISEASE_IPD[d.label] || d.label); });
+      REPORT_WARDS.forEach(group => group.forEach(g => {
+        let rec = deptRow(REPORT_WARD_TO_DEPT[g.ward]);
+        out.ward[g.ward] = rec ? num(getNorm(rec, 'ยอดผู้ป่วยทั้งหมด') || 0) : 0;
+        out.total += out.ward[g.ward];
+        (g.subs || []).forEach(s => { out.subs[g.ward + '|' + s.label] = rec ? num(getNorm(rec, REPORT_SUB_IPD[s.label] || s.label) || 0) : 0; });
+      }));
+      return out;
+    }
+
+    // ใช้ยอดสดจาก IPD เป็นหลัก ถ้ายังไม่มีข้อมูลรายตึกค่อยใช้ชีต "สรุป"
     function buildReportText(targetData, sumRec) {
+      let live = buildLiveSummary(targetData['ID']);
+      if (live) {
+        let lines = [];
+        let shiftTime = SHIFT_TIME_LABEL[String(targetData['เวร']||'').trim()] || '';
+        lines.push(`วันที่ ${targetData['วันที่']||'-'}`);
+        lines.push(`เวร ${targetData['เวร']||'-'}${shiftTime ? ' ' + shiftTime : ''}`);
+        lines.push(formatSupervisorLabel(targetData['พยาบาลตรวจการ'], false));
+        lines.push(`แพทย์เวร MED : ${targetData['แพทย์เวร MED']||'-'}`);
+        lines.push(`แพทย์เวร ER : ${targetData['แพทย์เวร ER']||'-'}`);
+        REPORT_O2_COLS.forEach(col => lines.push(`${col} ${live.o2[col]} ราย`));
+        lines.push('โรคหลักตามยุทธศาสตร์ของสถาบัน');
+        REPORT_DISEASE_COLS.forEach(d => lines.push(`${d.label} ${live.disease[d.label]} ราย`));
+        lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${live.total} ราย`);
+        REPORT_WARDS.forEach(group => group.forEach(g => {
+          lines.push(`${g.ward} ${live.ward[g.ward]} ราย`);
+          if (g.subs && g.subs.length) {
+            lines.push(`(***${g.subs.map(s => `${s.label} = ${live.subs[g.ward + '|' + s.label]}`).join(', ')} )`);
+          }
+        }));
+        return lines.join('\n');
+      }
+      return buildReportTextFromSheet(targetData, sumRec);
+    }
+
+    function buildReportTextFromSheet(targetData, sumRec) {
       let lines = [];
       let shiftTime = SHIFT_TIME_LABEL[String(targetData['เวร']||'').trim()] || '';
       lines.push(`วันที่ ${targetData['วันที่']||'-'}`);
@@ -1061,16 +1135,16 @@
         return lines.join('\n');
       }
 
-      REPORT_O2_COLS.forEach(col => { let v = num(sumRec[col] || 0); lines.push(`${col} ${v} ราย`); });
+      REPORT_O2_COLS.forEach(col => { let v = num(getNorm(sumRec, col) || 0); lines.push(`${col} ${v} ราย`); });
 
       lines.push('โรคหลักตามยุทธศาสตร์ของสถาบัน');
       REPORT_DISEASE_COLS.forEach(d => { let v = firstKeyVal(sumRec, d.keys); lines.push(`${d.label} ${v} ราย`); });
 
-      lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${num(sumRec['รวมยอดผู้ป่วยในทั้งหมด']||0)} ราย`);
+      lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${num(getNorm(sumRec, 'รวมยอดผู้ป่วยในทั้งหมด')||0)} ราย`);
 
       REPORT_WARDS.forEach(group => {
         group.forEach(g => {
-          let v = num(sumRec[g.ward] || 0);
+          let v = num(getNorm(sumRec, g.ward) || 0);
           lines.push(`${g.ward} ${v} ราย`);
           if (g.subs && g.subs.length) {
             let parts = g.subs.map(s => {
