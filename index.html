@@ -385,6 +385,21 @@
         width: 100% !important;
       }
     }
+
+    /* ===== ฟอร์มบันทึกข้อมูล IPD แบบจัดกลุ่ม ===== */
+    .ipd-section { background:#fff; border:1px solid #e5e7eb; border-radius:1rem; overflow:visible; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .ipd-section > .ipd-head { display:flex; align-items:center; gap:.5rem; padding:.65rem 1rem; border-bottom:1px solid #f1f5f9; font-weight:700; font-size:.95rem; border-radius:1rem 1rem 0 0; }
+    .ipd-section > .ipd-body { padding:1rem; display:grid; gap:.85rem; }
+    .ipd-grid-1 { grid-template-columns:1fr; }
+    .ipd-grid-staff { grid-template-columns:1fr; }
+    .ipd-grid-num { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    @media (min-width:640px){ .ipd-grid-num { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (min-width:768px){ .ipd-grid-staff { grid-template-columns:repeat(3,minmax(0,1fr)); } .ipd-grid-num { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+    @media (min-width:1024px){ .ipd-grid-num { grid-template-columns:repeat(5,minmax(0,1fr)); } }
+    .ipd-grid-num > div { display:flex; flex-direction:column; justify-content:flex-end; }
+    .ipd-grid-num label { font-size:.8rem; line-height:1.2; margin-bottom:.3rem; }
+    .ipd-grid-num input[type=number] { text-align:center; font-weight:700; padding:.5rem .5rem; }
+    .ipd-grid-num .ipd-wide { grid-column:1 / -1; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -519,17 +534,17 @@
     </div>
   </main>
 
-  <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] justify-center items-center opacity-0 transition-opacity duration-300 hidden">
+  <div id="formModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] justify-center items-stretch sm:items-center sm:p-4 opacity-0 transition-opacity duration-300 hidden">
     <!-- ✅ แก้ไข: โมเดล PC กลับเป็นขนาดเดิม (max-w-4xl) สวยงาม มืออาชีพ ไม่เต็มจอ -->
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300" id="modalContent">
-      <div class="border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-t-2xl p-4 md:p-5">
+    <div class="bg-white sm:rounded-2xl shadow-2xl w-full max-w-5xl h-[100dvh] sm:h-auto sm:max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300" id="modalContent">
+      <div class="border-b flex justify-between items-center bg-gradient-to-r from-teal-600 to-cyan-600 text-white sm:rounded-t-2xl p-4 md:p-5">
         <h2 id="modal-title" class="text-lg md:text-xl font-bold tracking-wide">จัดการข้อมูล</h2>
         <button onclick="closeModal()" class="text-white hover:text-red-200 text-2xl transition"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-4 md:p-6 overflow-y-auto flex-1 custom-scroll bg-gray-50/50">
         <form id="dataForm" onsubmit="saveData(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></form>
       </div>
-      <div class="p-4 border-t flex justify-end gap-3 bg-white rounded-b-2xl shadow-inner">
+      <div class="p-3 sm:p-4 border-t flex justify-end gap-3 bg-white sm:rounded-b-2xl shadow-inner">
         <button type="button" onclick="closeModal()" class="px-5 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 transition font-semibold">ยกเลิก</button>
         <button type="submit" form="dataForm" class="px-5 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl hover:shadow-lg transition font-bold"><i class="fa-solid fa-save"></i> บันทึกข้อมูล</button>
       </div>
@@ -1597,6 +1612,8 @@
     function generateCard(dept, type, date, shift) {
       let deptName = dept['แผนก'];
       let phone = dept['เบอร์ภายใน'] || 'ไม่มีเบอร์';
+      let serviceProfile = type === 'IPD' ? String(getNorm(dept, 'Service profile') || '').trim() : '';
+      let profileHtml = serviceProfile ? `<div class="text-[10px] leading-tight text-gray-500 mt-1 px-1 line-clamp-2" title="${esc(serviceProfile)}">${esc(serviceProfile)}</div>` : '';
       let records = globalData.tables[type] || [];
       let hdrs = globalData.headers[type] || [];
 
@@ -1634,25 +1651,28 @@
       let statLine = `RN: ${rnCount} | NA: ${naCount} | PT: ${patCount}`;
 
       if (isReallyFilled) {
-        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-300 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36">
+        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-300 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative min-h-[9rem]">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-check text-emerald-500 text-lg shadow-sm bg-white rounded-full"></i></div>
           <h4 class="font-bold text-emerald-800 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-emerald-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">${statLine}</div>
           <div class="text-xs text-emerald-600 mt-2 bg-emerald-200/50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
+          ${profileHtml}
         </div>`;
       } else if (record) {
-        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
+        return `<div onclick="openModal(${idx}, '${esc(type)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative min-h-[9rem] opacity-95">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-exclamation text-rose-400 text-lg bg-white rounded-full"></i></div>
           <h4 class="font-bold text-rose-700 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-rose-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">${statLine}</div>
           <div class="text-xs text-rose-500 mt-2 bg-rose-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
+          ${profileHtml}
         </div>`;
       } else {
-        return `<div onclick="openPreFilledModal('${esc(type)}', '${esc(date)}', '${esc(shift)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative h-36 opacity-95">
+        return `<div onclick="openPreFilledModal('${esc(type)}', '${esc(date)}', '${esc(shift)}', '${esc(deptName)}')" class="card-zoom bg-gradient-to-br from-red-50 to-rose-50 border border-rose-200 rounded-2xl p-3 flex flex-col items-center justify-center text-center relative min-h-[9rem] opacity-95">
           <div class="absolute top-2 right-2"><i class="fa-solid fa-circle-exclamation text-rose-400 text-lg bg-white rounded-full"></i></div>
           <h4 class="font-bold text-rose-700 text-sm leading-tight mt-1 line-clamp-2">${esc(deptName)}</h4>
           <div class="text-[10px] text-rose-800 bg-white/70 mt-1 px-1 py-1 rounded font-semibold w-full text-center shadow-sm">ยังไม่ลงข้อมูล</div>
           <div class="text-xs text-rose-500 mt-2 bg-rose-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-phone"></i> ${esc(phone)}</div>
+          ${profileHtml}
         </div>`;
       }
     }
@@ -2228,7 +2248,7 @@
         let isDataSheet = currentSheet === 'Data'; // ✅ ใหม่: ตาราง "ข้อมูลรายเวร(ย้อนหลัง)" กดแถวเพื่อเปิดหน้าบันทึกเวรประจำวันแบบเต็มได้เลย
         tbody.innerHTML = rows.map((row, idx) => {
           let tdHtml = visibleHeaders.map(h => `<td class="px-4 py-3 text-gray-600 truncate max-w-[150px]">${esc(row[h] ?? '-')}</td>`).join('');
-          let pk = row['Code'] || row['ID'];
+          let pk = row['Code'] || row['ID'] || (currentSheet === 'แผนก' ? row['แผนก'] : '');
           let rowClickAttr = isDataSheet ? ` onclick='openDailyRecordFromTable("${esc(row['ID'])}")' style="cursor:pointer;"` : '';
           return `<tr class="hover:bg-white transition duration-150"${rowClickAttr}>${tdHtml}
             <td class="px-4 py-3 text-center whitespace-nowrap">
@@ -2570,6 +2590,7 @@
         ? `<i class="fa-solid fa-pen-to-square text-amber-300"></i> บันทึกข้อมูล (${esc(sheetLabel)})`
         : `<i class="fa-solid fa-plus-circle text-cyan-300"></i> เพิ่มข้อมูล (${esc(sheetLabel)})`;
 
+      form.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
       const headers = globalData.headers[targetSheet] || [];
       let rowData = idx !== null ? Object.assign({}, globalData.tables[targetSheet][idx]) : {};
       if (window._modalSavedData) {
@@ -2833,7 +2854,7 @@
           </select>`;
         }
         else {
-          let textKeywords = ['Code','ID','วันที่','เวร','หน่วยงาน','แผนก','เวลา','ช่วยงานตึก','หมายเหตุ','แนบรูป','แพทย์','พยาบาล','RN','PN','NA','พนักงาน','เวรเปล','Head','EKG','ชื่อ','ตำแหน่ง','โทร','ประเภท','เบอร์ภายใน','pIC'];
+          let textKeywords = ['Code','ID','วันที่','เวร','หน่วยงาน','แผนก','เวลา','ช่วยงานตึก','หมายเหตุ','แนบรูป','แพทย์','พยาบาล','RN','PN','NA','พนักงาน','เวรเปล','Head','EKG','ชื่อ','ตำแหน่ง','โทร','ประเภท','เบอร์ภายใน','pIC','Service profile','profile'];
           let isText = textKeywords.some(kw => header.includes(kw));
           let isNumber = !isText;
           if (isTotalField) {
@@ -2854,12 +2875,14 @@
           ? `<div class="md:col-span-2 lg:col-span-2 bg-pink-50/40 border border-pink-100 rounded-2xl p-3">
               ${inputHtml}
             </div>`
-          : `<div>
+          : `<div data-field="${esc(header)}">
             <label class="font-bold ${labelColor}" title="${esc(header)}">${iconHtml} ${esc(primaryHeaders[header] ? String(header).replace(/\s*1$/, '') : header)} ${labelStar}</label>
             ${inputHtml}
           </div>`;
       });
       form.innerHTML += `<input type="hidden" name="_targetSheet" value="${esc(targetSheet)}">`;
+      if (targetSheet === 'แผนก' && idx !== null) form.innerHTML += `<input type="hidden" name="_origPk" value="${esc(rowData['แผนก'] || '')}">`;
+      if (targetSheet === 'IPD') layoutIpdForm(form);
 
       const modal = document.getElementById('formModal');
       const modalContent = document.getElementById('modalContent');
@@ -2867,6 +2890,48 @@
       modal.style.display = 'flex';
       setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); }, 10);
       setTimeout(() => { Object.keys(primaryHeaders).forEach(h => renderBadges(h)); }, 50);
+    }
+
+
+    // ===== จัดกลุ่มฟอร์ม "บันทึกข้อมูล (ข้อมูล IPD)" เป็นหมวด อ่านง่าย รองรับทุกขนาดจอ =====
+    const IPD_SECTIONS = [
+      { title: 'ข้อมูลเวร', icon: 'fa-calendar-day', color: '#0f766e', bg: '#f0fdfa', grid: 'ipd-grid-staff', match: h => ['เวร', 'หน่วยงาน', 'วันที่'].includes(h) },
+      { title: 'บุคลากรในเวรนี้', icon: 'fa-user-nurse', color: '#1d4ed8', bg: '#eff6ff', grid: 'ipd-grid-staff', match: h => /^(RN|PN|NA)\s*\d*$/.test(h) || /^พนักงาน\s*\d*$/.test(h) },
+      { title: 'จำนวนผู้ป่วยตามประเภท', icon: 'fa-bed-pulse', color: '#be123c', bg: '#fff1f2', grid: 'ipd-grid-num', match: h => h === 'ยอดผู้ป่วยทั้งหมด' || /^ผู้ป่วยประเภท\s*[1-5]$/.test(h) },
+      { title: 'กลุ่มผู้ป่วย / สาขา', icon: 'fa-hospital-user', color: '#7c3aed', bg: '#f5f3ff', grid: 'ipd-grid-num', match: h => ['Case ICU','Med','Surg','Ortho','ENT','EYE','Uro','PED','Gynae','OBS','NB','รอคลอด','หลังคลอด','ลูก','เด็กป่วย','On photo','มารดาเลี้ยงบุตร'].includes(h) },
+      { title: 'โรคเฝ้าระวัง', icon: 'fa-virus', color: '#b45309', bg: '#fffbeb', grid: 'ipd-grid-num', match: h => ['PUI','Covid-19','HIV','TB/MDR TB','AD','DF','DHF','FLU','RSV','Monkeypox','HFM','Chicken pox','Herpangina'].includes(h) },
+      { title: 'การเคลื่อนย้ายและออกซิเจน', icon: 'fa-lungs', color: '#0369a1', bg: '#f0f9ff', grid: 'ipd-grid-num', match: h => /ความช่วยเหลือในการเคลื่อนย้าย/.test(h) || ['BR','PC','IC','On Respirator','On HFNC','Mask c bag','cannular','Cannular'].includes(h) },
+      { title: 'เตียงว่าง', icon: 'fa-bed', color: '#15803d', bg: '#f0fdf4', grid: 'ipd-grid-num', match: h => /ว่าง$/.test(h) },
+      { title: 'บุคลากรเวรดึก (จัดล่วงหน้า)', icon: 'fa-moon', color: '#4338ca', bg: '#eef2ff', grid: 'ipd-grid-staff', match: h => /เวรดึก/.test(h) },
+      { title: 'อัตรากำลังเวรเช้า (จำนวนคน)', icon: 'fa-sun', color: '#c2410c', bg: '#fff7ed', grid: 'ipd-grid-num', match: h => /เวรเช้า$/.test(h) },
+      { title: 'หมายเหตุและรูปภาพ', icon: 'fa-note-sticky', color: '#475569', bg: '#f8fafc', grid: 'ipd-grid-1', match: h => ['หมายเหตุ','แนบรูป'].includes(h) }
+    ];
+
+    function layoutIpdForm(form) {
+      let fields = Array.from(form.querySelectorAll(':scope > div[data-field]'));
+      if (!fields.length) return;
+      form.className = 'flex flex-col gap-4';
+      let used = new Set();
+      let sections = IPD_SECTIONS.map(sec => {
+        let items = fields.filter(f => !used.has(f) && sec.match(String(f.getAttribute('data-field') || '').trim()));
+        items.forEach(f => used.add(f));
+        return { sec, items };
+      });
+      let others = fields.filter(f => !used.has(f));
+      if (others.length) sections.push({ sec: { title: 'ข้อมูลอื่น ๆ', icon: 'fa-list', color: '#475569', bg: '#f8fafc', grid: 'ipd-grid-num' }, items: others });
+      sections.forEach(({ sec, items }) => {
+        if (!items.length) return;
+        let box = document.createElement('section');
+        box.className = 'ipd-section';
+        box.innerHTML = `<div class="ipd-head" style="color:${sec.color};background:${sec.bg}"><i class="fa-solid ${sec.icon}"></i><span>${sec.title}</span></div><div class="ipd-body ${sec.grid}"></div>`;
+        let body = box.querySelector('.ipd-body');
+        items.forEach(f => {
+          let h = f.getAttribute('data-field') || '';
+          if (sec.grid === 'ipd-grid-num' && (h === 'ยอดผู้ป่วยทั้งหมด' || /ความช่วยเหลือในการเคลื่อนย้าย/.test(h))) f.classList.add('ipd-wide');
+          body.appendChild(f);
+        });
+        form.appendChild(box);
+      });
     }
 
     function autoFillPhone(supName) {
@@ -2994,7 +3059,7 @@
       delete dataObj['_targetSheet'];
 
       // 🔥 ตรวจสอบว่าชื่อแผนกใหม่ไม่ซ้ำกับชื่อที่มีอยู่แล้วในระบบ (เฉพาะตอนเพิ่มแผนกใหม่ ไม่ใช่ตอนแก้ไขแผนกเดิม)
-      if (targetSheet === 'แผนก' && !dataObj['ID']) {
+      if (targetSheet === 'แผนก' && String(dataObj['แผนก'] || '').trim() !== String(dataObj['_origPk'] || '').trim()) {
         let newDeptName = String(dataObj['แผนก'] || '').trim();
         let existingDepts = globalData.tables['แผนก'] || [];
         let isDuplicateDept = existingDepts.some(d => String(d['แผนก'] || '').trim().toLowerCase() === newDeptName.toLowerCase());
