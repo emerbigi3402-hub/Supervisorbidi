@@ -1110,7 +1110,7 @@
         REPORT_DISEASE_COLS.forEach(d => lines.push(`${d.label} ${live.disease[d.label]} ราย`));
         lines.push(`รวมยอดผู้ป่วยในทั้งหมด ${live.total} ราย`);
         REPORT_WARDS.forEach(group => group.forEach(g => {
-          lines.push(`${g.ward} ${live.ward[g.ward]} ราย`);
+          lines.push(`${g.ward}   ${live.ward[g.ward]} ราย`);
           if (g.subs && g.subs.length) {
             lines.push(`(***${g.subs.map(s => `${s.label} = ${live.subs[g.ward + '|' + s.label]}`).join(', ')} )`);
           }
@@ -1145,7 +1145,7 @@
       REPORT_WARDS.forEach(group => {
         group.forEach(g => {
           let v = num(getNorm(sumRec, g.ward) || 0);
-          lines.push(`${g.ward} ${v} ราย`);
+          lines.push(`${g.ward}   ${v} ราย`);
           if (g.subs && g.subs.length) {
             let parts = g.subs.map(s => {
               let val = valByPartials(sumRec, s.partials, s.excludePartials);
