@@ -1540,7 +1540,8 @@
           <div id="aiResult" class="p-4 text-sm text-gray-700 leading-relaxed ai-markdown">
             <p class="text-gray-400">กดปุ่มเพื่อให้ AI ช่วยวิเคราะห์ยอดผู้ป่วย อัตรากำลัง Productivity โรคเฝ้าระวัง ออกซิเจน เตียงว่าง และหมายเหตุของทุกหน่วยงานในเวรนี้ พร้อมข้อเสนอการจัดอัตรากำลัง</p>
           </div>
-        </div>`;
+        </div>
+        ${buildAIChatPanel(date)}`;
       container.innerHTML = html;
     }
 
@@ -1621,6 +1622,82 @@
         box.innerHTML = '<p class="text-red-600 font-semibold"><i class="fa-solid fa-circle-exclamation mr-1"></i>' + esc(e.message || String(e)) + '</p>';
       } finally {
         btn.disabled = false; btn.classList.remove('opacity-60');
+      }
+    }
+
+
+    // ===== 💬 แชทปรึกษา AI (ใช้ข้อมูลทุกเวรของวันที่เลือก) =====
+    window._aiChat = window._aiChat || { date: null, history: [], busy: false };
+    const AI_CHAT_SUGGESTIONS = ['ตึกไหนควรส่งคนไปช่วย ER ก่อน', 'สรุปปัญหาจากหมายเหตุของวันนี้', 'เปรียบเทียบเวรเช้ากับเวรบ่ายของวันนี้', 'ตึกไหนมีผู้ป่วยหนักหรือใช้ออกซิเจนมากที่สุด'];
+
+    function renderAIChatMessages() {
+      const st = window._aiChat;
+      if (!st.history.length) return '<p class="text-gray-400 text-sm">พิมพ์คำถามเกี่ยวกับการบริหารจัดการของวันนี้ได้เลย AI จะตอบโดยใช้ข้อมูลทุกเวรของวันที่เลือกในระบบ</p>';
+      return st.history.map(m => m.role === 'user'
+        ? `<div class="flex justify-end"><div class="max-w-[85%] bg-violet-600 text-white rounded-2xl rounded-br-sm px-4 py-2 whitespace-pre-wrap">${esc(m.text)}</div></div>`
+        : `<div class="flex justify-start"><div class="max-w-[90%] bg-gray-100 text-gray-800 rounded-2xl rounded-bl-sm px-4 py-2 ai-markdown">${m.error ? '<span class="text-red-600 font-semibold">' + esc(m.text) + '</span>' : (window.marked ? marked.parse(m.text) : esc(m.text))}</div></div>`
+      ).join('');
+    }
+
+    function buildAIChatPanel(date) {
+      if (window._aiChat.date !== date) window._aiChat = { date: date, history: [], busy: false };
+      return `
+        <div class="mt-6 mb-6 bg-white border border-violet-200 rounded-xl shadow-sm flex flex-col">
+          <div class="flex items-center justify-between gap-3 p-4 border-b border-violet-100 bg-violet-50 rounded-t-xl">
+            <h3 class="text-lg font-bold text-violet-700"><i class="fa-solid fa-comments mr-1"></i> ปรึกษา AI (วันที่ ${esc(date)})</h3>
+            <button type="button" onclick="clearAIChat()" class="text-sm text-violet-600 hover:text-violet-800 font-semibold"><i class="fa-solid fa-rotate-left mr-1"></i> เริ่มแชทใหม่</button>
+          </div>
+          <div id="aiChatLog" class="p-4 flex flex-col gap-3 max-h-[28rem] overflow-y-auto text-sm leading-relaxed">${renderAIChatMessages()}</div>
+          <div class="px-4 pb-2 flex flex-wrap gap-2">
+            ${AI_CHAT_SUGGESTIONS.map(q => `<button type="button" data-q="${esc(q)}" onclick="sendAIChat(this.getAttribute('data-q'))" class="text-xs bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 rounded-full px-3 py-1">${esc(q)}</button>`).join('')}
+          </div>
+          <div class="p-3 border-t border-violet-100 flex gap-2 items-end">
+            <textarea id="aiChatInput" rows="2" placeholder="พิมพ์คำถาม เช่น เวรบ่ายควรดึงคนจากตึกไหนไปช่วย 7/6 (Enter = ส่ง, Shift+Enter = ขึ้นบรรทัดใหม่)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChat();}" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-violet-400 resize-none"></textarea>
+            <button id="aiChatSend" type="button" onclick="sendAIChat()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-4 py-2 rounded-xl shadow-sm h-[2.75rem]"><i class="fa-solid fa-paper-plane"></i><span class="hidden sm:inline ml-1">ส่ง</span></button>
+          </div>
+          <p class="px-4 pb-3 text-xs text-gray-400">คำตอบจาก AI ใช้ประกอบการตัดสินใจ ควรตรวจสอบกับสถานการณ์จริงหน้างานทุกครั้ง</p>
+        </div>`;
+    }
+
+    function refreshAIChatLog() {
+      const log = document.getElementById('aiChatLog');
+      if (!log) return;
+      log.innerHTML = renderAIChatMessages() + (window._aiChat.busy ? '<div class="flex justify-start"><div class="bg-gray-100 text-violet-700 rounded-2xl px-4 py-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i> AI กำลังตอบ...</div></div>' : '');
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function clearAIChat() {
+      window._aiChat.history = [];
+      refreshAIChatLog();
+    }
+
+    function collectDayForAI(date) {
+      const ids = (globalData.tables['Data'] || []).filter(r => String(r['วันที่'] || '').trim() === String(date || '').trim()).map(r => String(r['ID'] || '').trim());
+      return ids.map(id => collectShiftForAI(id));
+    }
+
+    async function sendAIChat(preset) {
+      const st = window._aiChat;
+      if (st.busy) return;
+      const input = document.getElementById('aiChatInput');
+      const question = String(preset || (input ? input.value : '')).trim();
+      if (!question) return;
+      if (input) input.value = '';
+      const history = st.history.filter(m => !m.error).map(m => ({ role: m.role, text: m.text }));
+      st.history.push({ role: 'user', text: question });
+      st.busy = true; refreshAIChatLog();
+      try {
+        const payload = { date: st.date, shifts: collectDayForAI(st.date), history: history, question: question };
+        const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'chatShift', data: payload }) });
+        const raw = await res.text();
+        let json;
+        try { json = JSON.parse(raw); } catch (_) { throw new Error('เซิร์ฟเวอร์ไม่ได้ตอบเป็น JSON: ' + raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 300)); }
+        if (!json.result) throw new Error(json.error || 'AI ไม่ได้ตอบกลับ');
+        st.history.push({ role: 'model', text: json.result });
+      } catch (e) {
+        st.history.push({ role: 'model', text: e.message || String(e), error: true });
+      } finally {
+        st.busy = false; refreshAIChatLog();
       }
     }
 
