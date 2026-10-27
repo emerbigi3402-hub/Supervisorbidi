@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <style>
     /* ========== 🔍 BASE STYLES & PC ========== */
     :root { font-size: 16px; }
@@ -400,6 +401,13 @@
     .ipd-grid-num label { font-size:.8rem; line-height:1.2; margin-bottom:.3rem; }
     .ipd-grid-num input[type=number] { text-align:center; font-weight:700; padding:.5rem .5rem; }
     .ipd-grid-num .ipd-wide { grid-column:1 / -1; }
+    .ai-markdown h1,.ai-markdown h2,.ai-markdown h3{font-weight:700;color:#5b21b6;margin:.9rem 0 .4rem}
+    .ai-markdown h2{font-size:1.05rem}.ai-markdown h3{font-size:1rem}
+    .ai-markdown ul{list-style:disc;padding-left:1.25rem;margin:.3rem 0}.ai-markdown ol{list-style:decimal;padding-left:1.25rem;margin:.3rem 0}
+    .ai-markdown li{margin:.15rem 0}.ai-markdown p{margin:.35rem 0}
+    .ai-markdown table{border-collapse:collapse;width:100%;margin:.5rem 0;font-size:.85rem;display:block;overflow-x:auto}
+    .ai-markdown th,.ai-markdown td{border:1px solid #e5e7eb;padding:.35rem .5rem;text-align:left}
+    .ai-markdown th{background:#f5f3ff}
   </style>
 </head>
 <body class="min-h-screen">
@@ -1409,6 +1417,10 @@
       let shiftOptions = filteredShifts.map(r => `<option value="${esc(r['ID'])}" ${r['ID']===currentDailyRecordId?'selected':''}>${esc(r['วันที่'])} ${esc(r['เวร'])} (${esc(r['พยาบาลตรวจการ']||'-')})</option>`).join('');
       let depts = globalData.tables['แผนก'] || [];
       let ipdDepts = depts.filter(d => d['ประเภท'] === 'IPD');
+      // ลำดับการ์ด IPD: 3/2–3/5, 7/2–7/6, ICU, ห้องคลอด, NICU, 5/3–5/5 (แผนกอื่นต่อท้าย)
+      const IPD_CARD_ORDER = ['3/2','3/3','3/4','3/5','7/2','7/3','7/4','7/5','7/6','ICU','ห้องคลอด','NICU','5/3','5/4','5/5'];
+      const ipdRank = d => { let i = IPD_CARD_ORDER.indexOf(String(d['แผนก'] || '').trim()); return i === -1 ? 999 : i; };
+      ipdDepts = ipdDepts.map((d, i) => [d, i]).sort((a, b) => (ipdRank(a[0]) - ipdRank(b[0])) || (a[1] - b[1])).map(x => x[0]);
       let opdDepts = depts.filter(d => d['ประเภท'] === 'OPD');
       // เรียงการ์ด OPD Med, Med 2, Med 3 ... Med 6 จากน้อยไปมาก (แผนกอื่นคงตำแหน่งเดิม)
       (function sortOpdMedCards() {
@@ -1517,8 +1529,99 @@
           </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
         </div>
-        <div class="mt-6">${buildProductivityTable(currentDailyRecordId || (date + shift), ipdDepts)}</div>`;
+        <div class="mt-6">${buildProductivityTable(currentDailyRecordId || (date + shift), ipdDepts)}</div>
+        <div class="mt-6 mb-4 bg-white border border-violet-200 rounded-xl shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-violet-100 bg-violet-50 rounded-t-xl">
+            <h3 class="text-lg font-bold text-violet-700"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> วิเคราะห์เวรด้วย AI</h3>
+            <button id="aiAnalyzeBtn" type="button" onclick="runShiftAIAnalysis()" class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-4 py-2 rounded-xl shadow-sm">
+              <i class="fa-solid fa-robot mr-1"></i> ให้ AI วิเคราะห์เวรนี้
+            </button>
+          </div>
+          <div id="aiResult" class="p-4 text-sm text-gray-700 leading-relaxed ai-markdown">
+            <p class="text-gray-400">กดปุ่มเพื่อให้ AI ช่วยวิเคราะห์ยอดผู้ป่วย อัตรากำลัง Productivity โรคเฝ้าระวัง ออกซิเจน เตียงว่าง และหมายเหตุของทุกหน่วยงานในเวรนี้ พร้อมข้อเสนอการจัดอัตรากำลัง</p>
+          </div>
+        </div>`;
       container.innerHTML = html;
+    }
+
+
+    // ===== วิเคราะห์เวรด้วย AI (Gemini ผ่าน Apps Script) =====
+    function nz_(obj) { let o = {}; Object.entries(obj).forEach(([k, v]) => { if (v !== 0 && v !== '' && v !== null && v !== undefined) o[k] = v; }); return o; }
+
+    function collectShiftForAI(shiftId) {
+      const T = globalData.tables;
+      const sid = String(shiftId || '').trim();
+      const shiftData = (T['Data'] || []).find(r => String(r['ID'] || '').trim() === sid) || {};
+      const depts = T['แผนก'] || [];
+      const profileOf = name => { let d = depts.find(x => String(x['แผนก'] || '').trim() === name); return d ? String(getNorm(d, 'Service profile') || '').trim() : ''; };
+      const pick = (rec, keys) => { let o = {}; keys.forEach(k => { let v = num(getNorm(rec, k) || 0); if (v) o[k] = v; }); return o; };
+      const ipd = (T['IPD'] || []).filter(r => String(r['ID'] || '').trim() === sid).map(r => {
+        let name = String(r['หน่วยงาน'] || '').trim();
+        let p = calcWardProductivity(r);
+        let night = re => Object.keys(r).filter(k => re.test(String(k).trim())).reduce((a, k) => a + countStaff(r[k]), 0);
+        return {
+          หน่วยงาน: name,
+          ServiceProfile: profileOf(name),
+          ยอดผู้ป่วย: p.patients,
+          ประเภทผู้ป่วย: pick(r, ['ผู้ป่วยประเภท 5', 'ผู้ป่วยประเภท 4', 'ผู้ป่วยประเภท 3', 'ผู้ป่วยประเภท 2', 'ผู้ป่วยประเภท 1']),
+          ไม่ได้จำแนกประเภท: p.unclassified,
+          กลุ่มผู้ป่วย: pick(r, ['Case ICU','Med','Surg','Ortho','ENT','EYE','Uro','PED','Gynae','OBS','NB','รอคลอด','หลังคลอด','ลูก','เด็กป่วย','On photo','มารดาเลี้ยงบุตร']),
+          โรคเฝ้าระวัง: pick(r, ['PUI','Covid-19','HIV','TB/MDR TB','AD','DF','DHF','FLU','RSV','Monkeypox','HFM','Chicken pox','Herpangina']),
+          ออกซิเจน: pick(r, ['On Respirator','On HFNC','Mask c bag','cannular']),
+          การเคลื่อนย้าย: pick(r, ['จำนวนผู้ป่วยที่ต้องการความช่วยเหลือในการเคลื่อนย้าย','BR','PC','IC']),
+          เตียงว่าง: pick(r, Object.keys(r).filter(k => /ว่าง$/.test(String(k).trim()))),
+          บุคลากรเวรนี้: { RN: p.rn, PN: p.pn, NA: p.na, รวม: p.staff },
+          บุคลากรเวรดึกที่จัดไว้: nz_({ RN: night(/^RN\s*เวรดึก/), PN: night(/^PN\s*เวรดึก/), NA: night(/^NA\s*เวรดึก/), พนักงาน: night(/^พนักงานเวรดึก/) }),
+          อัตรากำลังเวรเช้าที่ต้องการ: pick(r, ['Head เวรเช้า','RN เวรเช้า','PN เวรเช้า','NA เวรเช้า']),
+          Productivity: p.prod === null ? null : Math.round(p.prod * 10) / 10,
+          หมายเหตุ: String(getNorm(r, 'หมายเหตุ') || '').trim()
+        };
+      });
+      const opd = (T['OPD'] || []).filter(r => String(r['ID'] || '').trim() === sid).map(r => {
+        let staff = re => Object.keys(r).filter(k => re.test(String(k).trim())).reduce((a, k) => a + countStaff(r[k]), 0);
+        return nz_({
+          หน่วยงาน: String(r['หน่วยงาน'] || '').trim(),
+          ยอดผู้รับบริการ: num(getNorm(r, 'ยอดผู้รับบริการ') || 0),
+          ประเภทผู้ป่วยER: nz_(pick(r, ['ผู้ป่วยประเภท 5','ผู้ป่วยประเภท 4','ผู้ป่วยประเภท 3','ผู้ป่วยประเภท 2','ผู้ป่วยประเภท 1'])),
+          Admit: num(getNorm(r, 'ยอด Admit') || 0), Obs: num(getNorm(r, 'Obs') || 0),
+          Refer: num(getNorm(r, 'Refer  ตามสิทธิ์') || 0) + num(getNorm(r, 'Refer นอกสิทธิ์') || 0),
+          CPR: num(getNorm(r, 'CPR') || 0), รอด: num(getNorm(r, 'รอด') || 0), Dead: num(getNorm(r, 'Dead') || 0),
+          ผ่าตัด: num(getNorm(r, 'ยอดผู้ป่วยผ่าตัด') || 0), ช่วยงานตึก: String(getNorm(r, 'ช่วยงานตึก') || '').trim(),
+          RN: staff(/^RN\s*\d*$/), PN: staff(/^PN\s*\d*$/), NA: staff(/^NA\s*\d*$/), พนักงาน: staff(/^พนักงาน\s*\d*$/) + staff(/^พนักงานเวรเปล\s*\d*$/),
+          หมายเหตุ: String(getNorm(r, 'หมายเหตุ') || '').trim()
+        });
+      }).filter(o => Object.keys(o).length > 1);
+      return {
+        วันที่: shiftData['วันที่'] || '', เวร: shiftData['เวร'] || '',
+        แพทย์เวร: nz_({ MED: shiftData['แพทย์เวร MED'] || '', ER: shiftData['แพทย์เวร ER'] || '', Intern: shiftData['แพทย์ Intern/Extern'] || '' }),
+        เกณฑ์Productivity: { สูตร: '[Σ(ผู้ป่วยแต่ละประเภท×ชม./วัน)÷3]×100÷(RN+PN+NA×7)', ชมต่อวัน: { 'ประเภท 5': 12, 'ประเภท 4': 7.5, 'ประเภท 3': 5.5, 'ประเภท 2': 3.5, 'ประเภท 1': 1.5 }, ต่ำกว่า: PROD_LOW, สูงกว่า: PROD_HIGH },
+        IPD: ipd, OPD: opd
+      };
+    }
+
+    async function runShiftAIAnalysis() {
+      const box = document.getElementById('aiResult');
+      const btn = document.getElementById('aiAnalyzeBtn');
+      const sid = currentDailyRecordId;
+      if (!sid) { box.innerHTML = '<p class="text-red-600">กรุณาเลือกเวรก่อน</p>'; return; }
+      const payload = collectShiftForAI(sid);
+      if (!payload.IPD.length && !payload.OPD.length) { box.innerHTML = '<p class="text-red-600">เวรนี้ยังไม่มีข้อมูลหน่วยงานให้วิเคราะห์</p>'; return; }
+      btn.disabled = true; btn.classList.add('opacity-60');
+      box.innerHTML = '<div class="flex items-center gap-3 text-violet-700"><i class="fa-solid fa-spinner fa-spin text-xl"></i> AI กำลังวิเคราะห์ข้อมูลเวรนี้ อาจใช้เวลา 10–40 วินาที...</div>';
+      try {
+        const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'analyzeShift', data: payload }) });
+        const raw = await res.text();
+        let json;
+        try { json = JSON.parse(raw); } catch (_) { throw new Error('เซิร์ฟเวอร์ไม่ได้ตอบเป็น JSON: ' + raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 300)); }
+        let result = json.result || (json.data && json.data.result);
+        if (!result) throw new Error(json.error || 'AI ไม่ได้ส่งผลวิเคราะห์กลับมา');
+        box.innerHTML = (window.marked ? marked.parse(result) : '<pre class="whitespace-pre-wrap">' + esc(result) + '</pre>')
+          + '<p class="text-xs text-gray-400 mt-4 border-t pt-2">ผลวิเคราะห์จาก AI ใช้ประกอบการตัดสินใจ ผู้ตรวจการควรตรวจสอบกับสถานการณ์จริงหน้างานทุกครั้ง</p>';
+      } catch (e) {
+        box.innerHTML = '<p class="text-red-600 font-semibold"><i class="fa-solid fa-circle-exclamation mr-1"></i>' + esc(e.message || String(e)) + '</p>';
+      } finally {
+        btn.disabled = false; btn.classList.remove('opacity-60');
+      }
     }
 
     // ===== Productivity รายเวร (เฉพาะ IPD) =====
