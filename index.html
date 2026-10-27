@@ -1539,7 +1539,7 @@
       let rows = ipdDepts.map(d => {
         let name = String(d['แผนก'] || '').trim();
         let rec = records.find(r => String(r['หน่วยงาน'] || '').trim() === name);
-        return rec ? Object.assign({ name, idx: (globalData.tables['IPD'] || []).indexOf(rec) }, calcWardProductivity(rec)) : null;
+        return rec ? Object.assign({ name, idx: (globalData.tables['IPD'] || []).indexOf(rec), note: String(getNorm(rec, 'หมายเหตุ') || '').trim() }, calcWardProductivity(rec)) : null;
       }).filter(Boolean);
       // คะแนนต่ำอยู่บน (ส่งคนไปช่วยได้ก่อน) ถ้าเท่ากันให้แผนกที่มีบุคลากรมากกว่าอยู่บน ไม่มีบุคลากรไว้ท้ายสุด
       rows.sort((a, b) => {
@@ -1579,8 +1579,8 @@
                   <td class="px-3 py-2 text-center">${r.patients}</td>
                   <td class="px-3 py-2 text-center">${r.rn}</td><td class="px-3 py-2 text-center">${r.pn}</td><td class="px-3 py-2 text-center">${r.na}</td>
                   <td class="px-3 py-2 text-center font-semibold">${r.staff}</td>
-                  <td class="px-3 py-2 text-center font-bold">${r.prod === null ? '-' : r.prod.toFixed(1)}</td>
-                  <td class="px-3 py-2"><span class="px-2 py-1 rounded-md font-semibold ${s.c}">${s.t}</span></td>
+                  <td class="px-3 py-2 text-center font-bold"><span class="px-2 py-1 rounded-md ${s.c}" title="${esc(s.t)}">${r.prod === null ? '-' : r.prod.toFixed(1)}</span></td>
+                  <td class="px-3 py-2 whitespace-pre-line text-gray-700">${esc(r.note)}</td>
                 </tr>`; }).join('')}
               </tbody>
             </table>
@@ -1588,7 +1588,7 @@
           <p class="text-xs text-gray-500 mt-2 leading-relaxed">
             สูตร: Productivity (%) = [Σ(จำนวนผู้ป่วยแต่ละประเภท × ชม.การพยาบาลต่อวัน) ÷ ${SHIFTS_PER_DAY}] × 100 ÷ (จำนวน RN+PN+NA ในเวร × ${WORK_HOURS_PER_SHIFT} ชม.)
             · ชม.การพยาบาลต่อวัน: ประเภท 5 = 12, ประเภท 4 = 7.5, ประเภท 3 = 5.5, ประเภท 2 = 3.5, ประเภท 1 = 1.5 (กองการพยาบาล สป.สธ., 2545)
-            · กดชื่อตึกเพื่อดูข้อมูล IPD ของตึกนั้น · เกณฑ์: ต่ำกว่า ${PROD_LOW} = อัตรากำลังเกิน, ${PROD_LOW}–${PROD_HIGH} = เหมาะสม, สูงกว่า ${PROD_HIGH} = อัตรากำลังไม่พอ
+            · กดชื่อตึกเพื่อดูข้อมูล IPD ของตึกนั้น · หมายเหตุดึงจากช่องหมายเหตุในข้อมูล IPD ของตึก · สีของคะแนน: <span class="text-blue-700 font-semibold">น้ำเงิน</span> ต่ำกว่า ${PROD_LOW} (อัตรากำลังเกิน), <span class="text-green-700 font-semibold">เขียว</span> ${PROD_LOW}–${PROD_HIGH} (เหมาะสม), <span class="text-red-700 font-semibold">แดง</span> สูงกว่า ${PROD_HIGH} (อัตรากำลังไม่พอ)
             ${anyUnclassified ? `<br><span class="text-amber-600">* มีผู้ป่วยที่ไม่ได้จำแนกประเภท คิดเป็นประเภท 2 (${UNCLASSIFIED_HOURS} ชม./วัน)</span>` : ''}
           </p>
         </div>`;
