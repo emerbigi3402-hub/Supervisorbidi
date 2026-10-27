@@ -1539,7 +1539,7 @@
       let rows = ipdDepts.map(d => {
         let name = String(d['แผนก'] || '').trim();
         let rec = records.find(r => String(r['หน่วยงาน'] || '').trim() === name);
-        return rec ? Object.assign({ name }, calcWardProductivity(rec)) : null;
+        return rec ? Object.assign({ name, idx: (globalData.tables['IPD'] || []).indexOf(rec) }, calcWardProductivity(rec)) : null;
       }).filter(Boolean);
       // คะแนนต่ำอยู่บน (ส่งคนไปช่วยได้ก่อน) ถ้าเท่ากันให้แผนกที่มีบุคลากรมากกว่าอยู่บน ไม่มีบุคลากรไว้ท้ายสุด
       rows.sort((a, b) => {
@@ -1558,7 +1558,7 @@
         <div class="mb-8">
           <div class="flex items-center gap-2 mb-3 border-b-2 border-amber-200 pb-2">
             <i class="fa-solid fa-ranking-star text-2xl text-amber-500"></i>
-            <h3 class="text-xl font-bold text-amber-700">Productivity รายเวร (IPD) — เรียงจากคะแนนต่ำไปสูง</h3>
+            <h3 class="text-xl font-bold text-amber-700">Productivity รายเวร (IPD) — เรียงจากน้อยไปมาก</h3>
           </div>
           <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
             <table class="w-full text-sm">
@@ -1568,14 +1568,14 @@
                   <th class="px-3 py-2 text-center">ผู้ป่วย</th><th class="px-3 py-2 text-center">RN</th>
                   <th class="px-3 py-2 text-center">PN</th><th class="px-3 py-2 text-center">NA</th>
                   <th class="px-3 py-2 text-center">รวมบุคลากร</th><th class="px-3 py-2 text-center">Productivity (%)</th>
-                  <th class="px-3 py-2 text-left">การบริหารอัตรากำลัง</th>
+                  <th class="px-3 py-2 text-left">หมายเหตุ</th>
                 </tr>
               </thead>
               <tbody>
                 ${rows.map((r, i) => { let s = status(r.prod); return `
                 <tr class="border-t border-gray-100">
                   <td class="px-3 py-2 text-center font-bold">${i + 1}</td>
-                  <td class="px-3 py-2 font-semibold">${esc(r.name)}${r.unclassified ? ' <span class="text-amber-600">*</span>' : ''}</td>
+                  <td class="px-3 py-2 font-semibold"><button type="button" onclick="openModal(${r.idx}, 'IPD', '${esc(r.name)}')" class="text-teal-700 underline decoration-dotted hover:text-teal-900" title="ดูข้อมูล IPD ของตึกนี้">${esc(r.name)}</button>${r.unclassified ? ' <span class="text-amber-600">*</span>' : ''}</td>
                   <td class="px-3 py-2 text-center">${r.patients}</td>
                   <td class="px-3 py-2 text-center">${r.rn}</td><td class="px-3 py-2 text-center">${r.pn}</td><td class="px-3 py-2 text-center">${r.na}</td>
                   <td class="px-3 py-2 text-center font-semibold">${r.staff}</td>
@@ -1588,7 +1588,7 @@
           <p class="text-xs text-gray-500 mt-2 leading-relaxed">
             สูตร: Productivity (%) = [Σ(จำนวนผู้ป่วยแต่ละประเภท × ชม.การพยาบาลต่อวัน) ÷ ${SHIFTS_PER_DAY}] × 100 ÷ (จำนวน RN+PN+NA ในเวร × ${WORK_HOURS_PER_SHIFT} ชม.)
             · ชม.การพยาบาลต่อวัน: ประเภท 5 = 12, ประเภท 4 = 7.5, ประเภท 3 = 5.5, ประเภท 2 = 3.5, ประเภท 1 = 1.5 (กองการพยาบาล สป.สธ., 2545)
-            · เกณฑ์: ต่ำกว่า ${PROD_LOW} = อัตรากำลังเกิน, ${PROD_LOW}–${PROD_HIGH} = เหมาะสม, สูงกว่า ${PROD_HIGH} = อัตรากำลังไม่พอ
+            · กดชื่อตึกเพื่อดูข้อมูล IPD ของตึกนั้น · เกณฑ์: ต่ำกว่า ${PROD_LOW} = อัตรากำลังเกิน, ${PROD_LOW}–${PROD_HIGH} = เหมาะสม, สูงกว่า ${PROD_HIGH} = อัตรากำลังไม่พอ
             ${anyUnclassified ? `<br><span class="text-amber-600">* มีผู้ป่วยที่ไม่ได้จำแนกประเภท คิดเป็นประเภท 2 (${UNCLASSIFIED_HOURS} ชม./วัน)</span>` : ''}
           </p>
         </div>`;
