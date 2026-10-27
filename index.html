@@ -1501,8 +1501,97 @@
             <i class="fa-brands fa-line text-lg"></i> Share สรุปรายงานไป Line กลุ่ม
           </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
-        </div>`;
+        </div>
+        <div class="mt-6">${buildProductivityTable(currentDailyRecordId || (date + shift), ipdDepts)}</div>`;
       container.innerHTML = html;
+    }
+
+    // ===== Productivity รายเวร (เฉพาะ IPD) =====
+    // ชั่วโมงการพยาบาลที่ผู้ป่วยต้องการต่อ 24 ชม. ตามประเภทผู้ป่วย (กองการพยาบาล สป.สธ. 2545)
+    const NURSING_HOURS_PER_DAY = { 'ผู้ป่วยประเภท 5': 12, 'ผู้ป่วยประเภท 4': 7.5, 'ผู้ป่วยประเภท 3': 5.5, 'ผู้ป่วยประเภท 2': 3.5, 'ผู้ป่วยประเภท 1': 1.5 };
+    const UNCLASSIFIED_HOURS = 3.5;     // ผู้ป่วยที่ไม่ได้จำแนกประเภท คิดเท่าประเภท 2
+    const SHIFTS_PER_DAY = 3;           // แปลงชั่วโมงต่อวันเป็นต่อเวร
+    const WORK_HOURS_PER_SHIFT = 7;     // ชั่วโมงทำงานจริงต่อคนต่อเวร (เวร 8 ชม. หักพัก 1 ชม.)
+    const PROD_LOW = 85, PROD_HIGH = 115;
+
+    function calcWardProductivity(rec) {
+      let classified = 0, hoursDay = 0;
+      Object.keys(NURSING_HOURS_PER_DAY).forEach(k => {
+        let n = num(getNorm(rec, k) || 0);
+        classified += n; hoursDay += n * NURSING_HOURS_PER_DAY[k];
+      });
+      let total = num(getNorm(rec, 'ยอดผู้ป่วยทั้งหมด') || 0);
+      let unclassified = Math.max(0, total - classified);
+      hoursDay += unclassified * UNCLASSIFIED_HOURS;
+      let patients = Math.max(total, classified);
+      let count = re => Object.keys(rec).filter(k => re.test(String(k).trim())).reduce((a, k) => a + countStaff(rec[k]), 0);
+      let rn = count(/^RN\s*\d*$/), pn = count(/^PN\s*\d*$/), na = count(/^NA\s*\d*$/);
+      let staff = rn + pn + na;
+      let required = hoursDay / SHIFTS_PER_DAY;
+      let available = staff * WORK_HOURS_PER_SHIFT;
+      let prod = available > 0 ? (required / available) * 100 : null;
+      return { patients, unclassified, rn, pn, na, staff, required, available, prod };
+    }
+
+    function buildProductivityTable(shiftId, ipdDepts) {
+      let records = (globalData.tables['IPD'] || []).filter(r => String(r['ID'] || '').trim() === String(shiftId || '').trim());
+      if (!records.length) return '';
+      let rows = ipdDepts.map(d => {
+        let name = String(d['แผนก'] || '').trim();
+        let rec = records.find(r => String(r['หน่วยงาน'] || '').trim() === name);
+        return rec ? Object.assign({ name }, calcWardProductivity(rec)) : null;
+      }).filter(Boolean);
+      // คะแนนต่ำอยู่บน (ส่งคนไปช่วยได้ก่อน) ถ้าเท่ากันให้แผนกที่มีบุคลากรมากกว่าอยู่บน ไม่มีบุคลากรไว้ท้ายสุด
+      rows.sort((a, b) => {
+        if (a.prod === null && b.prod === null) return 0;
+        if (a.prod === null) return 1;
+        if (b.prod === null) return -1;
+        let pa = Math.round(a.prod * 10), pb = Math.round(b.prod * 10);
+        return pa !== pb ? pa - pb : b.staff - a.staff;
+      });
+      let anyUnclassified = rows.some(r => r.unclassified > 0);
+      let status = p => p === null ? { t: 'ไม่มีข้อมูลบุคลากร', c: 'text-gray-400' }
+        : p < PROD_LOW ? { t: 'อัตรากำลังเกิน — ส่งไปช่วยได้', c: 'text-blue-700 bg-blue-50' }
+        : p > PROD_HIGH ? { t: 'อัตรากำลังไม่พอ — ต้องการคนช่วย', c: 'text-red-700 bg-red-50' }
+        : { t: 'เหมาะสม', c: 'text-green-700 bg-green-50' };
+      return `
+        <div class="mb-8">
+          <div class="flex items-center gap-2 mb-3 border-b-2 border-amber-200 pb-2">
+            <i class="fa-solid fa-ranking-star text-2xl text-amber-500"></i>
+            <h3 class="text-xl font-bold text-amber-700">Productivity รายเวร (IPD) — เรียงจากคะแนนต่ำไปสูง</h3>
+          </div>
+          <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+            <table class="w-full text-sm">
+              <thead class="bg-amber-50 text-amber-800">
+                <tr>
+                  <th class="px-3 py-2 text-center">ลำดับ</th><th class="px-3 py-2 text-left">ตึก</th>
+                  <th class="px-3 py-2 text-center">ผู้ป่วย</th><th class="px-3 py-2 text-center">RN</th>
+                  <th class="px-3 py-2 text-center">PN</th><th class="px-3 py-2 text-center">NA</th>
+                  <th class="px-3 py-2 text-center">รวมบุคลากร</th><th class="px-3 py-2 text-center">Productivity (%)</th>
+                  <th class="px-3 py-2 text-left">การบริหารอัตรากำลัง</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map((r, i) => { let s = status(r.prod); return `
+                <tr class="border-t border-gray-100">
+                  <td class="px-3 py-2 text-center font-bold">${i + 1}</td>
+                  <td class="px-3 py-2 font-semibold">${esc(r.name)}${r.unclassified ? ' <span class="text-amber-600">*</span>' : ''}</td>
+                  <td class="px-3 py-2 text-center">${r.patients}</td>
+                  <td class="px-3 py-2 text-center">${r.rn}</td><td class="px-3 py-2 text-center">${r.pn}</td><td class="px-3 py-2 text-center">${r.na}</td>
+                  <td class="px-3 py-2 text-center font-semibold">${r.staff}</td>
+                  <td class="px-3 py-2 text-center font-bold">${r.prod === null ? '-' : r.prod.toFixed(1)}</td>
+                  <td class="px-3 py-2"><span class="px-2 py-1 rounded-md font-semibold ${s.c}">${s.t}</span></td>
+                </tr>`; }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-gray-500 mt-2 leading-relaxed">
+            สูตร: Productivity (%) = [Σ(จำนวนผู้ป่วยแต่ละประเภท × ชม.การพยาบาลต่อวัน) ÷ ${SHIFTS_PER_DAY}] × 100 ÷ (จำนวน RN+PN+NA ในเวร × ${WORK_HOURS_PER_SHIFT} ชม.)
+            · ชม.การพยาบาลต่อวัน: ประเภท 5 = 12, ประเภท 4 = 7.5, ประเภท 3 = 5.5, ประเภท 2 = 3.5, ประเภท 1 = 1.5 (กองการพยาบาล สป.สธ., 2545)
+            · เกณฑ์: ต่ำกว่า ${PROD_LOW} = อัตรากำลังเกิน, ${PROD_LOW}–${PROD_HIGH} = เหมาะสม, สูงกว่า ${PROD_HIGH} = อัตรากำลังไม่พอ
+            ${anyUnclassified ? `<br><span class="text-amber-600">* มีผู้ป่วยที่ไม่ได้จำแนกประเภท คิดเป็นประเภท 2 (${UNCLASSIFIED_HOURS} ชม./วัน)</span>` : ''}
+          </p>
+        </div>`;
     }
 
     function generateCard(dept, type, date, shift) {
@@ -2766,7 +2855,7 @@
               ${inputHtml}
             </div>`
           : `<div>
-            <label class="font-bold ${labelColor}" title="${esc(header)}">${iconHtml} ${esc(header)} ${labelStar}</label>
+            <label class="font-bold ${labelColor}" title="${esc(header)}">${iconHtml} ${esc(primaryHeaders[header] ? String(header).replace(/\s*1$/, '') : header)} ${labelStar}</label>
             ${inputHtml}
           </div>`;
       });
