@@ -77,7 +77,7 @@
     /* ===== 🖥️ PC SPECIFIC TWEAKS ===== */
     @media (min-width: 769px) {
       /* ขยายกล่องข้อความรายงานที่ 2 ให้สูงพอดี ไม่ต้องเลื่อนใน PC */
-      #reportCopyText { min-height: 800px !important; height: auto !important; }
+      #reportCopyText { min-height: 0 !important; height: 460px !important; overflow-y: auto !important; resize: vertical; }
     }
 
     /* =========================================================================
@@ -490,6 +490,18 @@
   .ros-modal.open{display:flex;}
   .ros-close{cursor:pointer;transition:.3s;}
   .ros-close:hover{color:#f43f5e;transform:rotate(90deg);}
+
+  .prod-table button { min-height: 0 !important; padding: 0 !important; margin: 0 !important; font-size: inherit !important; width: auto !important; }
+  /* ===================== 🖥️ PC: กระชับขนาดให้พอดีจอ ดูเป็นมืออาชีพ ===================== */
+  @media (min-width: 1024px) {
+    :root { font-size: 14.5px; }
+    main { max-width: 1440px !important; }
+    #daily-record-content .card-zoom { min-height: 8.5rem; }
+    .prod-table thead th { padding: 0.55rem 0.6rem !important; font-size: 0.85rem !important; white-space: nowrap; }
+    .prod-table tbody td { padding: 0.45rem 0.6rem !important; font-size: 0.9rem !important; }
+    .prod-table td.prod-note { min-width: 9rem; font-size: 0.82rem !important; }
+  }
+  @media (min-width: 1600px) { :root { font-size: 15.5px; } main { max-width: 1680px !important; } }
   </style>
 </head>
 <body class="min-h-screen">
@@ -2069,6 +2081,7 @@
       let sumRecord = (globalData.tables['สรุป']||[]).find(r => String(r['ID']||'').trim() === String(targetData['ID']||'').trim());
       let reportText = buildReportText(targetData, sumRecord);
 
+      let _prodHtml = buildProductivityTable(currentDailyRecordId || (date + shift), ipdDepts);
       let html = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div class="lg:col-span-2 bg-white border-l-4 border-cyan-500 p-5 md:p-6 rounded-xl shadow-sm h-full">
@@ -2149,7 +2162,8 @@
           </div>
         </div>
 
-        <div class="bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm mt-6 mb-4">
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 mt-6 items-start">
+        <div class="${_prodHtml ? 'xl:col-span-2' : 'xl:col-span-5'} bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm">
           <h3 class="text-base md:text-lg font-bold text-green-700 mb-3 border-b border-green-200 pb-2">
             <i class="fa-brands fa-line text-green-500 text-xl mr-1"></i> ข้อความสรุปรายงานประจำวัน (ส่งครั้งที่ 2)
           </h3>
@@ -2162,7 +2176,8 @@
           </button>
           <p class="text-xs text-gray-500 mt-2"><i class="fa-solid fa-circle-info text-green-500"></i> ข้อความนี้ดึงจากชีต <strong>"สรุป"</strong> (ID ตรงกับเวรนี้) — สามารถคัดลอก/ลากเลือก/แก้ไขข้อความก่อนส่งได้</p>
         </div>
-        <div class="mt-6">${buildProductivityTable(currentDailyRecordId || (date + shift), ipdDepts)}</div>
+        ${_prodHtml ? `<div class="xl:col-span-3 min-w-0">${_prodHtml}</div>` : ''}
+        </div>
         <div class="mt-6 mb-4 bg-white border border-violet-200 rounded-xl shadow-sm">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-violet-100 bg-violet-50 rounded-t-xl">
             <h3 class="text-lg font-bold text-violet-700"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> วิเคราะห์เวรด้วย AI</h3>
@@ -2389,7 +2404,7 @@
             <h3 class="text-xl font-bold text-amber-700">Productivity รายเวร (IPD) — เรียงจากน้อยไปมาก</h3>
           </div>
           <div class="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm prod-table">
               <thead class="bg-amber-50 text-amber-800">
                 <tr>
                   <th class="px-3 py-2 text-center">ลำดับ</th><th class="px-3 py-2 text-left">ตึก</th>
@@ -2408,7 +2423,7 @@
                   <td class="px-3 py-2 text-center">${r.rn}</td><td class="px-3 py-2 text-center">${r.pn}</td><td class="px-3 py-2 text-center">${r.na}</td>
                   <td class="px-3 py-2 text-center font-semibold">${r.staff}</td>
                   <td class="px-3 py-2 text-center font-bold"><span class="px-2 py-1 rounded-md ${s.c}" title="${esc(s.t)}">${r.prod === null ? '-' : r.prod.toFixed(1)}</span></td>
-                  <td class="px-3 py-2 whitespace-pre-line text-gray-700">${esc(r.note)}</td>
+                  <td class="px-3 py-2 whitespace-pre-line text-gray-700 prod-note">${esc(r.note)}</td>
                 </tr>`; }).join('')}
               </tbody>
             </table>
